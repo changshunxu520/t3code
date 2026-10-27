@@ -12,11 +12,12 @@ export function PullRequestActivityUnavailableState({
   compact = false,
 }: {
   error: string;
+  /** The host's word for a change request, as in "pull request". */
+  term?: string;
   onRetry: () => void;
   compact?: boolean;
 }) {
-  const { locale: uiLocale } = useI18n();
-  const { t } = useI18n();
+  const { locale: uiLocale, t } = useI18n();
   return (
     <div
       className={cn(

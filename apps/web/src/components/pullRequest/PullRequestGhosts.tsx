@@ -11,6 +11,11 @@ import {
   UsersIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import {
+  capitalizeTerm,
+  sourceControlClients,
+  type ChangeRequestTerminology,
+} from "@t3tools/client-runtime/source-control-clients";
 
 import { readLocalApi } from "~/localApi";
 import { cn } from "~/lib/utils";
@@ -49,30 +54,31 @@ const DEFAULT_DETAIL_TABS = [
 export function PullRequestListGhost({ rows = 7, caption }: { rows?: number; caption?: string }) {
   const { t } = useI18n();
   return (
-    <div
-      role="status"
-      aria-label={caption ?? t("pullRequests.loading.list")}
-      className="motion-safe:animate-skeleton space-y-0.5"
-    >
+    <div role="status" aria-label={caption ?? t("pullRequests.loading.list")} className="space-y-0.5">
+      {/* Outside the pulse so the explanation stays readable. */}
       {caption ? (
-        <p className="px-3 pb-1 text-xs font-medium text-muted-foreground/70">{caption}</p>
+        <p className="px-3 pb-1 text-xs font-medium text-muted-foreground/70 redesign:text-muted-foreground">
+          {caption}
+        </p>
       ) : null}
-      {Array.from({ length: rows }, (_, index) => (
-        <div
-          key={index}
-          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-3 py-2.5"
-        >
-          <GhostBar className="size-4 rounded-full" />
-          <div className="min-w-0 space-y-1.5">
-            <GhostBar className={cn("h-4", TITLE_WIDTHS[index % TITLE_WIDTHS.length])} />
-            <GhostBar className={cn("h-3.5", META_WIDTHS[index % META_WIDTHS.length])} />
+      <div className="motion-safe:animate-skeleton space-y-0.5">
+        {Array.from({ length: rows }, (_, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-3 py-2.5"
+          >
+            <GhostBar className="size-4 rounded-full" />
+            <div className="min-w-0 space-y-1.5">
+              <GhostBar className={cn("h-4", TITLE_WIDTHS[index % TITLE_WIDTHS.length])} />
+              <GhostBar className={cn("h-3.5", META_WIDTHS[index % META_WIDTHS.length])} />
+            </div>
+            <div className="flex flex-col items-end gap-1.5">
+              <GhostBar className="w-12" />
+              <GhostBar className="w-16" />
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1.5">
-            <GhostBar className="w-12" />
-            <GhostBar className="w-16" />
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -109,6 +115,7 @@ export function PullRequestDetailGhost({
         isDraft: summary.isDraft ?? entry?.isDraft,
       }
     : entry;
+  const terminology = sourceControlClients.get(seed?.provider).changeRequest;
   const statePresentation = seed
     ? resolvePullRequestState({
         state: seed.state,
@@ -116,7 +123,7 @@ export function PullRequestDetailGhost({
         t,
       })
     : null;
-  // Passing list rollups can omit workflows awaiting approval; wait for detail to claim success.
+  // Passing list rollups can omit workflows awaiting approval; wait for detail.
   const checksPresentation =
     seed?.checksState === "failing" || seed?.checksState === "pending"
       ? pullRequestChecksStatePresentation(seed.checksState, t)
@@ -174,7 +181,10 @@ export function PullRequestDetailGhost({
             size="icon-xs"
             variant="ghost"
             disabled
-            aria-label={translateWebSource(uiLocale, "Pull request actions loading")}
+            aria-label={translateWebSource(
+              uiLocale,
+              `${capitalizeTerm(terminology.singular)} actions loading`,
+            )}
           >
             <EllipsisIcon aria-hidden className="size-4" />
           </Button>
@@ -182,7 +192,7 @@ export function PullRequestDetailGhost({
             <Button
               size="icon-xs"
               variant="ghost"
-              aria-label={translateWebSource(uiLocale, "Collapse pull request panel")}
+              aria-label={translateWebSource(uiLocale, `Collapse ${terminology.singular} panel`)}
               onClick={onClose}
             >
               <PanelRightIcon aria-hidden className="size-3.5" />
@@ -227,7 +237,7 @@ export function PullRequestDetailGhost({
                   <PullRequestCopyableCode
                     key={checkout}
                     value={checkout}
-                    target="pull request checkout command"
+                    target={`${terminology.singular} checkout command`}
                     copyLabel={translateWebSource(uiLocale, "Copy checkout command")}
                     copiedLabel={translateWebSource(uiLocale, "Checkout command copied")}
                     className="ml-auto font-mono"
@@ -423,7 +433,12 @@ export function PullRequestTimelineGhost({ rows = 6 }: { rows?: number }) {
   );
 }
 
-export function PullRequestConversationGhost({ rows = 3 }: { rows?: number }) {
+export function PullRequestConversationGhost({
+  rows = 3,
+}: {
+  rows?: number;
+  terminology?: ChangeRequestTerminology;
+}) {
   const { t } = useI18n();
   return (
     <div

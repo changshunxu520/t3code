@@ -47,6 +47,8 @@ export function PullRequestReviewForm({
 }: {
   environmentId: EnvironmentId;
   reference: PullRequestRef;
+  /** The host's word for a change request, as in "pull request". */
+  term?: string;
   verdicts: ReadonlyArray<PullRequestReviewVerdict>;
   requestChangesSummaryRequired: boolean;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -54,8 +56,7 @@ export function PullRequestReviewForm({
   onPendingChange: (pending: boolean) => void;
   onSubmitted: () => void;
 }) {
-  const { locale: uiLocale } = useI18n();
-  const { t } = useI18n();
+  const { locale: uiLocale, t } = useI18n();
   const verdictLabel = (value: PullRequestReviewVerdict) =>
     t(
       value === "approve"
@@ -67,9 +68,6 @@ export function PullRequestReviewForm({
   const [requestedVerdict, setRequestedVerdict] = useState<PullRequestReviewVerdict>("comment");
   const comments = usePendingReviewComments(reference);
   const reviewKey = pullRequestReviewKey(reference);
-  // The panel stays mounted while the selected pull request changes. Keeping summaries beside
-  // the keyed line-comment drafts makes the selected pull request's body correct on the first
-  // render, before an effect could reset state left behind by the previous one.
   const body = usePullRequestReviewStore((store) => store.summaries[reviewKey] ?? "");
   const removeComments = usePullRequestReviewStore((store) => store.removeComments);
   const setSummary = usePullRequestReviewStore((store) => store.setSummary);
@@ -101,8 +99,7 @@ export function PullRequestReviewForm({
       toastManager.add({ type: "error", title: t("pullRequests.review.submitFailed") });
       return;
     }
-    // More remarks may have been added while the host was accepting this snapshot. Leave those,
-    // and any summary revised in the meantime, ready for the next review.
+    // Preserve comments and summary edits made during submission.
     removeComments(
       reviewKey,
       submittedComments.map((comment) => comment.id),
