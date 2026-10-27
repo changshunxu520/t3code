@@ -1,5 +1,5 @@
 import type { Session, WebContents } from "electron";
-import { BrowserWindow, session } from "electron";
+import { app, BrowserWindow, session } from "electron";
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
@@ -54,6 +54,27 @@ const externalProtocolPromptUrl = (rawUrl: string | undefined): string | null =>
 };
 
 const MAX_PROMPT_URL_LENGTH = 300;
+
+/** Chromium's Accept-Language form of the OS languages, e.g. `zh-Hans-CN` becomes `zh-CN,zh`. */
+export const previewAcceptLanguages = (preferred: ReadonlyArray<string>): string | undefined => {
+  const tags: string[] = [];
+  const add = (tag: string) => {
+    if (!tags.includes(tag)) tags.push(tag);
+  };
+  for (const raw of preferred) {
+    const [first, ...subtags] = raw.replace(/_/g, "-").split("-");
+    const language = first?.toLowerCase();
+    if (!language || !/^[a-z]{2,3}$/.test(language)) continue;
+    const script = subtags.find((subtag) => /^[A-Za-z]{4}$/.test(subtag))?.toLowerCase();
+    const region =
+      subtags.find((subtag) => /^([A-Za-z]{2}|\d{3})$/.test(subtag))?.toUpperCase() ??
+      (language === "zh" && script === "hans" ? "CN" : undefined) ??
+      (language === "zh" && script === "hant" ? "TW" : undefined);
+    if (region) add(`${language}-${region}`);
+    add(language);
+  }
+  return tags.length > 0 ? tags.join(",") : undefined;
+};
 
 export class BrowserSessionPartitionDerivationError extends Schema.TaggedError<BrowserSessionPartitionDerivationError>()(
   "BrowserSessionPartitionDerivationError",
@@ -249,6 +270,11 @@ export const make = Effect.gen(function* BrowserSessionMake() {
         try: () => {
           const browserSession = session.fromPartition(partition);
           // Rewriting Electron's native User-Agent makes Turnstile fail integrity checks with error 600010.
+          // Packaged builds ship only en-US, so without this every guest asks servers for English.
+          const acceptLanguages = previewAcceptLanguages(app.getPreferredSystemLanguages());
+          if (acceptLanguages) {
+            browserSession.setUserAgent(browserSession.getUserAgent(), acceptLanguages);
+          }
           browserSession.setPermissionRequestHandler(
             (webContents, permission, callback, details) => {
               if (permission === "openExternal") {

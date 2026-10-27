@@ -121,6 +121,8 @@ const PICTURE_IN_PICTURE_JPEG_QUALITY = 80;
 const CAPTURE_PAGE_RETRY_ATTEMPTS = 3;
 const CAPTURE_PAGE_RETRY_DELAY_MS = 120;
 const CAPTURE_PAGE_ATTEMPT_TIMEOUT_MS = 1_000;
+/** A dropped debugger often reattaches while its target is still swapping and closes again. */
+const DETACHED_SESSION_RETRY_DELAYS_MS = [0, 100, 400, 1_000] as const;
 const PICTURE_IN_PICTURE_INITIAL_WIDTH = 480;
 const PICTURE_IN_PICTURE_INITIAL_HEIGHT = 320;
 const PICTURE_IN_PICTURE_MIN_WIDTH = 240;
@@ -2338,11 +2340,32 @@ const makeNativeOperations = Effect.fn("PreviewManager.makeOperations")(function
           : ([false, sessions] as const),
       );
       if (!removed) return;
+      // The browser host keeps the tab until a retry settles, so a brief drop does not close it.
+      yield* Scope.close(detached.scope, Exit.void).pipe(Effect.ignore);
+      const tabId = wc.isDestroyed() ? null : yield* tabIdForWebContents(wc.id);
+      if (tabId === null) {
+        yield* releaseControlSession(detached);
+        return;
+      }
+      for (const delay of DETACHED_SESSION_RETRY_DELAYS_MS) {
+        if (delay > 0) yield* Effect.sleep(delay);
+        if (wc.isDestroyed() || (yield* tabIdForWebContents(wc.id)) !== tabId) break;
+        if (wc.isDevToolsOpened()) {
+          wc.once("devtools-closed", () => {
+            if (!wc.isDestroyed()) runFork(restoreControlSession(tabId, wc));
+          });
+          break;
+        }
+        const reattached = yield* ensureControlSession(wc).pipe(
+          Effect.as(true),
+          Effect.orElseSucceed(() => false),
+        );
+        if (!reattached) continue;
+        yield* releaseControlSession(detached);
+        yield* restoreControlSession(tabId, wc);
+        return;
+      }
       yield* releaseControlSession(detached);
-      if (wc.isDestroyed()) return;
-      const tabId = yield* tabIdForWebContents(wc.id);
-      if (tabId === null) return;
-      yield* restoreControlSession(tabId, wc);
     },
     (recover) => Effect.ignore(recover),
   );

@@ -1119,6 +1119,28 @@ describe("PreviewManager", () => {
     ),
   );
 
+  effectIt.effect("retries a reattach whose target closes again while it swaps", () =>
+    withManager((manager) =>
+      Effect.gen(function* () {
+        const guest = makeAttachingGuest(49);
+        fromId.mockReturnValue(guest.wc);
+        yield* manager.createTab("tab_swapping");
+        yield* manager.registerWebview("tab_swapping", 49);
+        yield* Effect.yieldNow;
+        expect(guest.attach).toHaveBeenCalledTimes(1);
+
+        guest.sendCommand.mockRejectedValueOnce(new Error("target closed while handling command"));
+        guest.chromiumDetach();
+        yield* TestClock.adjust(0);
+        expect(guest.attach).toHaveBeenCalledTimes(2);
+
+        yield* TestClock.adjust(100);
+        expect(guest.attach).toHaveBeenCalledTimes(3);
+        expect(guest.wc.debugger.isAttached()).toBe(true);
+      }),
+    ),
+  );
+
   effectIt.effect("skips a guest destroyed while another guest's session opens", () =>
     withManager((manager) =>
       Effect.gen(function* () {
