@@ -19,11 +19,13 @@ const { fromPartition, sessions } = vi.hoisted(() => ({
   >(),
 }));
 
-const { fromWebContents } = vi.hoisted(() => ({
+const { fromWebContents, getPreferredSystemLanguages } = vi.hoisted(() => ({
   fromWebContents: vi.fn<(webContents: unknown) => unknown>(() => null),
+  getPreferredSystemLanguages: vi.fn<() => string[]>(() => []),
 }));
 
 vi.mock("electron", () => ({
+  app: { getPreferredSystemLanguages },
   BrowserWindow: { fromWebContents },
   session: {
     fromPartition,
@@ -52,6 +54,8 @@ const layer = BrowserSession.layer.pipe(
 describe("BrowserSession", () => {
   beforeEach(() => {
     sessions.clear();
+    getPreferredSystemLanguages.mockReset();
+    getPreferredSystemLanguages.mockReturnValue([]);
     fromPartition.mockReset();
     fromPartition.mockImplementation((partition: string) => {
       const browserSession = {
@@ -151,6 +155,41 @@ describe("BrowserSession", () => {
       assert.strictEqual(browserSession.getUserAgent(), nativeUserAgent);
     }).pipe(Effect.provide(layer)),
   );
+
+  it.effect("asks servers for the OS languages while keeping the native User-Agent", () =>
+    Effect.gen(function* () {
+      getPreferredSystemLanguages.mockReturnValue(["zh-Hans-CN", "en-US"]);
+      const browserSessions = yield* BrowserSession.BrowserSession;
+      const partition = yield* browserSessions.getPartition("scope-a");
+      yield* browserSessions.getSession("scope-a");
+
+      const browserSession = sessions.get(partition);
+      assert.isDefined(browserSession);
+      assert.deepStrictEqual(browserSession.setUserAgent.mock.calls, [
+        ["Mozilla/5.0 Electron/41.5.0 t3code/0.0.27", "zh-CN,zh,en-US,en"],
+      ]);
+    }).pipe(Effect.provide(layer)),
+  );
+
+  it.effect("leaves the session alone when the OS reports no languages", () =>
+    Effect.gen(function* () {
+      const browserSessions = yield* BrowserSession.BrowserSession;
+      const partition = yield* browserSessions.getPartition("scope-a");
+      yield* browserSessions.getSession("scope-a");
+
+      assert.strictEqual(sessions.get(partition)?.setUserAgent.mock.calls.length, 0);
+    }).pipe(Effect.provide(layer)),
+  );
+
+  it("formats OS language tags the way Chromium sends them", () => {
+    assert.strictEqual(
+      BrowserSession.previewAcceptLanguages(["zh-Hans-CN", "zh-Hant-TW", "en_GB", "ja"]),
+      "zh-CN,zh,zh-TW,en-GB,en,ja",
+    );
+    assert.strictEqual(BrowserSession.previewAcceptLanguages(["zh-Hans"]), "zh-CN,zh");
+    assert.strictEqual(BrowserSession.previewAcceptLanguages(["es-419", "", "?"]), "es-419,es");
+    assert.isUndefined(BrowserSession.previewAcceptLanguages([]));
+  });
 
   it.effect("grants clipboard-sanitized-write through both the request and check handlers", () =>
     Effect.gen(function* () {
