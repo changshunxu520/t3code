@@ -40,7 +40,16 @@ vi.mock("../../features/settings/appearance/useScaledTextRole", () => ({
 }));
 vi.mock("../../lib/mobileTheme", () => ({ themeColorWithContrast: () => "#ffffff" }));
 
+vi.mock("../../i18n/mobileStrings", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../i18n/mobileStrings")>();
+  return {
+    ...actual,
+    localizeMobileString: vi.fn((value: string) => actual.localizeMobileString(value, "en")),
+  };
+});
+
 import * as Dialog from "./Dialog.android";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 
 const roots: Root[] = [];
 
@@ -55,6 +64,7 @@ function mountHost() {
 }
 
 afterEach(() => {
+  vi.mocked(localizeMobileString).mockReset();
   for (const root of roots.splice(0)) act(() => root.unmount());
   renderedClicks.length = 0;
   document.body.innerHTML = "";
@@ -101,4 +111,58 @@ it("ignores a late action from a dialog that a newer one replaced", () => {
 
   expect(olderAction).toHaveBeenCalledOnce();
   expect(container.textContent).toContain("Newer");
+});
+
+it("localizes native dialog actions without changing their callbacks", async () => {
+  const actual = await vi.importActual<typeof import("../../i18n/mobileStrings")>(
+    "../../i18n/mobileStrings",
+  );
+  vi.mocked(localizeMobileString).mockImplementation((value) =>
+    actual.localizeMobileString(value, "zh-CN"),
+  );
+  const { container } = mountHost();
+  const onConfirm = vi.fn();
+  const onCancel = vi.fn();
+  act(() =>
+    Dialog.confirm({ title: "Commit changes", confirmText: "Commit", onConfirm, onCancel }),
+  );
+  expect(container.textContent).toContain("提交更改");
+  const buttons = Array.from(container.querySelectorAll("button"));
+  expect(buttons.map((button) => button.textContent)).toEqual(["取消", "提交"]);
+  act(() => buttons[1]!.click());
+  expect(onConfirm).toHaveBeenCalledOnce();
+  expect(onCancel).not.toHaveBeenCalled();
+  expect(container.textContent).toBe("");
+});
+
+it("keeps a prompt's repository-owned default value unchanged", async () => {
+  const actual = await vi.importActual<typeof import("../../i18n/mobileStrings")>(
+    "../../i18n/mobileStrings",
+  );
+  vi.mocked(localizeMobileString).mockImplementation((value) =>
+    actual.localizeMobileString(value, "zh-CN"),
+  );
+  const { container } = mountHost();
+  const onConfirm = vi.fn();
+  act(() =>
+    Dialog.prompt({ title: "Name", confirmText: "Save", initialValue: "Settings", onConfirm }),
+  );
+  expect(container.textContent).toContain("名称");
+  const save = Array.from(container.querySelectorAll("button")).find(
+    (button) => button.textContent === "保存",
+  );
+  act(() => save!.click());
+  expect(onConfirm).toHaveBeenCalledWith("Settings");
+});
+
+it("localizes a queued pre-host dialog in Chinese", async () => {
+  const actual = await vi.importActual<typeof import("../../i18n/mobileStrings")>(
+    "../../i18n/mobileStrings",
+  );
+  vi.mocked(localizeMobileString).mockImplementation((value) =>
+    actual.localizeMobileString(value, "zh-CN"),
+  );
+  Dialog.alert("Could not import shared content", undefined, [{ text: "Dismiss" }]);
+  const { container } = mountHost();
+  expect(container.textContent).toBe("无法导入共享内容关闭");
 });

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useAtomValue } from "@effect/atom-react";
 import {
   deriveWorkflowGroups,
@@ -151,7 +152,7 @@ export function ThreadAgentsSheet({ route }: StaticScreenProps<AgentsTarget>) {
               tintColorClassName="accent-foreground"
               hideBackButton
               hideShadow={false}
-              title="Agents"
+              title={localizeMobileString("Agents")}
               titleColorClassName="accent-foreground"
               titleFontSize={18}
               titleFontWeight="800"
@@ -200,18 +201,18 @@ function AgentRow(props: {
       <View
         accessible
         className="min-w-0 flex-1"
-        accessibilityHint={
+        accessibilityHint={localizeMobileString(
           subagent.remoteChild === undefined
             ? "Provider-managed agent. Its work appears in the transcript."
-            : `Runs on ${subagent.remoteChild.label}. Connect to it to open its thread.`
-        }
+            : `Runs on ${subagent.remoteChild.label}. Connect to it to open its thread.`,
+        )}
       >
         {row}
       </View>
     ) : (
       <Pressable
         accessibilityRole="link"
-        accessibilityHint="Opens this agent's thread"
+        accessibilityHint={localizeMobileString("Opens this agent's thread")}
         onPress={() => props.onOpen(target)}
         className="min-w-0 flex-1 active:opacity-70"
       >

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { Toolbar } from "../../../components/ui/Toolbar";
 import { parsePatchFiles } from "@pierre/diffs/utils/parsePatchFiles";
@@ -155,14 +156,21 @@ export function PullRequestGuideStopScreen({ route }: StaticScreenProps<GuideSto
               onPressAction={() => setCodeWordBreak(!appearance.codeWordBreak)}
             >
               <View pointerEvents="none">
-                <IconButton icon="ellipsis" accessibilityLabel="Guide options" />
+                <IconButton
+                  icon="ellipsis"
+                  accessibilityLabel={localizeMobileString("Guide options")}
+                />
               </View>
             </Menu>
           }
         />
       ) : null}
       <Toolbar placement="right">
-        <Toolbar.Menu title="Guide options" accessibilityLabel="Guide options" icon="ellipsis">
+        <Toolbar.Menu
+          title="Guide options"
+          accessibilityLabel={localizeMobileString("Guide options")}
+          icon="ellipsis"
+        >
           <Toolbar.MenuAction
             icon="text.alignleft"
             isOn={appearance.codeWordBreak}

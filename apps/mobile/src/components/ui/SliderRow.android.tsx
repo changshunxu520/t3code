@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Slider } from "@expo/ui/jetpack-compose";
 import { fillMaxWidth } from "@expo/ui/jetpack-compose/modifiers";
 import * as Haptics from "expo-haptics";
@@ -33,7 +34,7 @@ export function SliderRow(props: SliderRowProps) {
       </View>
       <View
         accessible
-        accessibilityLabel={props.label}
+        accessibilityLabel={localizeMobileString(props.label)}
         accessibilityRole="adjustable"
         accessibilityState={{ disabled: Boolean(props.disabled) }}
         accessibilityValue={{

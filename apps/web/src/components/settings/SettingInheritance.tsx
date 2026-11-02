@@ -1,3 +1,5 @@
+import { translateWebSource } from "../../i18n/messages";
+import { useI18n } from "../../i18n/WebI18nContext";
 import {
   DEFAULT_SERVER_SETTINGS,
   PROJECT_FILE_BACKED_SETTINGS,
@@ -164,13 +166,15 @@ export interface SettingOverridingProject extends ProjectOverrideEntry {
   readonly open: () => void;
 }
 
+const EMPTY_OVERRIDING_PROJECTS: readonly SettingOverridingProject[] = [];
+
 export function SettingInheritance({
   state,
   summary,
   targets,
   environments,
   keys,
-  overridingProjects = [],
+  overridingProjects = EMPTY_OVERRIDING_PROJECTS,
   onClearOverrides,
 }: {
   state: SettingInheritanceState;
@@ -184,14 +188,32 @@ export function SettingInheritance({
   overridingProjects?: readonly SettingOverridingProject[];
   onClearOverrides?: (entries: readonly ProjectOverrideEntry[]) => void;
 }) {
+  const { locale: sourceLocale, t } = useI18n();
   const scopeContext = useOptionalSettingsScope();
   const key = keys[0];
   if (!key || targets.length === 0) return null;
   const hasMultipleEnvironments = new Set(targets.map((target) => target.environmentId)).size > 1;
+  const localizedSummary = translateWebSource(sourceLocale, summary);
   const overrideSummary =
     overridingProjects.length > 0
-      ? `${summary} · ${overridingProjects.length} project ${overridingProjects.length === 1 ? "override" : "overrides"}`
-      : summary;
+      ? t(
+          overridingProjects.length === 1
+            ? "settings.inheritance.overrideSummaryOne"
+            : "settings.inheritance.overrideSummaryMany",
+          { summary: localizedSummary, count: overridingProjects.length },
+        )
+      : localizedSummary;
+  const localizeLayerValue = (value: string): string => {
+    const dayMatch = /^(\d+) days?$/u.exec(value);
+    if (dayMatch) {
+      return t("settings.inheritance.daysCount", { count: dayMatch[1] ?? "" });
+    }
+    const itemMatch = /^(\d+) items?$/u.exec(value);
+    if (itemMatch) {
+      return t("settings.inheritance.itemsCount", { count: itemMatch[1] ?? "" });
+    }
+    return translateWebSource(sourceLocale, value);
+  };
   const chains = targets.flatMap((target) => {
     const environment = environments.find(
       (candidate) => candidate.environmentId === target.environmentId,
@@ -252,7 +274,7 @@ export function SettingInheritance({
                 <Button
                   size="icon-micro"
                   variant="ghost-muted"
-                  aria-label={`${overrideSummary}. Show where this value comes from`}
+                  aria-label={t("settings.inheritance.showOrigin", { summary: overrideSummary })}
                 />
               }
             />
@@ -290,7 +312,10 @@ export function SettingInheritance({
                         layer.effective ? "font-medium text-foreground" : "text-muted-foreground",
                       )}
                     >
-                      {layer.key === "environment" ? "Environment" : layer.label}
+                      {translateWebSource(
+                        sourceLocale,
+                        layer.key === "environment" ? "Environment" : layer.label,
+                      )}
                     </span>
                     <span
                       className={cn(
@@ -302,7 +327,7 @@ export function SettingInheritance({
                             : "text-muted-foreground/60",
                       )}
                     >
-                      <span className="max-w-32 truncate">{layer.value}</span>
+                      <span className="max-w-32 truncate">{localizeLayerValue(layer.value)}</span>
                       {layer.effective ? (
                         <CheckIcon aria-hidden className="size-3.5 shrink-0 text-primary" />
                       ) : (
@@ -339,12 +364,17 @@ export function SettingInheritance({
                       <span className="flex w-full min-w-0 flex-col">
                         <span className="flex min-w-0 items-center gap-2">
                           <span className="min-w-0 flex-1 truncate text-sm text-foreground tabular-nums">
-                            {winningLayer?.value}
+                            {winningLayer ? localizeLayerValue(winningLayer.value) : null}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {winningLayer?.key === "environment"
-                              ? "Environment"
-                              : winningLayer?.label}
+                            {winningLayer
+                              ? translateWebSource(
+                                  sourceLocale,
+                                  winningLayer.key === "environment"
+                                    ? "Environment"
+                                    : winningLayer.label,
+                                )
+                              : null}
                           </span>
                           <ChevronRightIcon
                             aria-hidden
@@ -377,7 +407,7 @@ export function SettingInheritance({
                     {chain}
                     {hasMultipleEnvironments ? (
                       <p className="px-2 pt-1.5 text-xs text-muted-foreground">
-                        Same on all machines
+                        {translateWebSource(sourceLocale, "Same on all machines")}
                       </p>
                     ) : null}
                   </>
@@ -396,14 +426,17 @@ export function SettingInheritance({
                             aria-hidden
                             className="size-3 [[data-panel-open]_&]:rotate-90"
                           />
-                          Overridden by
+                          {translateWebSource(sourceLocale, "Overridden by")}
                         </CollapsibleTrigger>
                       ) : (
-                        <span>Overridden by</span>
+                        <span>{translateWebSource(sourceLocale, "Overridden by")}</span>
                       )}
                       {onClearOverrides ? (
                         <InlineButton onClick={() => onClearOverrides(overriding)}>
-                          Reset {overriding.length === 1 ? "it" : "all"}
+                          {translateWebSource(
+                            sourceLocale,
+                            overriding.length === 1 ? "Reset it" : "Reset all",
+                          )}
                         </InlineButton>
                       ) : null}
                     </div>
@@ -433,12 +466,14 @@ export function SettingInheritance({
                           </span>
                           <span className="max-w-32 truncate text-muted-foreground tabular-nums">
                             {isProjectScopedSettingKey(key)
-                              ? formatValue(
-                                  key,
-                                  members.find(
-                                    (member) =>
-                                      member.target.environmentId === project.environmentId,
-                                  )?.overrides[project.projectId]?.[key],
+                              ? localizeLayerValue(
+                                  formatValue(
+                                    key,
+                                    members.find(
+                                      (member) =>
+                                        member.target.environmentId === project.environmentId,
+                                    )?.overrides[project.projectId]?.[key],
+                                  ),
                                 )
                               : null}
                           </span>

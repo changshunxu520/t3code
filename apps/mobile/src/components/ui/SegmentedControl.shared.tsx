@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useState } from "react";
 import { I18nManager, Platform, Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, useReducedMotion, withTiming } from "react-native-reanimated";
@@ -60,7 +61,7 @@ export function SegmentedControl<Value extends string | number>(
             <Pressable
               key={`${typeof option.value}:${option.value}`}
               accessibilityRole={props.role ?? "button"}
-              accessibilityLabel={option.accessibilityLabel ?? option.label}
+              accessibilityLabel={localizeMobileString(option.accessibilityLabel ?? option.label)}
               accessibilityState={{ selected }}
               onPress={() => props.onSelect(option.value)}
               className="flex-1 items-center justify-center rounded-full px-2 py-1 active:opacity-70"

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Chip } from "../../components/ui/Chip";
 import { PullRequestSectionHeading } from "./PullRequestSectionHeading";
 import type { PullRequestListEntry } from "@t3tools/contracts";
@@ -24,7 +25,7 @@ export function PullRequestOverviewLoading({
   return (
     <View
       className="gap-5"
-      accessibilityLabel="Loading pull request details"
+      accessibilityLabel={localizeMobileString("Loading pull request details")}
       accessibilityState={{ busy: true }}
     >
       <PullRequestStackCard params={params} state={stack} />
@@ -92,7 +93,7 @@ export function PullRequestOverviewLoading({
       {summary.labels.length ? (
         <View className="flex-row flex-wrap gap-2">
           {summary.labels.map((label) => (
-            <Chip key={label.name} label={label.name} size="small" />
+            <Chip key={label.name} localize={false} label={label.name} size="small" />
           ))}
         </View>
       ) : null}

@@ -1,6 +1,8 @@
+import { localizeMenuActions } from "../../i18n/localizeMenuActions";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { MenuAction, MenuComponentProps } from "@react-native-menu/menu";
 import type { ReactNode } from "react";
-import { use, useRef, useState } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import type { StyleProp, ViewInstance, ViewStyle } from "react-native";
 import { Pressable, ScrollView, View } from "react-native";
 import { useKeyboardState } from "react-native-keyboard-controller";
@@ -42,6 +44,7 @@ export type AndroidAnchoredMenuProps = {
 };
 
 export function AndroidAnchoredMenu(props: AndroidAnchoredMenuProps) {
+  const localizedActions = useMemo(() => localizeMenuActions(props.actions), [props.actions]);
   const { scale, menuWidth: desiredMenuWidth } = useAndroidControlSizing();
   const [anchor, setAnchor] = useState<AnchorSnapshot | null>(null);
   const [path, setPath] = useState<readonly MenuAction[]>([]);
@@ -87,7 +90,7 @@ export function AndroidAnchoredMenu(props: AndroidAnchoredMenuProps) {
   });
 
   const parent = path[path.length - 1] ?? null;
-  const levelActions = (parent?.subactions ?? props.actions).filter(
+  const levelActions = (parent?.subactions ?? localizedActions).filter(
     (action) => !(action.attributes?.hidden ?? false),
   );
 
@@ -174,7 +177,7 @@ export function AndroidAnchoredMenu(props: AndroidAnchoredMenuProps) {
                 anchor={windowHinge ? { ...local, x: left, width: menuWidth } : local}
                 menuWidth={menuWidth}
                 actions={levelActions}
-                title={props.title}
+                title={props.title === undefined ? undefined : localizeMobileString(props.title)}
                 parent={parent}
                 onPress={onPressItem}
                 onBack={() => setPath((current) => current.slice(0, -1))}
@@ -208,7 +211,9 @@ export function AndroidAnchoredMenu(props: AndroidAnchoredMenuProps) {
                     anchor={local}
                     menuWidth={menuWidth}
                     actions={levelActions}
-                    title={props.title}
+                    title={
+                      props.title === undefined ? undefined : localizeMobileString(props.title)
+                    }
                     parent={parent}
                     onPress={onPressItem}
                     onBack={() => setPath((current) => current.slice(0, -1))}

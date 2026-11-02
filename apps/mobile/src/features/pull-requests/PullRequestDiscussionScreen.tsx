@@ -180,7 +180,11 @@ function Discussion({ params }: { params: PullRequestParams & { readonly discuss
             {activity.isPending && !thread ? <AppActivityIndicator /> : null}
             {thread ? (
               <View className="gap-2 pb-4">
-                <Text selectable className="font-mono text-xs text-foreground-muted">
+                <Text
+                  localize={false}
+                  selectable
+                  className="font-mono text-xs text-foreground-muted"
+                >
                   {thread.path}
                   {thread.line ? `:${thread.line}` : ""}
                 </Text>
@@ -202,7 +206,10 @@ function Discussion({ params }: { params: PullRequestParams & { readonly discuss
               <View key={comment.id} className="gap-3 border-b border-border-subtle py-4">
                 <View className="flex-row items-center gap-2">
                   <PullRequestAvatar actor={comment.author} size={28} />
-                  <Text className="min-w-0 flex-1 text-sm font-t3-medium">
+                  <Text
+                    localize={!comment.author?.login}
+                    className="min-w-0 flex-1 text-sm font-t3-medium"
+                  >
                     {comment.author?.login ?? "Unknown author"}
                   </Text>
                   <Text className="text-2xs text-foreground-muted">
@@ -230,7 +237,7 @@ function Discussion({ params }: { params: PullRequestParams & { readonly discuss
               />
             ) : null}
             {error || activity.error ? (
-              <Text selectable className="py-4 text-sm text-danger-foreground">
+              <Text localize={false} selectable className="py-4 text-sm text-danger-foreground">
                 {error ?? activity.error}
               </Text>
             ) : null}

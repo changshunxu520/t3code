@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import {
   DatePicker,
@@ -75,7 +76,9 @@ export function CustomSnoozeSheet(props: {
     const snoozedUntil = resolveCustomSnooze(input, new Date());
     if (!snoozedUntil) {
       setError(
-        mode === "date" ? "Choose a date and time in the future." : "Enter a positive duration.",
+        localizeMobileString(
+          mode === "date" ? "Choose a date and time in the future." : "Enter a positive duration.",
+        ),
       );
       return;
     }
@@ -117,7 +120,7 @@ export function CustomSnoozeSheet(props: {
                 modifiers={[padding({ all: 16 }), foregroundStyle(colors["--color-foreground"])]}
               >
                 <Picker
-                  label="Snooze mode"
+                  label={localizeMobileString("Snooze mode")}
                   selection={mode}
                   onSelectionChange={(value: CustomSnoozeInput["mode"]) => {
                     setMode(value);
@@ -127,13 +130,13 @@ export function CustomSnoozeSheet(props: {
                 >
                   {modes.map((option) => (
                     <Text key={option.value} modifiers={[tag(option.value)]}>
-                      {option.label}
+                      {localizeMobileString(option.label)}
                     </Text>
                   ))}
                 </Picker>
                 {mode === "date" ? (
                   <DatePicker
-                    title="Snooze until"
+                    title={localizeMobileString("Snooze until")}
                     selection={date}
                     displayedComponents={["date", "hourAndMinute"]}
                     onDateChange={updateDate}
@@ -146,7 +149,7 @@ export function CustomSnoozeSheet(props: {
                 ) : (
                   <HStack spacing={0}>
                     <Picker
-                      label="Duration amount"
+                      label={localizeMobileString("Duration amount")}
                       selection={amount}
                       onSelectionChange={(value: number) => {
                         setAmount(value);
@@ -169,7 +172,7 @@ export function CustomSnoozeSheet(props: {
                       ))}
                     </Picker>
                     <Picker
-                      label="Duration unit"
+                      label={localizeMobileString("Duration unit")}
                       selection={unit}
                       onSelectionChange={(value: typeof unit) => {
                         setUnit(value);
@@ -190,7 +193,7 @@ export function CustomSnoozeSheet(props: {
                             foregroundStyle(colors["--color-foreground"]),
                           ]}
                         >
-                          {option.label}
+                          {localizeMobileString(option.label)}
                         </Text>
                       ))}
                     </Picker>
@@ -243,7 +246,7 @@ function SnoozePopoverNavigation(props: {
                   headerTintColor: colors["--color-foreground"],
                   headerTitleStyle: { fontSize: 17, fontWeight: "700" },
                   headerTransparent: NATIVE_LIQUID_GLASS_SUPPORTED,
-                  title: "Custom snooze",
+                  title: localizeMobileString("Custom snooze"),
                 }}
               >
                 <SnoozeStack.Screen name="CustomSnooze">
@@ -252,7 +255,7 @@ function SnoozePopoverNavigation(props: {
                       <SheetHeader
                         title="Custom snooze"
                         onCancel={props.onClose}
-                        accessibilityLabel="Cancel custom snooze"
+                        accessibilityLabel={localizeMobileString("Cancel custom snooze")}
                         confirm={{ label: "Snooze", onPress: props.onSubmit }}
                       />
                       <ScrollView

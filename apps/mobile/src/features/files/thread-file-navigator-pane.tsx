@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { resolveFilesystemReadAccess } from "@t3tools/client-runtime/state/filesystem";
 import { environmentSession } from "../../state/session";
 import type { EnvironmentId } from "@t3tools/contracts";
@@ -150,7 +151,7 @@ export function ThreadFileNavigatorPane(props: {
                     setSearchQuery(event.nativeEvent.text ?? "");
                   }}
                   placement="integratedButton"
-                  placeholder="Search files"
+                  placeholder={localizeMobileString("Search files")}
                   textColor={foregroundColor}
                   tintColor={foregroundColor}
                 />
@@ -183,13 +184,13 @@ export function ThreadFileNavigatorPane(props: {
           <View className="h-12 flex-row items-center gap-2 px-3">
             <View className="min-w-0 flex-1">
               <Text className="text-sm font-t3-bold text-foreground">Files</Text>
-              <Text className="text-xs text-foreground-muted" numberOfLines={1}>
+              <Text localize={false} className="text-xs text-foreground-muted" numberOfLines={1}>
                 {props.projectName}
               </Text>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Refresh files"
+              accessibilityLabel={localizeMobileString("Refresh files")}
               hitSlop={8}
               className="h-8 w-8 items-center justify-center rounded-full active:bg-subtle"
               onPress={entriesQuery.refresh}
@@ -212,12 +213,12 @@ export function ThreadFileNavigatorPane(props: {
               type="monochrome"
             />
             <TextInput
-              accessibilityLabel="Search files"
+              accessibilityLabel={localizeMobileString("Search files")}
               autoCapitalize="none"
               autoCorrect={false}
               clearButtonMode="while-editing"
               className="min-h-10 flex-1 rounded-xl py-2 text-sm"
-              placeholder="Search files"
+              placeholder={localizeMobileString("Search files")}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />

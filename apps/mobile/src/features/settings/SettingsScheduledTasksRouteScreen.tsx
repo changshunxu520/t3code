@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import * as Dialog from "../../components/ui/Dialog";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -177,13 +178,13 @@ function FormField(props: {
     >
       <Text className="text-sm text-foreground-muted">{props.label}</Text>
       <RNTextInput
-        accessibilityLabel={props.label}
+        accessibilityLabel={localizeMobileString(props.label)}
         value={props.value}
         readOnly={props.disabled}
         onChangeText={props.onChange}
         textAlignVertical="center"
         keyboardType={props.keyboardType}
-        placeholder={props.placeholder}
+        placeholder={props.placeholder ? localizeMobileString(props.placeholder) : undefined}
         placeholderTextColorClassName="accent-foreground-muted"
         className="min-h-8 font-sans text-base text-foreground"
       />
@@ -234,7 +235,7 @@ function SelectRow(props: {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${props.label}, ${props.value}`}
+        accessibilityLabel={`${localizeMobileString(props.label)}, ${localizeMobileString(props.value)}`}
         className={
           props.borderTop
             ? "min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
@@ -273,7 +274,7 @@ function WebhookFilterRows(props: {
             <Text className="min-w-0 flex-1 text-sm text-foreground-muted">Filter {index + 1}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Remove filter ${index + 1}`}
+              accessibilityLabel={localizeMobileString(`Remove filter ${index + 1}`)}
               disabled={props.disabled}
               hitSlop={8}
               onPress={() => props.onChange(removeWebhookFilterDraft(props.filters, filter.id))}
@@ -346,7 +347,7 @@ function PickerRow(props: {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${props.label}, ${props.value}`}
+      accessibilityLabel={`${localizeMobileString(props.label)}, ${localizeMobileString(props.value)}`}
       accessibilityState={{ disabled: props.disabled }}
       disabled={props.disabled}
       onPress={props.onPress}
@@ -413,7 +414,7 @@ export function SettingsScheduledTasksRouteScreen() {
           withNativeGlassHeaderItem({
             type: "button",
             label: "",
-            accessibilityLabel: "New task",
+            accessibilityLabel: localizeMobileString("New task"),
             icon: { type: "sfSymbol", name: "plus" } as const,
             disabled: visibleEnvironments.length === 0,
             onPress: newTask,
@@ -427,7 +428,7 @@ export function SettingsScheduledTasksRouteScreen() {
             <AndroidSettingsEnvironmentFilter />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="New task"
+              accessibilityLabel={localizeMobileString("New task")}
               accessibilityState={{ disabled: visibleEnvironments.length === 0 }}
               disabled={visibleEnvironments.length === 0}
               onPress={newTask}
@@ -577,7 +578,7 @@ function SettingsScheduledTaskEditorScreen({ title }: { readonly title: string }
               withNativeGlassHeaderItem({
                 type: "button",
                 label: "",
-                accessibilityLabel: "Back",
+                accessibilityLabel: localizeMobileString("Back"),
                 icon: { type: "sfSymbol", name: "chevron.backward" },
                 onPress: () => navigation.goBack(),
               }),
@@ -1034,7 +1035,7 @@ function TaskForm({
             <>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Time, ${formatTime(draft.schedule.timeOfDay)}`}
+                accessibilityLabel={`${localizeMobileString("Time")}, ${formatTime(draft.schedule.timeOfDay)}`}
                 onPress={() => setTimePickerOpen((open) => !open)}
                 className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
               >
@@ -1119,7 +1120,7 @@ function TaskForm({
                 <View key={field}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`${field === "date" ? "Date" : "Time"}, ${label}`}
+                    accessibilityLabel={`${localizeMobileString(field === "date" ? "Date" : "Time")}, ${label}`}
                     onPress={() => setRunAtPicker((open) => (open === field ? null : field))}
                     className="min-h-14 flex-row items-center gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
                   >
@@ -1258,7 +1259,7 @@ function TaskForm({
               Enabled
             </Text>
             <ThemedSwitch
-              accessibilityLabel="Task enabled"
+              accessibilityLabel={localizeMobileString("Task enabled")}
               value={draft.enabled}
               onValueChange={(enabled) => setDraft({ ...draft, enabled })}
             />
@@ -1323,8 +1324,8 @@ function WebhookScheduleDetails({
         <>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Copy webhook URL"
-            accessibilityHint="Copies the URL to the clipboard"
+            accessibilityLabel={localizeMobileString("Copy webhook URL")}
+            accessibilityHint={localizeMobileString("Copies the URL to the clipboard")}
             disabled={!resolved.copyable}
             onPress={() => void tryCopyTextWithHaptic(resolved.address)}
             className="gap-1 active:opacity-70"
@@ -1460,13 +1461,13 @@ function EnvironmentTasks({
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Edit ${task.title}`}
+              accessibilityLabel={localizeMobileString(`Edit ${task.title}`)}
               onPress={() => {
                 onEdit(task);
               }}
               className="min-w-0 flex-1 gap-1 active:opacity-70"
             >
-              <Text textRole="body" className="text-foreground" numberOfLines={1}>
+              <Text localize={false} textRole="body" className="text-foreground" numberOfLines={1}>
                 {task.title}
               </Text>
               <Text className="text-sm text-foreground-muted" numberOfLines={2}>
@@ -1525,7 +1526,7 @@ function EnvironmentTasks({
             >
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Actions for ${task.title}`}
+                accessibilityLabel={localizeMobileString(`Actions for ${task.title}`)}
                 className="h-11 w-11 items-center justify-center"
               >
                 <SymbolView

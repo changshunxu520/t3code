@@ -83,6 +83,7 @@ import { useEnvironmentPresentation } from "../../state/presentation";
 import { sourceControlEnvironment } from "../../state/sourceControl";
 import { AppText as Text, AppTextInput as TextInput } from "../../components/ui/AppText";
 import { EnvironmentMachineSymbol } from "../../components/EnvironmentMachineSymbol";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { ErrorBanner } from "../../components/ui/ErrorBanner";
 import { SourceControlIcon } from "./SourceControlIcon";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
@@ -196,7 +197,9 @@ function ListSection(props: { readonly children: ReactNode }) {
 
 function ListRow(props: {
   readonly title: string;
+  readonly localizeTitle?: boolean;
   readonly subtitle?: string | null;
+  readonly localizeSubtitle?: boolean;
   readonly icon: ReactNode;
   readonly disabled?: boolean;
   readonly selected?: boolean;
@@ -209,7 +212,9 @@ function ListRow(props: {
       <NavigationRow
         className="bg-grouped-card"
         title={props.title}
+        localizeTitle={props.localizeTitle}
         subtitle={props.subtitle}
+        localizeSubtitle={props.localizeSubtitle}
         leading={props.icon}
         trailing={props.right}
         disabled={props.disabled}
@@ -240,9 +245,15 @@ function ListRow(props: {
           {props.icon}
         </View>
         <View className="flex-1 gap-0.5">
-          <Text className="text-base leading-snug font-t3-bold">{props.title}</Text>
+          <Text localize={props.localizeTitle} className="text-base leading-snug font-t3-bold">
+            {props.title}
+          </Text>
           {props.subtitle ? (
-            <Text className="text-sm leading-snug text-foreground-muted" numberOfLines={2}>
+            <Text
+              localize={props.localizeSubtitle}
+              className="text-sm leading-snug text-foreground-muted"
+              numberOfLines={2}
+            >
               {props.subtitle}
             </Text>
           ) : null}
@@ -1058,6 +1069,7 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
           <ListRow
             key={option.environmentId}
             title={option.label}
+            localizeTitle={false}
             icon={
               <EnvironmentMachineSymbol
                 kind={option.machine}
@@ -1167,16 +1179,20 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
             onChangeText={setName}
             autoCorrect={false}
             autoFocus
-            placeholder="Project name"
+            placeholder={localizeMobileString("Project name")}
             returnKeyType="done"
             onSubmitEditing={() => void submit()}
           />
           {pathPreview !== null ? (
-            <Text className="px-1 text-sm leading-snug text-foreground-muted" numberOfLines={2}>
+            <Text
+              localize={false}
+              className="px-1 text-sm leading-snug text-foreground-muted"
+              numberOfLines={2}
+            >
               {trimmedName.length > 0
-                ? `Creates ${pathPreview}`
-                : `Goes in ${environment.newProjectsRoot}`}
-              {showMachines ? ` on ${environment.label}` : null}
+                ? `${localizeMobileString("Creates")} ${pathPreview}`
+                : `${localizeMobileString("Goes in")} ${environment.newProjectsRoot}`}
+              {showMachines ? ` ${localizeMobileString(`on ${environment.label}`)}` : null}
             </Text>
           ) : null}
           {machineRows}
@@ -1184,6 +1200,7 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
             <ListSection>
               <ListRow
                 title={`Create private repository on ${publishTarget.definition.label}`}
+                localizeSubtitle={false}
                 subtitle={
                   trimmedName.length > 0 && pathPreview !== null
                     ? getNewProjectRepository(publishTarget, pathPreview)
@@ -1199,7 +1216,9 @@ export function AddProjectNewScreen(props: { readonly environmentId?: string | s
                 isFirst
                 right={
                   <ThemedSwitch
-                    accessibilityLabel={`Create private repository on ${publishTarget.definition.label}`}
+                    accessibilityLabel={localizeMobileString(
+                      `Create private repository on ${publishTarget.definition.label}`,
+                    )}
                     value={publishes}
                     onValueChange={setPublishes}
                   />
@@ -1449,8 +1468,10 @@ export function AddProjectDestinationScreen(props: {
       {error ? <ErrorBanner message={error} /> : null}
       {repositoryTitle ? (
         <View className="rounded-[24px] bg-grouped-card px-4 py-3">
-          <Text className="text-base font-t3-bold">{repositoryTitle}</Text>
-          <Text className="mt-0.5 text-xs text-foreground-muted" numberOfLines={2}>
+          <Text localize={false} className="text-base font-t3-bold">
+            {repositoryTitle}
+          </Text>
+          <Text localize={false} className="mt-0.5 text-xs text-foreground-muted" numberOfLines={2}>
             {remoteUrl}
           </Text>
         </View>

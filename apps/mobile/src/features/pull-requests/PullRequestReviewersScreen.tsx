@@ -22,6 +22,7 @@ import { AppText as Text, AppTextInput as TextInput } from "../../components/ui/
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Button } from "../../components/ui/Button";
 import { SymbolView } from "../../components/ui/AppSymbol";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { NativeStackScreenOptions } from "../../native/StackHeader";
 import { useNativeLayoutMetrics } from "../../native/native-layout-metrics";
 import { composerPullRequests } from "../../state/pull-requests";
@@ -150,7 +151,7 @@ export function PullRequestReviewersScreen({ route }: StaticScreenProps<PullRequ
             listCandidates && integratedSearch
               ? [
                   createNativeMailSearchToolbarItem({
-                    placeholder: "Search reviewers",
+                    placeholder: localizeMobileString("Search reviewers"),
                     onSearchTextChange: search,
                     showsSearchDismissButton: true,
                     searchTextChangeId: "pr-reviewer-search",
@@ -194,7 +195,7 @@ export function PullRequestReviewersScreen({ route }: StaticScreenProps<PullRequ
                 </Text>
               ) : null}
               {error ? (
-                <Text selectable className="text-sm text-danger-foreground">
+                <Text localize={false} selectable className="text-sm text-danger-foreground">
                   {error}
                 </Text>
               ) : null}
@@ -205,7 +206,9 @@ export function PullRequestReviewersScreen({ route }: StaticScreenProps<PullRequ
             return (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`${item.isRequested ? "Remove review request from" : "Request review from"} ${item.login}${item.kind === "team" ? " team" : ""}`}
+                accessibilityLabel={localizeMobileString(
+                  `${item.isRequested ? "Remove review request from" : "Request review from"} ${item.login}${item.kind === "team" ? " team" : ""}`,
+                )}
                 accessibilityState={{ disabled: !allowed || pending !== null }}
                 disabled={!allowed || pending !== null}
                 onPress={() => void update(item)}
@@ -213,7 +216,7 @@ export function PullRequestReviewersScreen({ route }: StaticScreenProps<PullRequ
               >
                 <PullRequestAvatar actor={item} size={32} />
                 <View className="min-w-0 flex-1 gap-0.5">
-                  <Text className="text-sm font-t3-medium" numberOfLines={1}>
+                  <Text localize={false} className="text-sm font-t3-medium" numberOfLines={1}>
                     {item.name || item.login}
                   </Text>
                   <Text className="text-xs text-foreground-muted" numberOfLines={1}>
@@ -307,7 +310,7 @@ export function PullRequestReviewersScreen({ route }: StaticScreenProps<PullRequ
                 onPress={() => void update({ id: query.trim(), kind: "user", isRequested: true })}
               />
               {error ? (
-                <Text selectable className="text-danger-foreground">
+                <Text localize={false} selectable className="text-danger-foreground">
                   {error}
                 </Text>
               ) : null}

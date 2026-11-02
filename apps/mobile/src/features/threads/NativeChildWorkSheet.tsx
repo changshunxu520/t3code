@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type {
   EnvironmentId,
   OrchestrationV2GetNativeChildWorkResult,
@@ -33,7 +34,7 @@ export function NativeChildWorkSheet(props: {
   );
   const children = query.data?.children;
   return (
-    <Sheet title="Subagent work" onClose={props.onClose}>
+    <Sheet title={localizeMobileString("Subagent work")} onClose={props.onClose}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
@@ -47,7 +48,7 @@ export function NativeChildWorkSheet(props: {
           Read only. These subagents cannot take messages.
         </Text>
         {query.error !== null ? (
-          <Text selectable className="font-sans text-sm text-danger-foreground">
+          <Text localize={false} selectable className="font-sans text-sm text-danger-foreground">
             {query.error}
           </Text>
         ) : children === undefined ? (
@@ -76,8 +77,10 @@ function NativeChild(props: { readonly child: OrchestrationV2NativeChildWork }) 
   const { child } = props;
   return (
     <View className="gap-2">
-      <Text className="font-t3-bold text-sm text-foreground">{child.role || "Subagent"}</Text>
-      <Text selectable className="font-sans text-sm text-foreground-secondary">
+      <Text localize={!child.role} className="font-t3-bold text-sm text-foreground">
+        {child.role || "Subagent"}
+      </Text>
+      <Text localize={false} selectable className="font-sans text-sm text-foreground-secondary">
         {child.prompt}
       </Text>
       {child.truncated ? (
@@ -98,12 +101,12 @@ function NativeChild(props: { readonly child: OrchestrationV2NativeChildWork }) 
                   : ""}
               </Text>
               {step.toolCalls.length === 0 ? null : (
-                <Text selectable className="font-mono text-xs text-foreground">
+                <Text localize={false} selectable className="font-mono text-xs text-foreground">
                   {step.toolCalls.map((call) => `${call.name} ${call.input}`).join("\n")}
                 </Text>
               )}
               {step.text === null ? null : (
-                <Text selectable className="font-mono text-xs text-foreground">
+                <Text localize={false} selectable className="font-mono text-xs text-foreground">
                   {step.text}
                 </Text>
               )}

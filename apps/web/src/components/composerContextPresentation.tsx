@@ -15,6 +15,8 @@ import type { EnvironmentId } from "@t3tools/contracts";
 import type { ComposerFileAttachment, ComposerImageAttachment } from "~/composerDraftStore";
 import { composerFileNeedsReattach } from "~/composerDraftStore";
 import { useTheme } from "~/hooks/useTheme";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
 import {
   formatAttachmentUploadProgress,
   type AttachmentUploadState,
@@ -181,9 +183,12 @@ function ContextChip(props: {
   );
 }
 
-function uploadStatusSuffix(upload: AttachmentUploadState | undefined): string | null {
+function uploadStatusSuffix(
+  upload: AttachmentUploadState | undefined,
+  locale: WebLocale = "en",
+): string | null {
   if (upload?.status === "uploading") return formatAttachmentUploadProgress(upload.progress);
-  if (upload?.status === "failed") return "upload failed";
+  if (upload?.status === "failed") return translateWebSource(locale, "upload failed");
   return null;
 }
 
@@ -200,6 +205,7 @@ function ImageContextChip(props: {
   record: ComposerImageAttachment;
   upload: AttachmentUploadState | undefined;
 }) {
+  const { locale } = useI18n();
   const actions = use(ComposerContextActionsContext);
   return (
     <Tooltip>
@@ -209,7 +215,7 @@ function ImageContextChip(props: {
             name={props.record.name}
             previewUrl={props.record.previewUrl}
             size={formatAttachmentSize(props.record.sizeBytes)}
-            suffix={uploadStatusSuffix(props.upload)}
+            suffix={uploadStatusSuffix(props.upload, locale)}
             onClick={() => actions.expandImage(props.record.id)}
           />
         }
@@ -225,10 +231,13 @@ function FileContextChip(props: {
   record: ComposerFileAttachment;
   upload: AttachmentUploadState | undefined;
 }) {
+  const { locale, t } = useI18n();
   const actions = use(ComposerContextActionsContext);
   const { resolvedTheme } = useTheme();
   const needsReattach = composerFileNeedsReattach(props.record);
-  const suffix = needsReattach ? "attach again" : uploadStatusSuffix(props.upload);
+  const suffix = needsReattach
+    ? translateWebSource(locale, "attach again")
+    : uploadStatusSuffix(props.upload, locale);
   const size = formatAttachmentSize(props.record.sizeBytes);
   const isVideo = videoMimeType(props.record) !== null;
   return (
@@ -249,7 +258,14 @@ function FileContextChip(props: {
       error={props.upload?.status === "failed"}
       unresolved={needsReattach}
       suffix={suffix}
-      accessibleLabel={`${isVideo && !needsReattach ? "Preview video" : "File"} attachment, ${props.record.name}, ${size}`}
+      accessibleLabel={t("composer.fileAttachmentAria", {
+        kind:
+          isVideo && !needsReattach
+            ? translateWebSource(locale, "Preview video")
+            : translateWebSource(locale, "File"),
+        name: props.record.name,
+        size,
+      })}
       onOpen={
         !needsReattach
           ? () =>
@@ -258,7 +274,7 @@ function FileContextChip(props: {
       }
       tooltip={
         needsReattach
-          ? `${props.record.name} was not saved with this draft. Attach it again to send it.`
+          ? t("composer.fileNeedsReattachTooltip", { name: props.record.name })
           : attachmentTooltip(props.record, props.upload)
       }
     />
@@ -281,16 +297,23 @@ function PullRequestContextChip(props: { record: ReviewCommentContext; kind: Con
   );
 }
 
-function previewAnnotationTooltip(annotation: PreviewAnnotationPayload): string {
+function previewAnnotationTooltip(
+  annotation: PreviewAnnotationPayload,
+  locale: WebLocale = "en",
+): string {
   const lines = [annotation.pageTitle?.trim() || annotation.pageUrl];
   if (annotation.comment.trim()) lines.push("", annotation.comment.trim());
   const targets: string[] = [];
-  const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;
-  if (annotation.elements.length > 0) targets.push(plural(annotation.elements.length, "element"));
-  if (annotation.regions.length > 0) targets.push(plural(annotation.regions.length, "region"));
-  if (annotation.strokes.length > 0) targets.push(plural(annotation.strokes.length, "drawing"));
+  const plural = (count: number, noun: string, zhNoun: string) =>
+    locale === "zh-CN" ? `${count} 个${zhNoun}` : `${count} ${noun}${count === 1 ? "" : "s"}`;
+  if (annotation.elements.length > 0)
+    targets.push(plural(annotation.elements.length, "element", "元素"));
+  if (annotation.regions.length > 0)
+    targets.push(plural(annotation.regions.length, "region", "区域"));
+  if (annotation.strokes.length > 0)
+    targets.push(plural(annotation.strokes.length, "drawing", "绘图"));
   if (annotation.styleChanges.length > 0) {
-    targets.push(plural(annotation.styleChanges.length, "style change"));
+    targets.push(plural(annotation.styleChanges.length, "style change", "样式更改"));
   }
   if (targets.length > 0) lines.push("", targets.join(", "));
   return lines.join("\n");
@@ -322,19 +345,20 @@ function ComposerPreviewAnnotationDetails({
   annotation: PreviewAnnotationPayload;
   screenshot: ComposerImageAttachment | undefined;
 }) {
-  const summary = previewAnnotationTooltip(annotation);
+  const { locale } = useI18n();
+  const summary = previewAnnotationTooltip(annotation, locale);
   const screenshotUrl = annotation.screenshot?.dataUrl || screenshot?.previewUrl;
   return (
     <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
       {screenshotUrl ? (
         <img
           src={screenshotUrl}
-          alt="Annotated preview crop"
+          alt={translateWebSource(locale, "Annotated preview crop")}
           className="max-h-64 w-full border-border/70 border-b bg-muted object-contain"
         />
       ) : (
         <div className="border-border/70 border-b bg-muted/40 px-3 py-2 text-secondary-label text-xs">
-          Screenshot unavailable
+          {translateWebSource(locale, "Screenshot unavailable")}
         </div>
       )}
       <div className="whitespace-pre-wrap wrap-break-word px-3 py-2.5 text-sm text-foreground">
@@ -360,16 +384,21 @@ function ComposerThreadContextChip(props: { record: ThreadContextRecord }) {
 }
 
 function UnresolvedContextChip(props: { label: string }) {
+  const { locale } = useI18n();
   return (
     <UnresolvedChip
       label={props.label}
-      tooltip="This context is no longer available. Remove it or attach it again."
+      tooltip={translateWebSource(
+        locale,
+        "This context is no longer available. Remove it or attach it again.",
+      )}
     />
   );
 }
 
 interface ComposerContextRenderContext {
   label: string;
+  locale: WebLocale;
 }
 
 const composerContextPresentationRegistry = createContextPresentationRegistry<
@@ -441,7 +470,11 @@ const composerContextPresentationRegistry = createContextPresentationRegistry<
           <ContextChip
             icon={isPullRequest ? <PullRequestGlyph.pullRequest /> : <MessageCircleIcon />}
             label={reviewCommentContextLabel(entry.record)}
-            kindLabel={isPullRequest ? pullRequestContextKindLabel(entry.record) : "Review comment"}
+            kindLabel={
+              isPullRequest
+                ? pullRequestContextKindLabel(entry.record)
+                : translateWebSource(context.locale, "Review comment")
+            }
             details={<ComposerReviewCommentDetails comment={entry.record} />}
             detailsMode={definition.capabilities.details}
             kind={isPullRequest ? PULL_REQUEST_CHIP_KINDS[pullRequestState] : "review-comment"}
@@ -457,7 +490,7 @@ const composerContextPresentationRegistry = createContextPresentationRegistry<
           <ContextChip
             icon={<MousePointerClickIcon />}
             label={previewAnnotationContextLabel(entry.record)}
-            kindLabel="Preview annotation"
+            kindLabel={translateWebSource(context.locale, "Preview annotation")}
             details={
               <ComposerPreviewAnnotationDetails
                 annotation={entry.record}
@@ -500,8 +533,10 @@ export function ComposerContextReferenceChip(props: {
   contextId: string;
   label: string;
 }): ReactElement {
+  const { locale } = useI18n();
   const records = use(ComposerContextRecordsContext);
   return composerContextPresentationRegistry.render(props.kind, records.get(props.contextId), {
     label: props.label,
+    locale,
   });
 }

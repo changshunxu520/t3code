@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { NativeScrollView } from "../../native/NativeScrollViewMarker";
 import { SearchField } from "../../components/ui/SearchField";
 import { Button } from "../../components/ui/Button";
@@ -494,10 +495,10 @@ export function BranchPickerScreen(props: {
           <SearchField
             inputRef={searchRef}
             autoFocus={false}
-            accessibilityLabel="Find a branch"
+            accessibilityLabel={localizeMobileString("Find a branch")}
             clearAccessibilityLabel="Clear branch search"
             onChangeText={props.onQueryChange}
-            placeholder="Find a branch"
+            placeholder={localizeMobileString("Find a branch")}
             value={props.query}
           />
         </View>
@@ -511,12 +512,12 @@ export function BranchPickerScreen(props: {
       <NativeStackScreenOptions
         options={{
           headerShown: true,
-          title: props.title,
+          title: localizeMobileString(props.title),
           unstable_headerToolbarItems: usesNativeMailSearchToolbar
             ? () => [
                 createNativeMailSearchToolbarItem({
                   onSearchTextChange: props.onQueryChange,
-                  placeholder: "Find a branch",
+                  placeholder: localizeMobileString("Find a branch"),
                   searchTextChangeId: "new-task-branch-search-text",
                   showsSearchDismissButton: true,
                 }),
@@ -529,7 +530,7 @@ export function BranchPickerScreen(props: {
                 autoCapitalize: "none",
                 hideNavigationBar: false,
                 obscureBackground: false,
-                placeholder: "Find a branch",
+                placeholder: localizeMobileString("Find a branch"),
                 onChangeText: (event) => {
                   props.onQueryChange(event.nativeEvent.text);
                 },

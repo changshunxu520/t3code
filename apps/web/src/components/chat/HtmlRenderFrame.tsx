@@ -17,6 +17,8 @@ import { toastManager } from "../ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { HtmlRenderDialog } from "./HtmlRenderDialog";
 import { observeResize } from "~/lib/observeResize";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 
 const MIN_URL_LIFE_MS = 5 * 60_000;
 
@@ -26,6 +28,8 @@ export function HtmlRenderFrame(props: {
   readonly threadRef: ScopedThreadRef | undefined;
   readonly onFullscreenChange?: (fullscreen: boolean) => void;
 }) {
+  const { locale, t } = useI18n();
+  const tr = (text: string) => translateWebSource(locale, text);
   const { attachmentId, title } = props.htmlRender;
   const [width, setWidth] = useState(HTML_RENDER_COLUMN_WIDTH);
   const observeBox = (box: HTMLDivElement) => {
@@ -83,7 +87,7 @@ export function HtmlRenderFrame(props: {
               <TooltipTrigger
                 render={
                   <Button
-                    aria-label="Open full screen"
+                    aria-label={tr("Open full screen")}
                     size="icon-xs"
                     variant="glass"
                     onClick={async () => {
@@ -95,8 +99,8 @@ export function HtmlRenderFrame(props: {
                       else
                         toastManager.add({
                           type: "error",
-                          title: "Page unavailable",
-                          description: "Reconnect to the environment and try again.",
+                          title: tr("Page unavailable"),
+                          description: tr("Reconnect to the environment and try again."),
                         });
                     }}
                   />
@@ -104,7 +108,7 @@ export function HtmlRenderFrame(props: {
               >
                 <Maximize2Icon className="size-3.5" />
               </TooltipTrigger>
-              <TooltipPopup side="left">Open full screen</TooltipPopup>
+              <TooltipPopup side="left">{tr("Open full screen")}</TooltipPopup>
             </Tooltip>
           </div>
           {expandedSrc !== null ? (
@@ -118,7 +122,7 @@ export function HtmlRenderFrame(props: {
         </>
       ) : failed ? (
         <p className="flex size-full items-center justify-center text-muted-foreground text-xs">
-          Unable to load {title}
+          {t("htmlRender.unableToLoad", { title })}
         </p>
       ) : null}
     </div>

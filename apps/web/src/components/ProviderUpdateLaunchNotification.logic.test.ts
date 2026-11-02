@@ -1,3 +1,4 @@
+import { type ProviderUpdateRunTranslate } from "./ProviderUpdateLaunchNotification.logic";
 import { describe, expect, it } from "vite-plus/test";
 import {
   EnvironmentId,
@@ -7,6 +8,7 @@ import {
 } from "@t3tools/contracts";
 import * as Cause from "effect/Cause";
 import { AsyncResult } from "effect/reactivity";
+import { translateWebMessage } from "../i18n/messages";
 
 import {
   canOneClickUpdateProviderCandidate,
@@ -296,6 +298,8 @@ it("does not offer incompatible latest versions and restores suggestions after p
 });
 
 describe("getProviderUpdateRunToastView", () => {
+  const translateChinese: ProviderUpdateRunTranslate = (key, values) =>
+    translateWebMessage("zh-CN", key, values);
   const updateState = (
     status: "succeeded" | "failed",
     message: string,
@@ -316,6 +320,18 @@ describe("getProviderUpdateRunToastView", () => {
     driver: driver(providerDriver),
     instanceId: instanceId(providerDriver),
     result,
+  });
+
+  it("localizes failed provider updates without translating provider or error text", () => {
+    const view = getProviderUpdateRunToastView(
+      [run("Laptop", "codex", AsyncResult.failure(Cause.die(new Error("WebSocket closed"))))],
+      translateChinese,
+    );
+    expect(view).toEqual({
+      type: "error",
+      title: translateWebMessage("zh-CN", "providerUpdate.run.failed"),
+      description: "Laptop · Codex: WebSocket closed",
+    });
   });
 
   it("lists every failed update and ignores interrupted ones", () => {
@@ -353,5 +369,24 @@ describe("getProviderUpdateRunToastView", () => {
       title: "2 of 3 provider updates failed",
       description: "Mac Studio · Claude: npm exited with code 1.\nLaptop · Codex: WebSocket closed",
     });
+    expect(
+      getProviderUpdateRunToastView(
+        [
+          run(
+            "Mac Studio",
+            "claudeAgent",
+            AsyncResult.success({
+              providers: [
+                provider({
+                  driver: driver("claudeAgent"),
+                  updateState: updateState("failed", "npm exited with code 1."),
+                }),
+              ],
+            }),
+          ),
+        ],
+        translateChinese,
+      )?.title,
+    ).toBe("提供商更新失败");
   });
 });

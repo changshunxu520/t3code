@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { LocalizedAlert as Alert } from "../../i18n/LocalizedAlert";
 import type { ConfirmDialogRequest, TextInputDialogRequest } from "./Dialog.types";
 
 export type { ConfirmDialogRequest, TextInputDialogRequest } from "./Dialog.types";

@@ -58,6 +58,8 @@ import {
 import { formatShortTimestamp } from "../../timestampFormat";
 import { getTriggerDisplayModelName } from "./providerIconUtils";
 import { ProviderInstanceIcon, providerTextColor } from "./ProviderInstanceIcon";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { cn } from "~/lib/utils";
 import { TimelineSystemDivider } from "./TimelineSystemDivider";
 import { subagentResumedSince } from "./V2LifecycleRow.logic";
@@ -73,11 +75,12 @@ export function V2LifecycleRow(props: {
   readonly runs: ReadonlyArray<HandoffTimelineRun>;
   readonly onOpenThread: (threadId: ThreadId) => void;
 }) {
+  const { locale, t } = useI18n();
   const { item } = props;
   if (item.type === "run_interrupt_result") {
     return (
       <TimelineSystemDivider
-        label="Run interrupted"
+        label={translateWebSource(locale, "Run interrupted")}
         detail={item.message}
         icon={CircleStopIcon}
         wrapDetail
@@ -97,14 +100,23 @@ export function V2LifecycleRow(props: {
     const relatedThreadId = item.source.type === "run" ? item.source.threadId : item.targetThreadId;
     return (
       <TimelineSystemDivider
-        label={item.source.type === "run" ? "Forked from conversation" : "Conversation fork"}
+        label={translateWebSource(
+          locale,
+          item.source.type === "run" ? "Forked from conversation" : "Conversation fork",
+        )}
         icon={GitForkIcon}
-        actionLabel={item.source.type === "run" ? "Open source conversation" : "Open fork"}
+        actionLabel={translateWebSource(
+          locale,
+          item.source.type === "run" ? "Open source conversation" : "Open fork",
+        )}
         onAction={() => props.onOpenThread(relatedThreadId)}
       />
     );
   }
   if (item.type === "thread_created") {
+    const openThreadAriaLabel = t("lifecycle.openThreadAria", {
+      title: item.title ?? translateWebSource(locale, "created thread"),
+    });
     if (props.resourceSummary) {
       return (
         <div
@@ -115,15 +127,15 @@ export function V2LifecycleRow(props: {
             <MessageSquareIcon className="size-4 text-secondary-label" aria-hidden />
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {item.title ?? "Created thread"}
+            {item.title ?? translateWebSource(locale, "Created thread")}
           </span>
           <Button
             size="xs"
             variant="outline"
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={openThreadAriaLabel}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {translateWebSource(locale, "Open chat")}
           </Button>
         </div>
       );
@@ -132,13 +144,18 @@ export function V2LifecycleRow(props: {
       <WorkLogRow
         data-v2-item-type={item.type}
         icon={<T3Wordmark className="size-4 text-icon-muted" aria-hidden />}
-        label={<>Created thread{item.title ? ` · ${item.title}` : ""}</>}
+        label={
+          <>
+            {translateWebSource(locale, "Created thread")}
+            {item.title ? ` · ${item.title}` : ""}
+          </>
+        }
         trailing={
           <InlineButton
-            aria-label={`Open ${item.title ?? "created thread"}`}
+            aria-label={openThreadAriaLabel}
             onClick={() => props.onOpenThread(item.targetThreadId)}
           >
-            Open chat
+            {translateWebSource(locale, "Open chat")}
           </InlineButton>
         }
       />
@@ -415,6 +432,7 @@ function SubagentTimelineLink(props: {
     readonly timestamp: string;
   };
 }) {
+  const { locale, t } = useI18n();
   const agent = useAtomValue(
     environmentThreadDetails.threadAtom(props.parentRef),
     (thread) => thread?.projection.subagents.find((agent) => agent.id === props.subagentId) ?? null,
@@ -436,7 +454,10 @@ function SubagentTimelineLink(props: {
         : null;
   const liveStatus = agent?.status ?? props.status;
   const status = props.event ? props.event.status : liveStatus;
-  const statusLabel = props.event?.label ?? subagentStatusVisual(liveStatus).label;
+  const statusLabel = translateWebSource(
+    locale,
+    props.event?.label ?? subagentStatusVisual(liveStatus).label,
+  );
   const result = (agent?.result ?? props.result)?.trim();
   const progress = (agent?.progress ?? props.progress)?.trim();
   const settled = SETTLED_SUBAGENT_STATUSES.has(status ?? liveStatus);
@@ -464,7 +485,9 @@ function SubagentTimelineLink(props: {
             {props.title}
           </span>
           {remote !== undefined ? (
-            <span className="shrink-0 text-xs text-muted-foreground">on {remote.label}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {t("lifecycle.onRemoteHost", { label: remote.label })}
+            </span>
           ) : null}
         </span>
         <span
@@ -515,7 +538,7 @@ function SubagentTimelineLink(props: {
             <button
               type="button"
               data-v2-item-type="subagent"
-              aria-label={`Open ${props.title}`}
+              aria-label={t("lifecycle.openThreadAria", { title: props.title })}
               aria-description={statusLabel}
               onClick={open}
               className={cn(
@@ -628,13 +651,17 @@ export function HandoffRow(props: {
   readonly pending?: boolean;
   readonly failed?: boolean;
 }) {
+  const { locale } = useI18n();
   const { from: fromEndpoints, to } = props.endpoints;
   const settings = useAtomValue(serverEnvironment.settingsValueAtom(props.environmentId));
   const derived = deriveProviderInstanceEntries(props.providers);
   const entries = settings ? applyProviderInstanceSettings(derived, settings, null) : derived;
   return (
     <TimelineSystemDivider
-      label={props.pending ? "Context handoff pending" : "Context handoff"}
+      label={translateWebSource(
+        locale,
+        props.pending ? "Context handoff pending" : "Context handoff",
+      )}
       icon={ArrowRightLeftIcon}
       showDetailSeparator={false}
       tone={props.failed ? "danger" : "neutral"}

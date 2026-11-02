@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../i18n/mobileStrings";
 import { useRoute } from "@react-navigation/native";
 import type {
   NativeStackHeaderItem,
@@ -28,7 +29,7 @@ function labelFromChildren(children: ReactNode): string {
       parts.push(labelFromChildren(child.props.children));
     }
   });
-  return parts.join("");
+  return localizeMobileString(parts.join(""));
 }
 
 type NativeStackHeaderIcon = NonNullable<
@@ -83,7 +84,10 @@ function convertMenuAction(
     return {
       type: "action",
       label,
-      description: typeof element.props.subtitle === "string" ? element.props.subtitle : undefined,
+      description:
+        typeof element.props.subtitle === "string"
+          ? localizeMobileString(element.props.subtitle)
+          : undefined,
       disabled: Boolean(element.props.disabled),
       icon: iconFromProp(element.props.icon),
       onPress: register(element.props.onPress),
@@ -91,7 +95,7 @@ function convertMenuAction(
       destructive: Boolean(element.props.destructive),
       discoverabilityLabel:
         typeof element.props.discoverabilityLabel === "string"
-          ? element.props.discoverabilityLabel
+          ? localizeMobileString(element.props.discoverabilityLabel)
           : undefined,
     };
   }
@@ -101,7 +105,7 @@ function convertMenuAction(
       type: "submenu",
       label:
         typeof element.props.title === "string"
-          ? element.props.title
+          ? localizeMobileString(element.props.title)
           : labelFromChildren(element.props.children),
       icon: iconFromProp(element.props.icon),
       inline: Boolean(element.props.inline),
@@ -152,11 +156,11 @@ function convertToolbarChild(
       type: "button",
       label:
         typeof child.props.label === "string"
-          ? child.props.label
-          : String(child.props.accessibilityLabel ?? ""),
+          ? localizeMobileString(child.props.label)
+          : localizeMobileString(String(child.props.accessibilityLabel ?? "")),
       accessibilityLabel:
         typeof child.props.accessibilityLabel === "string"
-          ? child.props.accessibilityLabel
+          ? localizeMobileString(child.props.accessibilityLabel)
           : undefined,
       axisBehavior: child.props.axisBehavior as NativeStackHeaderAxisBehavior,
       disabled: Boolean(child.props.disabled),
@@ -176,16 +180,19 @@ function convertToolbarChild(
   if (typeName === "NativeHeaderToolbarMenu") {
     return {
       type: "menu",
-      label: typeof child.props.title === "string" ? child.props.title : "",
+      label: typeof child.props.title === "string" ? localizeMobileString(child.props.title) : "",
       accessibilityLabel:
         typeof child.props.accessibilityLabel === "string"
-          ? child.props.accessibilityLabel
+          ? localizeMobileString(child.props.accessibilityLabel)
           : undefined,
       disabled: Boolean(child.props.disabled),
       axisBehavior: child.props.axisBehavior as NativeStackHeaderAxisBehavior,
       icon: iconFromProp(child.props.icon),
       menu: {
-        title: typeof child.props.title === "string" ? child.props.title : undefined,
+        title:
+          typeof child.props.title === "string"
+            ? localizeMobileString(child.props.title)
+            : undefined,
         items: collectMenuItems(child.props.children, register),
       },
       sharesBackground: !child.props.separateBackground,

@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { useAtomValue } from "@effect/atom-react";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import {
@@ -35,6 +37,7 @@ export function ThreadServersPanel(props: {
   readonly environmentId: EnvironmentId;
   readonly threadId: ThreadId;
 }) {
+  const { locale: copyLocale } = useI18n();
   const servers = useThreadDiscoveredPorts(props);
   const canOpen = useEnvironmentScope(props.environmentId, AuthPreviewOperateScope);
   const canStop = useAtomValue(
@@ -94,7 +97,10 @@ export function ThreadServersPanel(props: {
   };
 
   return (
-    <ThreadDetailsSection headingId="thread-details-servers-heading" title="Servers">
+    <ThreadDetailsSection
+      headingId="thread-details-servers-heading"
+      title={translateWebSource(copyLocale, "Servers")}
+    >
       <ul className="m-0 list-none p-0">
         {servers.map((server) => {
           const key = serverKey(server);
@@ -130,7 +136,8 @@ export function ThreadServersPanel(props: {
                   </span>
                 </TooltipTrigger>
                 <TooltipPopup side="left">
-                  Open in the browser panel. {externalClickLabel} for your browser.
+                  {translateWebSource(copyLocale, "Open in the browser panel.")}
+                  {externalClickLabel} {translateWebSource(copyLocale, "for your browser.")}
                 </TooltipPopup>
               </Tooltip>
               {stoppable ? (
@@ -155,7 +162,9 @@ export function ThreadServersPanel(props: {
                         <SquareIcon aria-hidden className="size-3 fill-current" />
                       )}
                     </TooltipTrigger>
-                    <TooltipPopup side="left">Stop server</TooltipPopup>
+                    <TooltipPopup side="left">
+                      {translateWebSource(copyLocale, "Stop server")}
+                    </TooltipPopup>
                   </Tooltip>
                 </div>
               ) : null}

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { Ref } from "react";
 import { Keyboard, Pressable, TextInput, View, type TextInputInstance } from "react-native";
 import { useResolveClassNames } from "uniwind";
@@ -47,7 +48,7 @@ export function WorkspaceSearchField({
         {props.query ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear search"
+            accessibilityLabel={localizeMobileString("Clear search")}
             onPress={props.onClear}
             className="h-11 w-11 items-center justify-center"
           >

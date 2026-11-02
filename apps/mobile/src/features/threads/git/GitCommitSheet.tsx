@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { ScreenContent } from "../../../components/ui/ScreenContent";
 import { SheetHeader } from "../../../components/ui/SheetHeader";
 import { Button } from "../../../components/ui/Button";
@@ -74,7 +75,7 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
       title="Commit changes"
       subtitle={gitStatus.data?.refName ?? "(detached HEAD)"}
       onCancel={() => navigation.goBack()}
-      accessibilityLabel="Cancel commit"
+      accessibilityLabel={localizeMobileString("Cancel commit")}
     />
   );
 
@@ -112,7 +113,7 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
             <Text className="text-sm font-t3-medium text-foreground">Commit message</Text>
             <TextInput
               multiline
-              accessibilityLabel="Commit message"
+              accessibilityLabel={localizeMobileString("Commit message")}
               value={dialogCommitMessage}
               onChangeText={setDialogCommitMessage}
               placeholder="Describe your changes…"
@@ -186,6 +187,7 @@ export function GitCommitSheet(_props: GitCommitSheetProps) {
                     </View>
                     <View className="flex-1 gap-1">
                       <Text
+                        localize={false}
                         numberOfLines={1}
                         ellipsizeMode="middle"
                         className="text-sm font-t3-medium text-foreground"

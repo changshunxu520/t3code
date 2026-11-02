@@ -9,6 +9,8 @@ import { useRef, useState } from "react";
 
 import { useProjects, useThreadShell } from "~/state/entities";
 import { usePullRequestLinking } from "~/hooks/usePullRequestLinking";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebMessage, translateWebSource } from "~/i18n/messages";
 import { appAtomRegistry } from "~/rpc/atomRegistry";
 import { Atom } from "effect/reactivity";
 import { Button } from "../ui/button";
@@ -63,6 +65,8 @@ function LinkPullRequestDialog({
   projectId,
   onOpenChange,
 }: LinkPullRequestDialogProps) {
+  const { locale, t } = useI18n();
+  const tx = (text: string) => translateWebSource(locale, text);
   const inputRef = useRef<HTMLInputElement>(null);
   const [reference, setReference] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -103,36 +107,47 @@ function LinkPullRequestDialog({
     setPending(false);
     if (result._tag === "Failure") {
       const error = squashAtomCommandFailure(result);
-      setSubmitError(error instanceof Error ? error.message : "Could not link the pull request.");
+      setSubmitError(
+        error instanceof Error ? tx(error.message) : tx("Could not link the pull request."),
+      );
       return;
     }
     onOpenChange(false);
   };
 
+  const translateResolvedError = (errorText: string) => {
+    const match = /^No project in this environment can read (.+)\.$/.exec(errorText);
+    if (match?.[1]) {
+      return t("pullRequests.linkDialog.noProjectCanRead", { repo: match[1] });
+    }
+    return tx(errorText);
+  };
+
   const validation = !dirty
     ? null
     : reference.trim().length === 0
-      ? "Paste a pull request URL or enter 123 / #123."
+      ? tx("Paste a pull request URL or enter 123 / #123.")
       : resolved === null
-        ? "Use a pull request URL, 123, or #123."
+        ? tx("Use a pull request URL, 123, or #123.")
         : "error" in resolved
-          ? resolved.error
+          ? translateResolvedError(resolved.error)
           : null;
 
   return (
     <Dialog open={open} onOpenChange={(next) => (pending ? undefined : onOpenChange(next))}>
       <DialogPopup className="max-w-xl" initialFocus={inputRef}>
         <DialogHeader>
-          <DialogTitle>Link pull request</DialogTitle>
+          <DialogTitle>{tx("Link pull request")}</DialogTitle>
           <DialogDescription>
-            Attach a pull request to this thread by its URL, or by its number for this thread's
-            repository.
+            {tx(
+              "Attach a pull request to this thread by its URL, or by its number for this thread's repository.",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogPanel>
           <Input
             ref={inputRef}
-            placeholder="Pull request URL or #42"
+            placeholder={tx("Pull request URL or #42")}
             value={reference}
             onChange={(event) => {
               setDirty(true);
@@ -161,7 +176,7 @@ function LinkPullRequestDialog({
             onClick={() => onOpenChange(false)}
             disabled={pending}
           >
-            Cancel
+            {translateWebMessage(locale, "common.cancel")}
           </Button>
           <Button
             type="button"
@@ -169,7 +184,7 @@ function LinkPullRequestDialog({
             onClick={() => void submit()}
             disabled={pending || resolved === null || "error" in resolved}
           >
-            {pending ? "Linking..." : "Link"}
+            {tx(pending ? "Linking..." : "Link")}
           </Button>
         </DialogFooter>
       </DialogPopup>

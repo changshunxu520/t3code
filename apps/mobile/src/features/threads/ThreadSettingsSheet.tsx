@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import {
   getPromptControlledTraits,
   getTraitSelectChange,
@@ -1044,13 +1045,13 @@ function ThreadSettingsMainContent(props: {
                   />
                 </View>
                 <TextInput
-                  accessibilityLabel="Find a model"
+                  accessibilityLabel={localizeMobileString("Find a model")}
                   autoCapitalize="none"
                   autoCorrect={false}
                   className="min-w-0 flex-1 px-2 py-0 text-base text-foreground"
                   style={{ minHeight: 56, includeFontPadding: false, textAlignVertical: "center" }}
                   onChangeText={session.setSearchQuery}
-                  placeholder="Find a model"
+                  placeholder={localizeMobileString("Find a model")}
                   placeholderTextColorClassName="accent-placeholder"
                   selectionColorClassName="accent-focus/32"
                   cursorColorClassName="accent-focus"
@@ -1059,7 +1060,7 @@ function ThreadSettingsMainContent(props: {
                 />
                 {session.searchQuery.length > 0 ? (
                   <IconButton
-                    accessibilityLabel="Clear model search"
+                    accessibilityLabel={localizeMobileString("Clear model search")}
                     icon="xmark"
                     onPress={() => session.setSearchQuery("")}
                   />
@@ -1235,14 +1236,14 @@ function ThreadSettingsModelsScreen() {
     })),
   ];
   const filterMenu = {
-    title: "Model filters",
+    title: localizeMobileString("Model filters"),
     items: [
       {
         type: "submenu" as const,
-        title: "Provider",
+        title: localizeMobileString("Provider"),
         items: providerFilters.map((filter) => ({
           type: "action" as const,
-          title: filter.title,
+          title: localizeMobileString(filter.title),
           state: session.providerFilter === filter.value ? ("on" as const) : ("off" as const),
           onPress: () => session.setProviderFilter(filter.value),
         })),
@@ -1251,7 +1252,7 @@ function ThreadSettingsModelsScreen() {
         ? [
             {
               type: "action" as const,
-              title: "Show legacy models",
+              title: localizeMobileString("Show legacy models"),
               state: session.showLegacy ? ("on" as const) : ("off" as const),
               onPress: () => session.setShowLegacy(!session.showLegacy),
             },
@@ -1298,7 +1299,7 @@ function ThreadSettingsModelsScreen() {
               >
                 {(open) => (
                   <IconButton
-                    accessibilityLabel="Filter models"
+                    accessibilityLabel={localizeMobileString("Filter models")}
                     icon="line.3.horizontal.decrease"
                     selected={hasCustomCatalogFilter}
                     variant={hasCustomCatalogFilter ? "tonal" : "standard"}
@@ -1329,7 +1330,7 @@ function ThreadSettingsModelsScreen() {
                     ? "line.3.horizontal.decrease.circle.fill"
                     : "line.3.horizontal.decrease",
                   onSearchTextChange: session.setSearchQuery,
-                  placeholder: "Find a model",
+                  placeholder: localizeMobileString("Find a model"),
                   searchTextChangeId: "thread-settings-model-search-text",
                   showsSearchDismissButton: true,
                 }),
@@ -1367,7 +1368,7 @@ function ThreadSettingsModelsScreen() {
         <SheetHeader
           title="Thread settings"
           onCancel={presentation.onClose}
-          accessibilityLabel="Cancel thread settings"
+          accessibilityLabel={localizeMobileString("Cancel thread settings")}
           confirm={{
             label: session.pendingModel ? "Save thread settings" : "Done",
             onPress: commitAndClose,
@@ -1377,7 +1378,7 @@ function ThreadSettingsModelsScreen() {
       {Platform.OS === "ios" && !usesNativeMailSearchToolbar ? (
         <Toolbar placement="bottom">
           <Toolbar.Menu
-            accessibilityLabel="Filter models"
+            accessibilityLabel={localizeMobileString("Filter models")}
             icon={
               hasCustomCatalogFilter
                 ? "line.3.horizontal.decrease.circle.fill"
@@ -1483,12 +1484,12 @@ function ThreadSettingsPickerNavigator(props: ThreadSettingsPickerPresentation) 
         <ThreadSettingsPickerStack.Screen
           name="ThreadSettingsModels"
           component={ThreadSettingsModelsScreen}
-          options={{ headerBackVisible: false, title: "Thread settings" }}
+          options={{ headerBackVisible: false, title: localizeMobileString("Thread settings") }}
         />
         <ThreadSettingsPickerStack.Screen
           name="ThreadSettingsChoice"
           component={ThreadSettingsChoiceScreen}
-          options={({ route }) => ({ title: route.params.title })}
+          options={({ route }) => ({ title: localizeMobileString(route.params.title) })}
         />
       </ThreadSettingsPickerStack.Navigator>
     </ThreadSettingsPickerPresentationContext.Provider>

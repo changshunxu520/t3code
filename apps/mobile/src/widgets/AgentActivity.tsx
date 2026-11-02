@@ -58,6 +58,9 @@ function AgentActivity(
 ): LiveActivityLayout {
   "widget";
 
+  const isChinese = process.env.EXPO_PUBLIC_APP_LOCALE === "zh-CN";
+  const staleLabel = isChinese ? "状态已过期" : "Out of date";
+
   // Hierarchical foregrounds inherit system tint and vibrancy.
   type Foreground = Parameters<typeof foregroundStyle>[0];
   const primaryForeground = { type: "hierarchical", style: "primary" } as const;
@@ -103,7 +106,7 @@ function AgentActivity(
     ? props.activities.map((row) =>
         row.phase === "completed" || row.phase === "failed"
           ? row
-          : { ...row, phase: "stale", status: "Out of date" },
+          : { ...row, phase: "stale", status: staleLabel },
       )
     : props.activities;
   const ordered = [...activities].sort((a, b) => phasePriority(a.phase) - phasePriority(b.phase));
@@ -127,24 +130,38 @@ function AgentActivity(
       : tint;
 
   const allDone = props.activeCount === 0;
-  const doneLabel = failedRow ? "Failed" : "Done";
-  const outcomeLabel = failedRow ? "Agent work failed" : "Agent work completed";
+  const doneLabel = failedRow ? (isChinese ? "失败" : "Failed") : isChinese ? "完成" : "Done";
+  const outcomeLabel = failedRow
+    ? isChinese
+      ? "Agent 工作失败"
+      : "Agent work failed"
+    : isChinese
+      ? "Agent 工作已完成"
+      : "Agent work completed";
 
   const agentWord = props.activeCount === 1 ? "agent" : "agents";
   const agentsLabel = allDone
     ? outcomeLabel
     : environment.isStale
-      ? "Agent status out of date"
-      : `${props.activeCount} active ${agentWord}`;
+      ? isChinese
+        ? "Agent 状态已过期"
+        : "Agent status out of date"
+      : isChinese
+        ? `${props.activeCount} 个 Agent 正在运行`
+        : `${props.activeCount} active ${agentWord}`;
   const attentionSuffix =
     attentionRows.length > 0
-      ? `${attentionRows.length} need${attentionRows.length === 1 ? "s" : ""} attention`
+      ? isChinese
+        ? `${attentionRows.length} 个需要处理`
+        : `${attentionRows.length} need${attentionRows.length === 1 ? "s" : ""} attention`
       : "";
   const activeLabel = allDone
     ? doneLabel
     : environment.isStale
-      ? "Out of date"
-      : `${props.activeCount} active`;
+      ? staleLabel
+      : isChinese
+        ? `${props.activeCount} 个正在运行`
+        : `${props.activeCount} active`;
   const showCompactGlyph = !attentionRow && !failedRow && !allDone && !environment.isStale;
   const summary = attentionSuffix || activeLabel;
 

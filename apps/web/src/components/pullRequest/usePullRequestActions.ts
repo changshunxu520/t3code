@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { useAtomCommand } from "~/state/use-atom-command";
 import { scopeProjectRef } from "@t3tools/client-runtime/environment";
 import {
@@ -137,6 +139,8 @@ export function usePullRequestActionRunner({
   /** Resolve repository settings on click to avoid per-row reads. */
   resolveMergeMethod?: (detail: PullRequestDetail) => PullRequestMergeMethod;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const runAction = useAtomCommand(pullRequestEnvironment.runAction, {
     reportFailure: false,
   });
@@ -170,15 +174,18 @@ export function usePullRequestActionRunner({
     if (result._tag === "Failure") {
       toastManager.add({
         type: "error",
-        title: actionFailureLabels(terminology.singular)[action],
+        title: tx(actionFailureLabels(terminology.singular)[action]),
         description: readableFailure(
           squashAtomCommandFailure(result),
-          actionFailureHints(terminology.singular)[action],
+          tx(actionFailureHints(terminology.singular)[action]),
         ),
       });
       return;
     }
-    toastManager.add({ type: "success", title: actionSuccessLabels(terminology.singular)[action] });
+    toastManager.add({
+      type: "success",
+      title: tx(actionSuccessLabels(terminology.singular)[action]),
+    });
     onSuccess?.(action);
   };
 
@@ -186,6 +193,7 @@ export function usePullRequestActionRunner({
 }
 
 export function usePullRequestCloseBatch(onClosed: (entry: EnvironmentPullRequestEntry) => void) {
+  const { t, locale } = useI18n();
   const runAction = useAtomCommand(pullRequestEnvironment.runAction, { reportFailure: false });
   const pending = useRef(new Set<string>());
   const [closingKeys, setClosingKeys] = useState<ReadonlySet<string>>(() => new Set());
@@ -215,7 +223,7 @@ export function usePullRequestCloseBatch(onClosed: (entry: EnvironmentPullReques
         setClosingKeys(new Set(pending.current));
         if (result._tag === "Failure") {
           failures.push(
-            `#${entry.number}: ${readableFailure(squashAtomCommandFailure(result), actionFailureHints(sourceControlClients.get(entry.provider).changeRequest.singular).close)}`,
+            `#${entry.number}: ${readableFailure(squashAtomCommandFailure(result), translateWebSource(locale, actionFailureHints(sourceControlClients.get(entry.provider).changeRequest.singular).close))}`,
           );
           return;
         }
@@ -228,8 +236,10 @@ export function usePullRequestCloseBatch(onClosed: (entry: EnvironmentPullReques
       type: failures.length > 0 ? "error" : "success",
       title:
         failures.length > 0
-          ? `Closed ${closed} of ${batch.length} pull requests`
-          : `Closed ${closed} pull request${closed === 1 ? "" : "s"}`,
+          ? t("pullRequests.speed.closedPartial", { closed, total: batch.length })
+          : t(closed === 1 ? "pullRequests.speed.closedOne" : "pullRequests.speed.closedMany", {
+              count: closed,
+            }),
       ...(failures.length > 0 ? { description: failures.slice(0, 3).join("\n") } : {}),
     });
   };
@@ -255,6 +265,7 @@ export function usePullRequestHandoffs({
   environmentId: EnvironmentId;
   detail: PullRequestHandoffDetail | null;
 }) {
+  const { t, locale } = useI18n();
   const newThread = useNewThreadHandler();
   const prepareThread = usePreparePullRequestThreadAction({
     environmentId,
@@ -311,18 +322,24 @@ export function usePullRequestHandoffs({
     if (opened === null) {
       toastManager.add({
         type: "error",
-        title: "Could not open a thread",
-        description: "Try again from the project, or open a thread first.",
+        title: translateWebSource(locale, "Could not open a thread"),
+        description: translateWebSource(
+          locale,
+          "Try again from the project, or open a thread first.",
+        ),
       });
       return;
     }
     toastManager.add({
       type: "success",
-      title: "Asked in a thread",
+      title: translateWebSource(locale, "Asked in a thread"),
       description:
         task.prompt.length > 0
-          ? "The question is in the composer. Read it over, then send."
-          : `The ${terminology.singular} is in the composer. Type your question, then send.`,
+          ? translateWebSource(locale, "The question is in the composer. Read it over, then send.")
+          : translateWebSource(
+              locale,
+              `The ${terminology.singular} is in the composer. Type your question, then send.`,
+            ),
     });
   };
 
@@ -336,7 +353,7 @@ export function usePullRequestHandoffs({
     // Explicit timeouts survive toast updates and would pin the result after loading.
     const toastId = toastManager.add({
       type: "loading",
-      title: `Preparing the ${terminology.singular} checkout...`,
+      title: translateWebSource(locale, `Preparing the ${terminology.singular} checkout...`),
     });
     const projectRef = scopeProjectRef(environmentId, detail.projectId);
     // Checkout setup requires the thread to exist first.
@@ -348,8 +365,11 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: "Could not open a thread for the checkout",
-        description: "Try again from the project, or open a thread first.",
+        title: translateWebSource(locale, "Could not open a thread for the checkout"),
+        description: translateWebSource(
+          locale,
+          "Try again from the project, or open a thread first.",
+        ),
       });
       return;
     }
@@ -362,9 +382,12 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: `Could not prepare the ${terminology.singular} checkout`,
-        description: checkoutFailureDescription(
-          isAtomCommandInterrupted(prepared) ? undefined : squashAtomCommandFailure(prepared),
+        title: translateWebSource(locale, `Could not prepare the ${terminology.singular} checkout`),
+        description: translateWebSource(
+          locale,
+          checkoutFailureDescription(
+            isAtomCommandInterrupted(prepared) ? undefined : squashAtomCommandFailure(prepared),
+          ),
         ),
       });
       return;
@@ -381,8 +404,10 @@ export function usePullRequestHandoffs({
       setHandoff(null);
       toastManager.update(toastId, {
         type: "error",
-        title: "Checked out, but the thread stayed where it was",
-        description: `The checkout is ready on \`${prepared.value.branch}\`. Point a thread at it from the branch picker, then ask again.`,
+        title: translateWebSource(locale, "Checked out, but the thread stayed where it was"),
+        description: t("pullRequests.handoff.checkoutThreadMissing", {
+          branch: prepared.value.branch,
+        }),
       });
       return;
     }
@@ -393,11 +418,20 @@ export function usePullRequestHandoffs({
         prepared.value.isOnPullRequestHead
           ? {
               type: "success",
-              title: mode === "local" ? "Checked out here" : "Checked out",
+              title:
+                mode === "local"
+                  ? translateWebSource(locale, "Checked out here")
+                  : translateWebSource(locale, "Checked out"),
               description:
                 mode === "local"
-                  ? `This repository is on the ${terminology.singular}'s branch, with a thread open on it.`
-                  : `The ${terminology.singular} is in its own worktree, with a thread open on it.`,
+                  ? translateWebSource(
+                      locale,
+                      `This repository is on the ${terminology.singular}'s branch, with a thread open on it.`,
+                    )
+                  : translateWebSource(
+                      locale,
+                      `The ${terminology.singular} is in its own worktree, with a thread open on it.`,
+                    ),
             }
           : offHeadPullRequestCheckoutToast(terminology),
       );
@@ -409,8 +443,11 @@ export function usePullRequestHandoffs({
       prepared.value.isOnPullRequestHead
         ? {
             type: "success",
-            title: "Checkout ready",
-            description: "The task is in the composer. Read it over, then send.",
+            title: translateWebSource(locale, "Checkout ready"),
+            description: translateWebSource(
+              locale,
+              "The task is in the composer. Read it over, then send.",
+            ),
           }
         : offHeadPullRequestCheckoutToast(terminology),
     );

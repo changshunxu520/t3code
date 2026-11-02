@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { TextInput, View } from "react-native";
 
 import { AppText as Text } from "../../../components/ui/AppText";
@@ -30,7 +31,7 @@ export function ScheduledTaskPromptField(props: {
       <Text className="text-sm text-foreground-muted">Prompt</Text>
       <View className="relative">
         <TextInput
-          accessibilityLabel="Prompt"
+          accessibilityLabel={localizeMobileString("Prompt")}
           value={props.value}
           onChangeText={props.onChange}
           selection={props.selection}
@@ -39,7 +40,7 @@ export function ScheduledTaskPromptField(props: {
           multiline
           scrollEnabled
           textAlignVertical="top"
-          placeholder="What should the agent do each time?"
+          placeholder={localizeMobileString("What should the agent do each time?")}
           placeholderTextColorClassName="accent-foreground-muted"
           className="max-h-40 min-h-24 font-sans text-base text-foreground"
         />

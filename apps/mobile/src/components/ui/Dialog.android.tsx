@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { NativeThemeHost } from "./NativeThemeHost.android";
 import {
   AlertDialog,
@@ -184,7 +185,7 @@ function DialogPresentation(props: DialogPresentationProps) {
               : colors["--color-foreground"],
         }}
       >
-        <Text style={bodyTypography}>{action.text ?? ""}</Text>
+        <Text style={bodyTypography}>{localizeMobileString(action.text ?? "")}</Text>
       </Component>
     );
   };
@@ -212,14 +213,14 @@ function DialogPresentation(props: DialogPresentationProps) {
                 size={24}
               />
             ) : null}
-            <Text style={titleTypography}>{props.request.title}</Text>
+            <Text style={titleTypography}>{localizeMobileString(props.request.title)}</Text>
           </Column>
         </AlertDialog.Title>
         {props.inputInitialValue !== undefined ? (
           <AlertDialog.Text>
             <Column verticalArrangement={{ spacedBy: 16 }}>
               {props.request.message ? (
-                <Text style={bodyTypography}>{props.request.message}</Text>
+                <Text style={bodyTypography}>{localizeMobileString(props.request.message)}</Text>
               ) : null}
               <OutlinedTextField
                 autoFocus
@@ -240,11 +241,13 @@ function DialogPresentation(props: DialogPresentationProps) {
                 }}
               >
                 <OutlinedTextField.Label>
-                  <Text style={bodyTypography}>{props.request.title}</Text>
+                  <Text style={bodyTypography}>{localizeMobileString(props.request.title)}</Text>
                 </OutlinedTextField.Label>
                 {props.inputPlaceholder ? (
                   <OutlinedTextField.Placeholder>
-                    <Text style={bodyTypography}>{props.inputPlaceholder}</Text>
+                    <Text style={bodyTypography}>
+                      {localizeMobileString(props.inputPlaceholder)}
+                    </Text>
                   </OutlinedTextField.Placeholder>
                 ) : null}
               </OutlinedTextField>
@@ -252,7 +255,7 @@ function DialogPresentation(props: DialogPresentationProps) {
           </AlertDialog.Text>
         ) : props.request.message ? (
           <AlertDialog.Text>
-            <Text style={bodyTypography}>{props.request.message}</Text>
+            <Text style={bodyTypography}>{localizeMobileString(props.request.message)}</Text>
           </AlertDialog.Text>
         ) : null}
         {actions.length > 1 ? (

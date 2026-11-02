@@ -59,7 +59,9 @@ export function LinkedEnvironmentsSection(props: {
                     : "Reachable";
           return (
             <View key={link.environmentId} className="gap-0.5 p-4">
-              <Text className="text-base font-t3-bold text-foreground">{link.label}</Text>
+              <Text localize={false} className="text-base font-t3-bold text-foreground">
+                {link.label}
+              </Text>
               <Text
                 className={
                   health.kind === "reachable" && health.expiresInDays === null

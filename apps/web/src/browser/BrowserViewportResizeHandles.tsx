@@ -4,6 +4,8 @@ import type {
   PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { cn } from "~/lib/utils";
 
 import {
@@ -43,6 +45,8 @@ function ResizeHandle(props: {
   readonly onPointerDown: Props["onPointerDown"];
   readonly onKeyDown: Props["onKeyDown"];
 }) {
+  const { locale } = useI18n();
+  const tx = (text: string) => translateWebSource(locale, text);
   const {
     direction,
     label,
@@ -57,7 +61,7 @@ function ResizeHandle(props: {
   return (
     <button
       type="button"
-      aria-label={`${label}. Use arrow keys to resize.`}
+      aria-label={tx(`${label}. Use arrow keys to resize.`)}
       className={cn(EDGE_BUTTON_CLASS, kind === "corner" && "z-30", cursorClassName)}
       style={style}
       onPointerDown={(event) => onPointerDown(direction, event)}

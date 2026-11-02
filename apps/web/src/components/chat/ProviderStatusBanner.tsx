@@ -4,6 +4,8 @@ import { InfoIcon, XIcon } from "lucide-react";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "../ui/alert";
 import { Button, InlineButton } from "../ui/button";
 import { formatProviderDriverKindLabel } from "../../providerModels";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 
 function getIncompatibleVersion(status: ServerProvider) {
@@ -57,7 +59,7 @@ export function hasProviderSetup(status: ServerProvider): boolean {
   );
 }
 
-export function getProviderStatusMessage(status: ServerProvider): string {
+export function getProviderStatusMessage(status: ServerProvider, locale: WebLocale = "en"): string {
   if (
     status.auth.status !== "unauthenticated" &&
     status.compatibilityAdvisory?.status === "broken" &&
@@ -68,21 +70,31 @@ export function getProviderStatusMessage(status: ServerProvider): string {
   if (status.message) return status.message;
   const providerName = status.displayName?.trim() || formatProviderDriverKindLabel(status.driver);
   if (!status.installed && hasProviderSetup(status)) {
-    return `Open provider setup to install ${formatProviderDriverKindLabel(status.driver)} on this environment.`;
+    const driverLabel = formatProviderDriverKindLabel(status.driver);
+    return locale === "zh-CN"
+      ? `打开提供商设置以在此环境中安装 ${driverLabel}。`
+      : `Open provider setup to install ${driverLabel} on this environment.`;
   }
   if (status.auth.status === "unauthenticated") {
     if (hasProviderSetup(status)) {
-      return status.driver === "antigravity"
-        ? "Open provider setup to sign in with Google."
-        : "Open provider setup to sign in.";
+      return translateWebSource(
+        locale,
+        status.driver === "antigravity"
+          ? "Open provider setup to sign in with Google."
+          : "Open provider setup to sign in.",
+      );
     }
-    return "Sign in via the CLI to authenticate again.";
+    return translateWebSource(locale, "Sign in via the CLI to authenticate again.");
   }
   return status.status === "ready"
-    ? "No models are available for this provider."
+    ? translateWebSource(locale, "No models are available for this provider.")
     : status.status === "error"
-      ? `${providerName} provider is unavailable.`
-      : `${providerName} provider has limited availability.`;
+      ? locale === "zh-CN"
+        ? `${providerName} 提供商不可用。`
+        : `${providerName} provider is unavailable.`
+      : locale === "zh-CN"
+        ? `${providerName} 提供商可用性受限。`
+        : `${providerName} provider has limited availability.`;
 }
 
 export const ProviderStatusBanner = memo(function ProviderStatusBanner({
@@ -94,6 +106,7 @@ export const ProviderStatusBanner = memo(function ProviderStatusBanner({
   onOpenProviderSetup?: (instanceId: ProviderInstanceId) => void;
   status: ServerProvider | null;
 }) {
+  const { locale, t } = useI18n();
   if (!status || getProviderStatusBannerKey(status) === null) {
     return null;
   }
@@ -102,11 +115,19 @@ export const ProviderStatusBanner = memo(function ProviderStatusBanner({
   const isUnauthenticated = status.status === "error" && status.auth.status === "unauthenticated";
   const incompatible = getIncompatibleVersion(status);
   const title = isUnauthenticated
-    ? `${providerName} is unauthenticated`
+    ? t("providerStatus.unauthenticatedTitle", { provider: providerName })
     : incompatible
-      ? `${providerName} ${status.version ?? ""} is ${incompatible.status === "broken" ? "known to be broken" : "unsupported"}`
-      : `${providerName} provider status`;
-  const message = incompatible?.message ?? getProviderStatusMessage(status);
+      ? incompatible.status === "broken"
+        ? t("providerStatus.brokenVersionTitle", {
+            provider: providerName,
+            version: status.version ?? "",
+          })
+        : t("providerStatus.unsupportedVersionTitle", {
+            provider: providerName,
+            version: status.version ?? "",
+          })
+      : t("providerStatus.defaultTitle", { provider: providerName });
+  const message = incompatible?.message ?? getProviderStatusMessage(status, locale);
   const isWarning =
     incompatible?.status !== "broken" && (status.status === "warning" || incompatible !== null);
 
@@ -129,13 +150,16 @@ export const ProviderStatusBanner = memo(function ProviderStatusBanner({
           </Tooltip>
           {onOpenProviderSetup && hasProviderSetup(status) ? (
             <InlineButton onClick={() => onOpenProviderSetup(status.instanceId)}>
-              Open provider setup
+              {translateWebSource(locale, "Open provider setup")}
             </InlineButton>
           ) : null}
         </AlertDescription>
         <AlertAction>
           <Button
-            aria-label={`Dismiss ${providerName} provider ${status.status}`}
+            aria-label={t("providerStatus.dismissAria", {
+              provider: providerName,
+              status: status.status,
+            })}
             onClick={onDismiss}
             size="icon-xs"
             variant="ghost-muted"

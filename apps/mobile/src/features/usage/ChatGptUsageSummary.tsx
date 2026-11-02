@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId } from "@t3tools/contracts";
 import { CHATGPT_USAGE_URL, collectExternalUsageLinks } from "@t3tools/shared/usageLimits";
@@ -34,7 +35,9 @@ export function ChatGptUsageSummary({
         </Pressable>
       </View>
       <Text className="text-xs text-foreground-muted">
-        {usage.accounts.join(", ")}. Open ChatGPT with the account you connected.
+        {localizeMobileString(
+          `${usage.accounts.join(", ")}. Open ChatGPT with the account you connected.`,
+        )}
       </Text>
     </View>
   );

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { GlassView } from "expo-glass-effect";
 import { Pressable, View } from "react-native";
 import { withUniwind } from "uniwind";
@@ -14,6 +15,7 @@ const ChipGlass = withUniwind(GlassView, {
 
 export function Chip(props: {
   readonly label: string;
+  readonly localize?: boolean;
   readonly selected?: boolean;
   readonly icon?: AppSymbolName;
   readonly trailingIcon?: AppSymbolName;
@@ -36,6 +38,7 @@ export function Chip(props: {
         <SymbolView name={props.icon} size={15} tintColorClassName={iconColor} />
       ) : null}
       <AppText
+        localize={props.localize}
         textRole={small ? "caption" : "footnote"}
         numberOfLines={small ? undefined : 1}
         className={cn(
@@ -75,7 +78,11 @@ export function Chip(props: {
   return props.onPress ? (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={props.accessibilityLabel ?? props.label}
+      accessibilityLabel={
+        props.localize === false
+          ? (props.accessibilityLabel ?? props.label)
+          : localizeMobileString(props.accessibilityLabel ?? props.label)
+      }
       accessibilityState={{ selected: props.selected, disabled: Boolean(props.disabled) }}
       disabled={props.disabled}
       onPress={props.onPress}

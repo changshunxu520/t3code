@@ -12,6 +12,8 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { DESKTOP_DOWNLOAD_URL } from "~/branding";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import { isHostedStaticApp } from "~/hostedPairing";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
 import { useEnvironments } from "~/state/environments";
 
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
@@ -29,12 +31,20 @@ interface LinkSummary {
 
 function summarize(
   appPath: string,
+  locale: WebLocale,
+  t: ReturnType<typeof useI18n>["t"],
 ): { ok: true; value: LinkSummary } | { ok: false; error: string } {
   const url = new URL(appPath, window.location.origin);
   if (url.pathname !== "/new") {
     const prompt = parseThreadLinkPrompt(url.search);
     return prompt.ok
-      ? { ok: true, value: { prompt: prompt.value, details: ["Opens one of your threads."] } }
+      ? {
+          ok: true,
+          value: {
+            prompt: prompt.value,
+            details: [translateWebSource(locale, "Opens one of your threads.")],
+          },
+        }
       : prompt;
   }
   const link = parseNewThreadLink(url.search);
@@ -43,7 +53,10 @@ function summarize(
     const { owner, name, number } = link.value.pullRequest;
     return {
       ok: true,
-      value: { prompt: link.value.prompt, details: [`Pull request ${owner}/${name}#${number}`] },
+      value: {
+        prompt: link.value.prompt,
+        details: [t("promptLink.pullRequestDetail", { owner, name, number })],
+      },
     };
   }
   const { repository, provider, model } = link.value;
@@ -52,8 +65,12 @@ function summarize(
     value: {
       prompt: link.value.prompt,
       details: [
-        repository ? `Repository ${repository.owner}/${repository.name}` : "No project",
-        ...(provider ? [`Model ${model ? `${provider} ${model}` : provider}`] : []),
+        repository
+          ? t("promptLink.repositoryDetail", { owner: repository.owner, name: repository.name })
+          : translateWebSource(locale, "No project"),
+        ...(provider
+          ? [t("promptLink.modelDetail", { model: model ? `${provider} ${model}` : provider })]
+          : []),
       ],
     },
   };
@@ -98,7 +115,8 @@ function HostedPromptLinkLanding({
   readonly openInAppRemembered: boolean;
   readonly onChoose: (choice: "app" | "browser", remember: boolean) => void;
 }) {
-  const summary = summarize(appPath);
+  const { locale, t } = useI18n();
+  const summary = summarize(appPath, locale, t);
   const [remember, setRemember] = useState(false);
   const deepLink = promptLinkDeepLink(appPath);
   const onPhone = /android|iphone|ipad/i.test(navigator.userAgent);
@@ -114,7 +132,10 @@ function HostedPromptLinkLanding({
   if (!summary.ok) {
     return (
       <StandalonePage>
-        <StandalonePageHeader title="Could not open the link" description={summary.error} />
+        <StandalonePageHeader
+          title={translateWebSource(locale, "Could not open the link")}
+          description={translateWebSource(locale, summary.error)}
+        />
       </StandalonePage>
     );
   }
@@ -123,15 +144,22 @@ function HostedPromptLinkLanding({
   return (
     <StandalonePage>
       <StandalonePageHeader
-        title="Open this prompt"
-        description="It opens as a draft. Nothing runs until you press Send."
+        title={translateWebSource(locale, "Open this prompt")}
+        description={translateWebSource(
+          locale,
+          "It opens as a draft. Nothing runs until you press Send.",
+        )}
       />
       {prompt !== null && prompt.hiddenCharacters > 0 ? (
         <Alert className="mt-5" variant="error">
-          <AlertTitle>This prompt had hidden characters, it may be malicious</AlertTitle>
+          <AlertTitle>
+            {translateWebSource(locale, "This prompt had hidden characters, it may be malicious")}
+          </AlertTitle>
           <AlertDescription>
-            T3 Code removed {prompt.hiddenCharacters} hidden character
-            {prompt.hiddenCharacters === 1 ? "" : "s"}. Read the prompt before you send it.
+            {t("promptLink.removedHiddenChars", {
+              count: prompt.hiddenCharacters,
+              suffix: prompt.hiddenCharacters === 1 ? "" : "s",
+            })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -143,20 +171,20 @@ function HostedPromptLinkLanding({
       <p className="mt-3 text-xs text-muted-foreground">{details.join(" · ")}</p>
       <div className="mt-6 flex flex-wrap gap-2">
         <Button render={<a href={deepLink} />} onClick={() => onChoose("app", remember)}>
-          {onPhone ? "Open in app" : "Open in desktop app"}
+          {translateWebSource(locale, onPhone ? "Open in app" : "Open in desktop app")}
         </Button>
         {canContinue ? (
           <Button variant="outline" onClick={() => onChoose("browser", remember)}>
-            Continue here
+            {translateWebSource(locale, "Continue here")}
           </Button>
         ) : null}
         <Button variant="ghost" render={<a href={DESKTOP_DOWNLOAD_URL} />}>
-          Get T3 Code
+          {translateWebSource(locale, "Get T3 Code")}
         </Button>
       </div>
       <label className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
         <Checkbox checked={remember} onCheckedChange={(checked) => setRemember(checked === true)} />
-        Remember my choice
+        {translateWebSource(locale, "Remember my choice")}
       </label>
     </StandalonePage>
   );

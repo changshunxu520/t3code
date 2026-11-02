@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import { appAtomRegistry } from "../../state/atom-registry";
 import { useAtomValue } from "@effect/atom-react";
@@ -396,7 +397,7 @@ function ThreadArrangementSheet(props: { onClose: () => void }) {
                 presentation="inline"
                 title="Arrange threads"
                 onClose={props.onClose}
-                accessibilityLabel="Close arrange threads"
+                accessibilityLabel={localizeMobileString("Close arrange threads")}
               />
               <Text className="px-5 pb-3 text-sm text-foreground-muted">
                 Drag to reorder, pin, or settle. Changes save when you drop.

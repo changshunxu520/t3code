@@ -12,6 +12,7 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated";
 
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { AppText as Text } from "../../components/ui/AppText";
 import { SymbolView, type AppSymbolName } from "../../components/ui/AppSymbol";
@@ -344,7 +345,7 @@ export function ComposerDictationStatus(props: {
             {props.presentation.statusLabel}
           </Text>
           <Pressable
-            accessibilityLabel="Dismiss voice input error"
+            accessibilityLabel={localizeMobileString("Dismiss voice input error")}
             accessibilityRole="button"
             className="size-7 items-center justify-center active:opacity-70"
             hitSlop={8}
@@ -361,7 +362,7 @@ export function ComposerDictationStatus(props: {
       ) : (
         <View
           accessible
-          accessibilityLabel={props.presentation.statusLabel}
+          accessibilityLabel={localizeMobileString(props.presentation.statusLabel)}
           accessibilityLiveRegion={props.phase === "recording" ? "none" : "polite"}
           className="h-11"
         >
@@ -395,7 +396,7 @@ export function ComposerDictationCancelAction(props: {
   return (
     <VoiceActionButton
       size={props.size}
-      accessibilityLabel="Cancel dictation"
+      accessibilityLabel={localizeMobileString("Cancel dictation")}
       icon="xmark"
       onPress={props.onCancel}
     />
@@ -416,11 +417,11 @@ export function ComposerDictationPrimaryAction(props: {
     return (
       <VoiceActionButton
         size={props.size}
-        accessibilityLabel={
+        accessibilityLabel={localizeMobileString(
           props.presentation.confirmationEnabled
             ? "Finish dictation"
-            : (props.presentation.statusLabel ?? "Preparing voice input")
-        }
+            : (props.presentation.statusLabel ?? "Preparing voice input"),
+        )}
         disabled={!props.presentation.confirmationEnabled}
         icon="checkmark"
         loading={!props.presentation.confirmationEnabled}

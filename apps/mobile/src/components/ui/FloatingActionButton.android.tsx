@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { FloatingActionButtonProps } from "./FloatingActionButton.types";
 import { NativeThemeHost } from "./NativeThemeHost.android";
 import {
@@ -34,7 +35,7 @@ export function FloatingActionButton(props: FloatingActionButtonProps) {
     <View
       accessible
       accessibilityRole="button"
-      accessibilityLabel={props.label}
+      accessibilityLabel={localizeMobileString(props.label)}
       accessibilityActions={[{ name: "activate" }]}
       onAccessibilityAction={props.onPress}
       className={props.className}
@@ -58,7 +59,7 @@ export function FloatingActionButton(props: FloatingActionButtonProps) {
             {props.variant === "extended" ? (
               <ExtendedFloatingActionButton.Text>
                 <Text color={contentColor} style={{ ...typography, fontWeight: "500" }}>
-                  {props.label}
+                  {localizeMobileString(props.label)}
                 </Text>
               </ExtendedFloatingActionButton.Text>
             ) : null}

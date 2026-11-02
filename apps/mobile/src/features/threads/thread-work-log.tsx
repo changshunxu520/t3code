@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Button } from "../../components/ui/Button";
 import { ThreadSubagentGroup } from "./thread-subagent-group";
 import { ProposedPlanCard } from "./ProposedPlanCard";
@@ -858,7 +859,7 @@ function WorkspacePreparationRetryButton(props: {
       <Button
         label="Retry"
         tone="secondary"
-        accessibilityLabel="Retry workspace preparation"
+        accessibilityLabel={localizeMobileString("Retry workspace preparation")}
         disabled={busy}
         onPress={() => {
           setBusy(true);

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { ComponentProps, ReactNode } from "react";
 import { Platform, Pressable, View } from "react-native";
 
@@ -10,7 +11,9 @@ import { useAndroidControlSizing } from "./useAndroidControlSizing";
 export function NavigationRow({
   title,
   titleClassName,
+  localizeTitle = true,
   subtitle,
+  localizeSubtitle = true,
   subtitleNumberOfLines,
   subtitleEllipsizeMode,
   leading,
@@ -20,7 +23,9 @@ export function NavigationRow({
 }: Omit<ComponentProps<typeof Pressable>, "children"> & {
   readonly title: string;
   readonly titleClassName?: string;
+  readonly localizeTitle?: boolean;
   readonly subtitle?: string | null;
+  readonly localizeSubtitle?: boolean;
   readonly subtitleNumberOfLines?: ComponentProps<typeof AppText>["numberOfLines"];
   readonly subtitleEllipsizeMode?: ComponentProps<typeof AppText>["ellipsizeMode"];
   readonly leading?: ReactNode;
@@ -31,7 +36,12 @@ export function NavigationRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={[title, subtitle].filter(Boolean).join(", ")}
+      accessibilityLabel={[
+        localizeTitle ? localizeMobileString(title) : title,
+        subtitle && localizeSubtitle ? localizeMobileString(subtitle) : subtitle,
+      ]
+        .filter(Boolean)
+        .join(", ")}
       android_ripple={{ color: themeVariables["--color-subtle-strong"] }}
       unstable_pressDelay={Platform.OS === "android" ? 50 : undefined}
       {...props}
@@ -44,11 +54,16 @@ export function NavigationRow({
     >
       {leading ? <View className="size-6 items-center justify-center">{leading}</View> : null}
       <View className="min-w-0 flex-1 gap-1">
-        <AppText className={cn("text-base text-foreground", titleClassName)} numberOfLines={2}>
+        <AppText
+          localize={localizeTitle}
+          className={cn("text-base text-foreground", titleClassName)}
+          numberOfLines={2}
+        >
           {title}
         </AppText>
         {subtitle ? (
           <AppText
+            localize={localizeSubtitle}
             className="text-sm text-foreground-muted"
             ellipsizeMode={subtitleEllipsizeMode}
             numberOfLines={subtitleNumberOfLines ?? 2}

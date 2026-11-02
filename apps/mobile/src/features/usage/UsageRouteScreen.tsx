@@ -1,3 +1,4 @@
+import { localizeMobileString, MOBILE_LOCALE } from "../../i18n/mobileStrings";
 import { Button } from "../../components/ui/Button";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { ChatGptUsageSummary } from "./ChatGptUsageSummary";
@@ -229,14 +230,14 @@ function UsageScreen(props: {
     <Menu
       accessible
       accessibilityRole="button"
-      accessibilityLabel="Filter usage environments"
+      accessibilityLabel={localizeMobileString("Filter usage environments")}
       title="Environments"
       actions={environmentActions}
       onPressAction={({ nativeEvent }) => selectEnvironment(nativeEvent.event)}
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Filter usage environments"
+        accessibilityLabel={localizeMobileString("Filter usage environments")}
         className={cn(
           "items-center justify-center rounded-full",
           Platform.OS === "ios" ? "size-[28px]" : "size-[44px]",
@@ -358,8 +359,9 @@ function UsageScreen(props: {
                 <ChatGptUsageSummary selectedEnvironmentIds={selectedEnvironmentIds} />
                 {merged.duplicateSources.length > 0 ? (
                   <Text className="text-sm text-foreground-muted">
-                    Counted once across environments sharing a transcript directory:{" "}
-                    {merged.duplicateSources.join(", ")}
+                    {localizeMobileString(
+                      `Counted once across environments sharing a transcript directory: ${merged.duplicateSources.join(", ")}`,
+                    )}
                   </Text>
                 ) : null}
                 {isPending ? (
@@ -628,13 +630,18 @@ function ChartCard(props: {
         <View className="flex-row items-center justify-between">
           <Text className="text-xs text-foreground-tertiary">
             {props.isPast24Hours
-              ? formatHourShort(props.days[0] ?? "", props.timeZone)
-              : formatDayShort(props.sinceDay)}
+              ? formatHourShort(props.days[0] ?? "", props.timeZone, true, MOBILE_LOCALE)
+              : formatDayShort(props.sinceDay, MOBILE_LOCALE)}
           </Text>
           <Text className="text-xs text-foreground-tertiary">
             {props.isPast24Hours
-              ? formatHourShort(props.days[props.days.length - 1] ?? "", props.timeZone)
-              : formatDayShort(props.untilDay)}
+              ? formatHourShort(
+                  props.days[props.days.length - 1] ?? "",
+                  props.timeZone,
+                  true,
+                  MOBILE_LOCALE,
+                )
+              : formatDayShort(props.untilDay, MOBILE_LOCALE)}
           </Text>
         </View>
         <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
@@ -770,9 +777,11 @@ function ProviderSection(props: {
               </View>
             )}
             <Text className="text-sm text-foreground-muted">
-              {metric === "cost"
-                ? `${formatPercent(share)} of cost · ${formatTokens(provider.totalTokens)} tokens`
-                : `${formatPercent(share)} of tokens · ${formatUsd(provider.costUsd)}`}
+              {localizeMobileString(
+                metric === "cost"
+                  ? `${formatPercent(share)} of cost · ${formatTokens(provider.totalTokens)} tokens`
+                  : `${formatPercent(share)} of tokens · ${formatUsd(provider.costUsd)}`,
+              )}
             </Text>
           </View>
         );

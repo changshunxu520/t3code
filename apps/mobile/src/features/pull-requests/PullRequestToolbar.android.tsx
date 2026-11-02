@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { BackHandler, Keyboard, View, type TextInputInstance } from "react-native";
@@ -64,7 +65,7 @@ export function PullRequestToolbar(props: {
         searchField={
           <SearchField
             inputRef={input}
-            accessibilityLabel="Search pull requests"
+            accessibilityLabel={localizeMobileString("Search pull requests")}
             clearAccessibilityLabel="Clear search"
             placeholder="Search pull requests"
             value={tab.query}
@@ -84,7 +85,7 @@ export function PullRequestToolbar(props: {
             >
               {(open) => (
                 <AndroidHeaderIconButton
-                  accessibilityLabel="Filter pull requests"
+                  accessibilityLabel={localizeMobileString("Filter pull requests")}
                   icon={
                     filters.customized
                       ? "line.3.horizontal.decrease.circle.fill"

@@ -8,6 +8,7 @@ import { SymbolView, type AppSymbolName } from "./AppSymbol";
 export interface ListRowContentProps {
   readonly icon?: AppSymbolName;
   readonly label: string;
+  readonly localizeLabel?: boolean;
   readonly description?: string;
   readonly detail?: string;
   readonly disabled?: boolean;
@@ -16,6 +17,7 @@ export interface ListRowContentProps {
 export function ListRowLayout({
   icon,
   label,
+  localizeLabel = true,
   description,
   detail,
   disabled,
@@ -45,6 +47,7 @@ export function ListRowLayout({
       ) : null}
       <View className="min-w-0 flex-1 gap-1">
         <AppText
+          localize={localizeLabel}
           textRole="body"
           className={tone === "danger" ? "text-danger-foreground" : "text-foreground"}
         >

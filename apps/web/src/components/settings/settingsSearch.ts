@@ -528,6 +528,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     scope: "project-defaults",
   },
   {
+    id: "language",
+    title: "Language",
+    to: "/settings/general",
+    searchTerms: ["locale chinese english 语言 中文 英文"],
+  },
+  {
     id: "thread-notifications",
     title: "Thread notifications",
     to: "/settings/general",

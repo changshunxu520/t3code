@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { IconButtonProps } from "./IconButton.types";
 import { cn } from "../../lib/cn";
 import { Pressable } from "react-native";
@@ -18,7 +19,7 @@ export function IconButton(props: IconButtonProps) {
     <Pressable
       onPress={props.onPress}
       disabled={props.disabled}
-      accessibilityLabel={props.accessibilityLabel}
+      accessibilityLabel={localizeMobileString(props.accessibilityLabel)}
       accessibilityRole="button"
       accessibilityState={{ disabled: Boolean(props.disabled), selected: props.selected }}
       className={cn(

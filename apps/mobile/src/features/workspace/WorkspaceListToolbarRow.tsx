@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import { AndroidHeaderIconButton } from "../../components/ui/AndroidScreenHeader";
@@ -28,7 +29,7 @@ export function WorkspaceListToolbarRow(props: {
       {props.searching ? (
         <>
           <AndroidHeaderIconButton
-            accessibilityLabel="Close search"
+            accessibilityLabel={localizeMobileString("Close search")}
             icon="arrow.left"
             onPress={props.onCloseSearch}
           />

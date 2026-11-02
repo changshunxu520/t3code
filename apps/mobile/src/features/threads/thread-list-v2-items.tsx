@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import * as Dialog from "../../components/ui/Dialog";
 import type { ThreadRowProviderInstance } from "./thread-provider-instance";
 import {
@@ -444,6 +445,7 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
           </View>
         ) : null}
         <Text
+          localize={false}
           className={cn(
             "flex-1 text-base font-t3-medium",
             selected
@@ -528,6 +530,7 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
           >
             {branch ? (
               <Text
+                localize={false}
                 className={cn(
                   "text-xs",
                   selected
@@ -542,6 +545,7 @@ export const ThreadListV2PendingRow = memo(function ThreadListV2PendingRow(props
             {branch && props.environmentLabel ? "  ·  " : null}
             {props.environmentLabel ? (
               <Text
+                localize={false}
                 className={cn(
                   "text-xs",
                   selected
@@ -760,7 +764,9 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
   const rowAccessibilityActions = useMemo(
     () => [
       ...(prBadgeLabel ? [{ name: "openPullRequests", label: prBadgeLabel }] : []),
-      ...(showsWoke ? [{ name: "dismissWoke", label: "Dismiss Woke notification" }] : []),
+      ...(showsWoke
+        ? [{ name: "dismissWoke", label: localizeMobileString("Dismiss Woke notification") }]
+        : []),
     ],
     [prBadgeLabel, showsWoke],
   );
@@ -1119,6 +1125,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
           </View>
         ) : null}
         <Text
+          localize={false}
           className={cn(
             "flex-1 text-base",
             !recede && "font-t3-medium",
@@ -1155,7 +1162,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
             <Pressable
               className="-m-2.5 flex-row items-center gap-1 p-2.5"
               accessibilityRole="button"
-              accessibilityLabel="Dismiss Woke notification"
+              accessibilityLabel={localizeMobileString("Dismiss Woke notification")}
               onPress={handleAcknowledgeWoke}
               onLongPress={() => undefined}
               style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
@@ -1235,6 +1242,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
       <View className="mt-1 flex-row items-center gap-2" style={{ paddingLeft: titleTextInset }}>
         {(status === "failed" || status === "limited") && thread.runtime?.lastError ? (
           <Text
+            localize={false}
             className={cn(
               "flex-1 text-xs",
               selected
@@ -1261,6 +1269,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
               />
             ) : null}
             <Text
+              localize={false}
               className={cn(
                 "shrink text-xs",
                 selected
@@ -1418,6 +1427,7 @@ export const ThreadListV2Row = memo(function ThreadListV2Row(props: {
           ) : null}
           <View className="min-w-0 flex-1">
             <Text
+              localize={false}
               className={cn(
                 "text-base",
                 selected

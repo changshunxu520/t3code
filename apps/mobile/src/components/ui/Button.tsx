@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SymbolView, type AppSymbolName } from "./AppSymbol";
 import { Pressable } from "react-native";
 import { AppActivityIndicator } from "./AppActivityIndicator";
@@ -30,8 +31,12 @@ export function Button(props: ButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={props.accessibilityLabel ?? props.label}
-      accessibilityHint={props.accessibilityHint}
+      accessibilityLabel={localizeMobileString(props.accessibilityLabel ?? props.label)}
+      accessibilityHint={
+        props.accessibilityHint === undefined
+          ? undefined
+          : localizeMobileString(props.accessibilityHint)
+      }
       accessibilityState={{ disabled, busy: Boolean(props.loading) }}
       disabled={disabled}
       onPress={props.onPress}

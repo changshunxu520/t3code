@@ -30,6 +30,7 @@ import { AppText as Text } from "../../components/ui/AppText";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AndroidScreenHeader } from "../../components/ui/AndroidScreenHeader";
 import { ScreenContent } from "../../components/ui/ScreenContent";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { cn } from "../../lib/cn";
 import { environmentCatalog } from "../../connection/catalog";
 import { useEnvironmentPresentation } from "../../state/presentation";
@@ -262,6 +263,7 @@ const ReviewFileNavigatorRow = function ReviewFileNavigatorRow(props: {
       onPress={handlePress}
     >
       <Text
+        localize={false}
         className={
           selected
             ? "text-xs font-t3-bold text-foreground"
@@ -378,8 +380,10 @@ function ReviewFileNavigator({
               hideBackButton
               hideShadow={false}
               navigationItemStyle="editor"
-              subtitle={`${files.length} ${files.length === 1 ? "file" : "files"}`}
-              title="Changed files"
+              subtitle={localizeMobileString(
+                `${files.length} ${files.length === 1 ? "file" : "files"}`,
+              )}
+              title={localizeMobileString("Changed files")}
               titleColor={foregroundColor}
               titleFontSize={17}
               titleFontWeight="700"
@@ -649,7 +653,9 @@ export function ReviewSheet(props: ReviewSheetProps) {
           )}
         >
           <Text className="text-sm font-t3-bold text-foreground">Review unavailable</Text>
-          <Text className="text-xs leading-normal text-foreground-muted">{error}</Text>
+          <Text localize={false} className="text-xs leading-normal text-foreground-muted">
+            {error}
+          </Text>
         </View>,
       );
     }
@@ -823,6 +829,7 @@ export function ReviewSheet(props: ReviewSheetProps) {
                 >
                   <Text className="text-sm font-t3-bold text-foreground">No changes</Text>
                   <Text
+                    localize={selectedSection.subtitle == null}
                     className={cn(
                       "text-xs leading-normal text-foreground-muted",
                       Platform.OS === "android" && "mt-2 text-center",
@@ -838,11 +845,15 @@ export function ReviewSheet(props: ReviewSheetProps) {
                     Platform.OS === "android" ? "m-2 rounded-[20px]" : "border-b border-border",
                   )}
                 >
-                  <Text className="text-xs leading-normal text-foreground-muted">
+                  <Text localize={false} className="text-xs leading-normal text-foreground-muted">
                     {parsedDiff.reason}
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} bounces={false}>
-                    <Text selectable className="font-mono text-xs leading-relaxed text-foreground">
+                    <Text
+                      localize={false}
+                      selectable
+                      className="font-mono text-xs leading-relaxed text-foreground"
+                    >
                       {parsedDiff.text}
                     </Text>
                   </ScrollView>

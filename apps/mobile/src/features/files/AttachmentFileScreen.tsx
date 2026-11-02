@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Toolbar } from "../../components/ui/Toolbar";
 import * as Dialog from "../../components/ui/Dialog";
 import { NativeStackScreenOptions } from "../../native/StackHeader";
@@ -252,13 +253,16 @@ export function AttachmentFileScreen(props: AttachmentFileScreenProps) {
               title="File actions"
               onPressAction={handleAndroidMenuAction}
             >
-              <AndroidHeaderIconButton accessibilityLabel="File actions" icon="ellipsis" />
+              <AndroidHeaderIconButton
+                accessibilityLabel={localizeMobileString("File actions")}
+                icon="ellipsis"
+              />
             </Menu>
           }
         />
       ) : null}
       <Toolbar placement="right">
-        <Toolbar.Menu accessibilityLabel="File actions" icon="ellipsis">
+        <Toolbar.Menu accessibilityLabel={localizeMobileString("File actions")} icon="ellipsis">
           {renderedMode ? (
             <Toolbar.Menu inline>
               {menuActions

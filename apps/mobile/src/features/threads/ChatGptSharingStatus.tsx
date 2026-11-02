@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import * as Dialog from "../../components/ui/Dialog";
 import type { ServerProvider } from "@t3tools/contracts";
 import { CHATGPT_USAGE_URL, usesChatGptSharing } from "@t3tools/shared/usageLimits";
@@ -11,7 +12,7 @@ export function ChatGptSharingStatus({ provider }: { provider: ServerProvider | 
     <View className="flex-row items-center justify-between gap-3 px-3 py-1">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="ChatGPT token sharing is active"
+        accessibilityLabel={localizeMobileString("ChatGPT token sharing is active")}
         className="min-h-11 flex-row items-center gap-2"
         onPress={() => {
           Dialog.alert(

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { SheetCloseButton } from "../../../components/ui/SheetHeader";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
@@ -18,7 +19,7 @@ export function SettingsLegalDocumentCloseHeaderButton() {
 
   return (
     <SheetCloseButton
-      accessibilityLabel="Close legal document"
+      accessibilityLabel={localizeMobileString("Close legal document")}
       onClose={() => navigation.goBack()}
     />
   );
@@ -33,7 +34,7 @@ export function SettingsLegalDocumentExternalHeaderButton({
 
   return (
     <IconButton
-      accessibilityLabel="Open legal documents in external browser"
+      accessibilityLabel={localizeMobileString("Open legal documents in external browser")}
       icon="safari"
       onPress={() => void Linking.openURL(safeExternalUrl).catch(() => undefined)}
     />
@@ -84,7 +85,11 @@ export function SettingsLegalDocumentRouteScreen({
           <Text className="text-center font-t3-bold text-lg text-foreground">
             Couldn&apos;t load the {documentName.toLowerCase()}
           </Text>
-          <Text selectable className="text-center text-sm leading-normal text-foreground-muted">
+          <Text
+            localize={false}
+            selectable
+            className="text-center text-sm leading-normal text-foreground-muted"
+          >
             {loadError}
           </Text>
         </View>

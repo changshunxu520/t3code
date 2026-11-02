@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
 import { Pressable, ScrollView, View } from "react-native";
 
@@ -39,7 +40,9 @@ export function ThreadSideChatsRow(props: {
               <Pressable
                 key={sideChat.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Open side chat ${sideChat.title}${needs === null ? "" : `, needs ${needs}`}`}
+                accessibilityLabel={localizeMobileString(
+                  `Open side chat ${sideChat.title}${needs === null ? "" : `, needs ${needs}`}`,
+                )}
                 className="max-w-48 flex-row items-center gap-1.5 rounded-full bg-subtle px-2.5 py-1"
                 onPress={() =>
                   openLinkedThread({ environmentId: props.environmentId, threadId: sideChat.id })
@@ -53,7 +56,7 @@ export function ThreadSideChatsRow(props: {
                     )}
                   />
                 )}
-                <Text className="shrink text-xs text-foreground" numberOfLines={1}>
+                <Text localize={false} className="shrink text-xs text-foreground" numberOfLines={1}>
                   {sideChat.title}
                 </Text>
               </Pressable>

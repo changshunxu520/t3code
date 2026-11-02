@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SymbolView } from "./AppSymbol";
 import { NativeThemeHost } from "./NativeThemeHost.android";
 import {
@@ -49,8 +50,12 @@ export function Button(props: ButtonProps) {
     <View
       accessible
       accessibilityRole="button"
-      accessibilityLabel={props.accessibilityLabel ?? props.label}
-      accessibilityHint={props.accessibilityHint}
+      accessibilityLabel={localizeMobileString(props.accessibilityLabel ?? props.label)}
+      accessibilityHint={
+        props.accessibilityHint === undefined
+          ? undefined
+          : localizeMobileString(props.accessibilityHint)
+      }
       accessibilityState={{
         disabled: Boolean(props.disabled || props.loading),
         busy: Boolean(props.loading),
@@ -106,7 +111,9 @@ export function Button(props: ButtonProps) {
                   <Box modifiers={[size(8 * scale, 1)]} />
                 </>
               ) : null}
-              <Text style={{ ...typography, fontWeight: "500" }}>{props.label}</Text>
+              <Text style={{ ...typography, fontWeight: "500" }}>
+                {localizeMobileString(props.label)}
+              </Text>
             </Row>
           </Component>
         </NativeThemeHost>

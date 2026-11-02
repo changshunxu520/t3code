@@ -1,3 +1,5 @@
+import { translateWebSource } from "../../i18n/messages";
+import { useI18n } from "../../i18n/WebI18nContext";
 import { useAtomValue } from "@effect/atom-react";
 import type { EnvironmentId } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
@@ -16,6 +18,8 @@ export function DatabaseStorageNotice({
 }: {
   environments: ReadonlyArray<{ readonly environmentId: EnvironmentId; readonly label: string }>;
 }) {
+  const { locale: sourceLocale, t } = useI18n();
+
   const recommendations = useAtomValue(
     serverEnvironment.databaseCompactionRecommendations(
       JSON.stringify(environments.map((environment) => environment.environmentId)),
@@ -40,10 +44,12 @@ export function DatabaseStorageNotice({
       {visible.map(({ environmentId, status }) => (
         <SettingsRow
           key={environmentId}
-          title={`${(status.reclaimableBytes / 1024 ** 3).toFixed(1)} GiB on ${
-            environments.find((environment) => environment.environmentId === environmentId)
-              ?.label ?? environmentId
-          }`}
+          title={t("settings.databaseStorage.reclaimableOnEnvironment", {
+            size: `${(status.reclaimableBytes / 1024 ** 3).toFixed(1)} GiB`,
+            environment:
+              environments.find((environment) => environment.environmentId === environmentId)
+                ?.label ?? environmentId,
+          })}
           description={<code className="select-text break-all">{status.compactCommand}</code>}
           control={
             <div className="flex flex-wrap items-center gap-1.5">
@@ -52,14 +58,14 @@ export function DatabaseStorageNotice({
                 size="xs"
                 onClick={() => copyToClipboard(status.compactCommand, undefined)}
               >
-                Copy command
+                {translateWebSource(sourceLocale, "Copy command")}
               </Button>
               <Button
                 variant="ghost"
                 size="xs"
                 onClick={() => setDismissed((current) => [...current, environmentId])}
               >
-                Dismiss
+                {translateWebSource(sourceLocale, "Dismiss")}
               </Button>
             </div>
           }

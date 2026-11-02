@@ -78,6 +78,7 @@ const FileTreeRow = function FileTreeRow(props: {
       )}
       <PierreEntryIcon path={node.path} kind={node.kind} size={17} />
       <Text
+        localize={false}
         className={cn(
           "min-w-0 flex-1 text-sm leading-normal",
           props.selected
@@ -238,7 +239,11 @@ export function FileTreeBrowser(props: {
       ListHeaderComponent={
         <>
           {props.error && props.entries.length > 0 ? (
-            <Text accessibilityRole="alert" className="mx-4 my-2 text-xs text-foreground-muted">
+            <Text
+              localize={false}
+              accessibilityRole="alert"
+              className="mx-4 my-2 text-xs text-foreground-muted"
+            >
               {props.error}
             </Text>
           ) : null}
@@ -255,6 +260,7 @@ export function FileTreeBrowser(props: {
             <>
               <Text className="text-sm font-t3-bold text-foreground">Files unavailable</Text>
               <Text
+                localize={false}
                 accessibilityRole="alert"
                 className="mt-1 text-xs leading-normal text-foreground-muted"
               >

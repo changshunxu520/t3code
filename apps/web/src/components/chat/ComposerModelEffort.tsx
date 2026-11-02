@@ -10,6 +10,8 @@ import { getProviderOptionCurrentLabel } from "@t3tools/shared/model";
 import { CheckIcon, ChevronRightIcon, ChevronUpIcon } from "lucide-react";
 import { type KeyboardEvent, type ReactNode, use, useRef, useState } from "react";
 
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { cn } from "~/lib/utils";
 import {
   Menu,
@@ -148,7 +150,7 @@ export function describeComposerEffort(
       >
         {word ? (
           <span data-composer-control-label className="max-w-24 truncate">
-            {word}
+            <LocalizedEffortWord word={word} />
           </span>
         ) : glyph ? (
           <EffortGlyph count={glyph.count} filled={glyph.filled} size={size} />
@@ -169,6 +171,16 @@ export function describeComposerEffort(
   };
 }
 
+function LocalizedEffortWord(props: { word: string }) {
+  const { locale } = useI18n();
+  if (locale !== "zh-CN") return props.word;
+  const booleanMatch = /^(.+) (On|Off)$/.exec(props.word);
+  if (booleanMatch) {
+    return `${translateWebSource(locale, booleanMatch[1]!)} ${translateWebSource(locale, booleanMatch[2]!)}`;
+  }
+  return translateWebSource(locale, props.word);
+}
+
 const COLUMN_ROW =
   "flex h-8 w-full shrink-0 cursor-pointer items-center gap-2 rounded-sm px-2 text-left text-sm text-foreground outline-none hover:bg-foreground/[0.09] focus-visible:bg-foreground/[0.09] disabled:cursor-not-allowed disabled:opacity-64";
 const COLUMN_LABEL = "px-2 pt-1.5 pb-1 font-medium text-muted-foreground text-xs";
@@ -184,6 +196,8 @@ function ColumnRow(props: {
   disabled?: boolean;
   onPick: () => void;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const rowProps = {
     type: "button",
     role: "radio",
@@ -199,14 +213,14 @@ function ColumnRow(props: {
   } as const;
   const content = (
     <>
-      <span className="min-w-0 flex-1 truncate">{props.label}</span>
+      <span className="min-w-0 flex-1 truncate">{tx(props.label)}</span>
       {props.selected ? (
         <>
-          {props.isDefault ? <span className="sr-only">Default</span> : null}
+          {props.isDefault ? <span className="sr-only">{tx("Default")}</span> : null}
           <CheckIcon aria-hidden="true" className="size-3.5" />
         </>
       ) : props.isDefault ? (
-        <span className="text-muted-foreground/70 text-xs">Default</span>
+        <span className="text-muted-foreground/70 text-xs">{tx("Default")}</span>
       ) : null}
     </>
   );
@@ -215,7 +229,7 @@ function ColumnRow(props: {
     <Tooltip>
       <TooltipTrigger render={<button {...rowProps} />}>{content}</TooltipTrigger>
       <TooltipPopup side="right" className="max-w-56">
-        {props.description}
+        {tx(props.description)}
       </TooltipPopup>
     </Tooltip>
   );
@@ -239,6 +253,7 @@ function moveBetweenRows(event: KeyboardEvent<HTMLElement>) {
 }
 
 function EffortLevels(props: { traits: TraitsSelectionInput }) {
+  const { locale } = useI18n();
   const traits = useTraitsSelection(props.traits);
   const { effort, others } = columnControls(
     props.traits.provider,
@@ -252,8 +267,10 @@ function EffortLevels(props: { traits: TraitsSelectionInput }) {
           const value = traits.currentLabel(descriptor);
           return value ? (
             <div key={descriptor.id}>
-              <div className={COLUMN_LABEL}>{descriptor.label}</div>
-              <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">{value}</div>
+              <div className={COLUMN_LABEL}>{translateWebSource(locale, descriptor.label)}</div>
+              <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
+                {translateWebSource(locale, value)}
+              </div>
             </div>
           ) : null;
         })}
@@ -297,11 +314,16 @@ function EffortLevels(props: { traits: TraitsSelectionInput }) {
 type TraitsSelection = ReturnType<typeof useTraitsSelection>;
 
 function EffortRows(props: { control: ColumnControl; traits: TraitsSelection; locked: boolean }) {
+  const { locale } = useI18n();
   const { control, traits } = props;
   const { descriptor } = control;
   if (control.kind === "boolean") {
     return (
-      <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
+      <div
+        role="radiogroup"
+        aria-label={translateWebSource(locale, descriptor.label)}
+        className="flex flex-col gap-0.5"
+      >
         {([true, false] as const).map((value) => (
           <ColumnRow
             key={String(value)}
@@ -320,10 +342,14 @@ function EffortRows(props: { control: ColumnControl; traits: TraitsSelection; lo
   // An "Ultrathink:" prefix selects a level the column does not offer.
   const shown = choices.some((option) => option.id === value);
   return (
-    <div role="radiogroup" aria-label={descriptor.label} className="flex flex-col gap-0.5">
+    <div
+      role="radiogroup"
+      aria-label={translateWebSource(locale, descriptor.label)}
+      className="flex flex-col gap-0.5"
+    >
       {locked ? (
         <div className="px-2 pb-1.5 text-muted-foreground/80 text-xs">
-          {ULTRATHINK_IN_BODY_NOTE}
+          {translateWebSource(locale, ULTRATHINK_IN_BODY_NOTE)}
         </div>
       ) : null}
       {choices.map((option, index) => (
@@ -364,6 +390,8 @@ function OptionMenuRow(props: {
   /** Holds the column's tab stop when the model has no levels. */
   tabStop: boolean;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const { descriptor, traits } = props;
   const [open, setOpen] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -392,7 +420,7 @@ function OptionMenuRow(props: {
             type="button"
             data-effort-row
             tabIndex={props.tabStop ? 0 : -1}
-            aria-label={`${descriptor.label}: ${current}`}
+            aria-label={`${tx(descriptor.label)}: ${tx(current)}`}
             className={cn(OPTION_ROW, "data-popup-open:bg-foreground/[0.09]")}
             onKeyDown={(event) => {
               if (event.key !== "ArrowRight") return;
@@ -403,7 +431,7 @@ function OptionMenuRow(props: {
           />
         }
       >
-        <OptionRowText label={descriptor.label} value={current} />
+        <OptionRowText label={tx(descriptor.label)} value={tx(current)} />
         <ChevronRightIcon
           aria-hidden="true"
           className="-me-1 size-3.5 shrink-0 text-muted-foreground"
@@ -427,7 +455,7 @@ function OptionMenuRow(props: {
         }}
       >
         <MenuRadioGroup
-          aria-label={descriptor.label}
+          aria-label={tx(descriptor.label)}
           value={value}
           onValueChange={(next: string) => {
             if (next !== value) traits.changeSelect(descriptor, next);
@@ -437,15 +465,15 @@ function OptionMenuRow(props: {
             <MenuRadioItem key={choice.id} value={choice.id} closeOnClick>
               <span className="flex items-center gap-3">
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate">{choice.label}</span>
+                  <span className="truncate">{tx(choice.label)}</span>
                   {choice.description ? (
                     <span className="line-clamp-2 text-muted-foreground text-xs">
-                      {choice.description}
+                      {tx(choice.description)}
                     </span>
                   ) : null}
                 </span>
                 {choice.isDefault ? (
-                  <span className="text-muted-foreground/70 text-xs">Default</span>
+                  <span className="text-muted-foreground/70 text-xs">{tx("Default")}</span>
                 ) : null}
                 <MenuRadioItemIndicator />
               </span>
@@ -463,16 +491,18 @@ function OptionSwitchRow(props: {
   traits: TraitsSelection;
   tabStop: boolean;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const { descriptor, traits } = props;
   const checked = descriptor.currentValue === true;
   return (
     <label className={cn(OPTION_ROW, "has-focus-visible:bg-foreground/[0.09]")}>
-      <OptionRowText label={descriptor.label} value={checked ? "On" : "Off"} />
+      <OptionRowText label={tx(descriptor.label)} value={tx(checked ? "On" : "Off")} />
       <Switch
         size="sm"
         checked={checked}
         onCheckedChange={(next) => traits.changeBoolean(descriptor.id, next)}
-        aria-label={descriptor.label}
+        aria-label={tx(descriptor.label)}
         data-effort-row
         tabIndex={props.tabStop ? 0 : -1}
       />
@@ -481,13 +511,17 @@ function OptionSwitchRow(props: {
 }
 
 function NoEffortRow() {
+  const { locale } = useI18n();
   return (
-    <div className="flex h-8 items-center px-2 text-muted-foreground text-sm">No effort levels</div>
+    <div className="flex h-8 items-center px-2 text-muted-foreground text-sm">
+      {translateWebSource(locale, "No effort levels")}
+    </div>
   );
 }
 
 /** The model picker's effort column: the selected model's levels and its other options. */
 export function ComposerEffortColumn(props: { traits: TraitsSelectionInput | null }) {
+  const { locale } = useI18n();
   const picker = use(DockedPickerContext);
   const visibility = props.traits ? getTraitsSectionVisibility(props.traits) : null;
   const controls =
@@ -504,7 +538,11 @@ export function ComposerEffortColumn(props: { traits: TraitsSelectionInput | nul
       <div className="shrink-0 px-3 pt-2.5">
         <div className="flex h-8.25 -translate-y-px items-center gap-2 border-b border-border/70 pb-1.5 text-sm">
           <span className="text-muted-foreground">
-            {controls?.effort?.descriptor.label ?? (controls?.others.length ? "Options" : "Effort")}
+            {translateWebSource(
+              locale,
+              controls?.effort?.descriptor.label ??
+                (controls?.others.length ? "Options" : "Effort"),
+            )}
           </span>
           <span className="ms-auto min-w-0 truncate text-muted-foreground text-xs">
             {picker.modelLabel}
@@ -532,6 +570,8 @@ function SpeedSegment(props: {
   description?: string | undefined;
   onPick: () => void;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const buttonProps = {
     type: "button",
     role: "radio",
@@ -545,19 +585,20 @@ function SpeedSegment(props: {
       {props.label === "Fast" || props.label === "Ultrafast" ? (
         <FastBolt ultra={props.label === "Ultrafast"} />
       ) : null}
-      {props.label}
+      {tx(props.label)}
     </>
   );
   if (!props.description) return <button {...buttonProps}>{content}</button>;
   return (
     <Tooltip>
       <TooltipTrigger render={<button {...buttonProps} />}>{content}</TooltipTrigger>
-      <TooltipPopup side="top">{props.description}</TooltipPopup>
+      <TooltipPopup side="top">{tx(props.description)}</TooltipPopup>
     </Tooltip>
   );
 }
 
 function SpeedControl(props: { traits: TraitsSelectionInput }) {
+  const { locale } = useI18n();
   const traits = useTraitsSelection(props.traits);
   const { speedSelect, fastToggle } = splitSpeed(
     props.traits.provider,
@@ -568,7 +609,11 @@ function SpeedControl(props: { traits: TraitsSelectionInput }) {
   return (
     <div
       role="radiogroup"
-      aria-label={speedSelect?.label ?? fastToggle?.label}
+      aria-label={
+        (speedSelect?.label ?? fastToggle?.label)
+          ? translateWebSource(locale, (speedSelect?.label ?? fastToggle?.label)!)
+          : undefined
+      }
       className="flex rounded-lg bg-input/40 p-0.5"
     >
       {speedSelect
@@ -601,10 +646,12 @@ function PermissionsMenu(props: {
   options: ReadonlyArray<RuntimeModeOption>;
   onChange: (mode: RuntimeMode) => void;
 }) {
+  const { locale } = useI18n();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const current = props.options.find((option) => option.mode === props.runtimeMode);
   if (!current) return null;
   const CurrentIcon = current.icon;
+  const currentLabel = translateWebSource(locale, current.label);
   return (
     <Menu
       onOpenChangeComplete={(open) => {
@@ -617,13 +664,15 @@ function PermissionsMenu(props: {
             ref={triggerRef}
             type="button"
             data-composer-permissions-trigger
-            aria-label={`Permissions: ${current.label}`}
+            aria-label={
+              locale === "zh-CN" ? `权限：${currentLabel}` : `Permissions: ${currentLabel}`
+            }
             className="ms-auto flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-muted-foreground text-xs outline-none hover:bg-foreground/[0.09] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-popup-open:bg-foreground/[0.09] data-popup-open:text-foreground"
           />
         }
       >
         <CurrentIcon aria-hidden="true" className="size-3.5" />
-        {current.label}
+        {currentLabel}
         <ChevronUpIcon aria-hidden="true" className="size-3" />
       </MenuTrigger>
       <MenuPopup side="top" align="end" {...composerFloatingLayerProps}>

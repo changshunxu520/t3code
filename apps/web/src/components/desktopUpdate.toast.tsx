@@ -1,6 +1,9 @@
 import type { DesktopBridge, DesktopUpdateState } from "@t3tools/contracts";
 import { ArrowRightIcon } from "lucide-react";
 
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
+import { readWebI18n } from "~/i18n/readWebI18n";
 import {
   getDesktopUpdateDownloadedVersion,
   getDesktopUpdateReleaseUrl,
@@ -16,7 +19,10 @@ export async function openDesktopUpdateReleaseNotes(
   try {
     if (shell && (await shell.openExternal(releaseUrl))) return;
   } catch {}
-  toastManager.add({ type: "error", title: "Unable to open release notes" });
+  toastManager.add({
+    type: "error",
+    title: translateWebSource(readWebI18n().locale, "Unable to open release notes"),
+  });
 }
 
 function ReleaseNotesLink({
@@ -26,6 +32,7 @@ function ReleaseNotesLink({
   shell: DesktopUpdateShell;
   releaseUrl: string;
 }) {
+  const { locale } = useI18n();
   return (
     <button
       className="ml-2 inline cursor-pointer text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground"
@@ -34,7 +41,7 @@ function ReleaseNotesLink({
       }}
       type="button"
     >
-      Read more
+      {translateWebSource(locale, "Read more")}
       <ArrowRightIcon
         aria-hidden
         className="ml-1 inline size-3 -rotate-45 align-[-0.125em]"
@@ -48,13 +55,14 @@ export function showDesktopUpdateDownloadedToast(
   shell: DesktopUpdateShell,
   state: DesktopUpdateState,
 ): void {
+  const { locale } = readWebI18n();
   const releaseUrl = getDesktopUpdateReleaseUrl(getDesktopUpdateDownloadedVersion(state));
   toastManager.add({
     type: "success",
-    title: "Update downloaded",
+    title: translateWebSource(locale, "Update downloaded"),
     description: (
       <>
-        Restart the app from the update button to install it.
+        {translateWebSource(locale, "Restart the app from the update button to install it.")}
         {releaseUrl ? <ReleaseNotesLink releaseUrl={releaseUrl} shell={shell} /> : null}
       </>
     ),

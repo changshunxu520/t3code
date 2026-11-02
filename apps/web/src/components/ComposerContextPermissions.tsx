@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type { RuntimeMode } from "@t3tools/contracts";
 import { useAtomValue } from "@effect/atom-react";
 
@@ -13,6 +15,7 @@ export function ComposerContextPermissions(props: {
   runtimeMode: RuntimeMode;
   onOpen: () => void;
 }) {
+  const { locale: copyLocale } = useI18n();
   const shortcutLabel = shortcutLabelForCommand(
     useAtomValue(primaryServerKeybindingsAtom),
     "composer.mode",
@@ -35,7 +38,10 @@ export function ComposerContextPermissions(props: {
         <Icon aria-hidden="true" className="size-3" />
         <ComposerContextLabel>{label}</ComposerContextLabel>
       </TooltipTrigger>
-      <TooltipPopup>Permissions{shortcutLabel ? ` · ${shortcutLabel}` : null}</TooltipPopup>
+      <TooltipPopup>
+        {translateWebSource(copyLocale, "Permissions")}
+        {shortcutLabel ? ` · ${shortcutLabel}` : null}
+      </TooltipPopup>
     </Tooltip>
   );
 }

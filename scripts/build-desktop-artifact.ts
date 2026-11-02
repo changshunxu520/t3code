@@ -1060,6 +1060,10 @@ export const WINDOWS_SERVER_EXTRA_RESOURCES = [
     filter: [WINDOWS_SERVER_ASAR_RESOURCE, `${WINDOWS_SERVER_ASAR_RESOURCE}.unpacked/**/*`],
   },
 ] as const;
+export const WINDOWS_TRAY_ICON_EXTRA_RESOURCE = {
+  from: "apps/desktop/prod-resources/icon.ico",
+  to: "icon.ico",
+} as const;
 export const WSL_RUNTIME_ARCHIVE_NAME = "wsl-runtime.tar.gz";
 export const WSL_RUNTIME_ARCHIVE_HASH_NAME = `${WSL_RUNTIME_ARCHIVE_NAME}.sha256`;
 export const WSL_RUNTIME_ARCHIVE_EXTRA_RESOURCE = {
@@ -1828,7 +1832,9 @@ const buildDesktopBundlesUnlocked = Effect.fn("buildDesktopBundlesUnlocked")(fun
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
-  const spawnCommand = yield* resolveSpawnCommand("vp", ["run", "build:desktop"]);
+  const vpPath = yield* path.fromFileUrl(
+    new URL("../node_modules/vite-plus/bin/vp", import.meta.url),
+  );
   yield* Effect.acquireUseRelease(
     Effect.forEach(releasePackageFiles, (relativePath) =>
       Effect.gen(function* () {
@@ -1847,9 +1853,8 @@ const buildDesktopBundlesUnlocked = Effect.fn("buildDesktopBundlesUnlocked")(fun
         yield* updateReleasePackageVersions(appVersion, { rootDir: repoRoot });
         // The compiler must stop reading the aligned manifests before restoration.
         yield* runCommand(
-          ChildProcess.make(spawnCommand.command, spawnCommand.args, {
+          ChildProcess.make(process.execPath, [vpPath, "run", "build:desktop"], {
             cwd: repoRoot,
-            shell: spawnCommand.shell,
             env: { APP_VERSION: appVersion },
             extendEnv: true,
           }),
@@ -2709,8 +2714,11 @@ export function resolveDesktopUpdateChannel(version: string): "latest" | "nightl
   return /-nightly\.\d{8}\.\d+$/.test(version) ? "nightly" : "latest";
 }
 
+// Community Chinese previews are manual downloads and must never acquire an update feed.
 export function isDesktopPreviewVersion(version: string): boolean {
-  return /-pr\./.test(version) || /-preview\.\d{8}\.\d+$/.test(version);
+  return (
+    /-pr\./.test(version) || /-preview\.\d{8}\.\d+$/.test(version) || /-zh\.\d+$/.test(version)
+  );
 }
 
 export function resolveDesktopWebAssetBrand(version: string): WebAssetBrand {
@@ -2795,7 +2803,9 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
       ...DESKTOP_EXTRA_RESOURCES,
       ...(platform === "linux" ? LINUX_CAPTURE_EXTRA_RESOURCES : []),
       ...(platform === "linux" ? LINUX_BROWSER_SECRET_EXTRA_RESOURCES : []),
-      ...(platform === "win" ? WINDOWS_SERVER_EXTRA_RESOURCES : []),
+      ...(platform === "win"
+        ? [WINDOWS_TRAY_ICON_EXTRA_RESOURCE, ...WINDOWS_SERVER_EXTRA_RESOURCES]
+        : []),
       ...(platform === "win" && wslRuntimeBundled ? WSL_RUNTIME_EXTRA_RESOURCES : []),
     ],
   };
@@ -2823,6 +2833,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
       target: target === "dmg" ? [target, "zip"] : [target],
       icon: "icon.icns",
       category: "public.app-category.developer-tools",
+      strictVerify: true,
       extendInfo: {
         // macOS 26 offers Messages/Mail codes in every text field unless opted out.
         NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac: true,
@@ -2856,7 +2867,14 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
           role: "Viewer",
         },
       ],
-      ...(signed ? { sign: path.join(repoRoot, "scripts/sign-macos.ts") } : {}),
+      ...(signed
+        ? { sign: path.join(repoRoot, "scripts/sign-macos.ts") }
+        : {
+            // Skipping signing leaves Electron's linker signature without a valid bundle resource seal.
+            identity: "-",
+            hardenedRuntime: false,
+            notarize: false,
+          }),
       ...(macPasskeySigning
         ? {
             entitlements: macPasskeySigning.entitlementsPath,
@@ -3130,12 +3148,14 @@ export const stageWindowsServerSidecar = Effect.fn("stageWindowsServerSidecar")(
   }
 
   yield* Effect.log("[desktop-artifact] Installing server sidecar runtime externals...");
-  const installCommand = yield* resolveSpawnCommand("vp", [...STAGE_INSTALL_ARGS]);
   yield* runCommand(
-    ChildProcess.make(installCommand.command, installCommand.args, {
-      cwd: serverStageDir,
-      shell: installCommand.shell,
-    }),
+    ChildProcess.make(
+      process.execPath,
+      [path.join(input.repoRoot, "node_modules/vite-plus/bin/vp"), ...STAGE_INSTALL_ARGS],
+      {
+        cwd: serverStageDir,
+      },
+    ),
     { label: "vp install --prod (server sidecar)", verbose: input.verbose },
   );
 
@@ -3909,12 +3929,14 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
   }
 
   yield* Effect.log("[desktop-artifact] Installing staged production dependencies...");
-  const installCommand = yield* resolveSpawnCommand("vp", [...STAGE_INSTALL_ARGS]);
   yield* runCommand(
-    ChildProcess.make(installCommand.command, installCommand.args, {
-      cwd: stageAppDir,
-      shell: installCommand.shell,
-    }),
+    ChildProcess.make(
+      process.execPath,
+      [path.join(repoRoot, "node_modules/vite-plus/bin/vp"), ...STAGE_INSTALL_ARGS],
+      {
+        cwd: stageAppDir,
+      },
+    ),
     { label: "vp install --prod", verbose: options.verbose },
   );
   yield* stageClerkPasskeyNativeBinaries(stageAppDir, options.platform, options.arch);
@@ -3958,6 +3980,9 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
   const buildEnv: NodeJS.ProcessEnv = {
     ...process.env,
   };
+  buildEnv.ELECTRON_MIRROR ??= "https://npmmirror.com/mirrors/electron/";
+  buildEnv.ELECTRON_BUILDER_BINARIES_MIRROR ??=
+    "https://npmmirror.com/mirrors/electron-builder-binaries/";
   buildEnv.npm_config_user_agent = resolvePackageManagerUserAgent(rootPackageJson.packageManager);
   for (const [key, value] of Object.entries(buildEnv)) {
     if (value === "") {
@@ -4018,13 +4043,15 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
     "--publish",
     "never",
   ];
-  const builderCommand = yield* resolveSpawnCommand("vp", builderArgs, { env: buildEnv });
   yield* runCommand(
-    ChildProcess.make(builderCommand.command, builderCommand.args, {
-      cwd: repoRoot,
-      env: buildEnv,
-      shell: builderCommand.shell,
-    }),
+    ChildProcess.make(
+      process.execPath,
+      [path.join(repoRoot, "node_modules/vite-plus/bin/vp"), ...builderArgs],
+      {
+        cwd: repoRoot,
+        env: buildEnv,
+      },
+    ),
     {
       label: `vp exec --filter @t3tools/desktop -- electron-builder --projectDir ${stageAppDir} ${platformConfig.cliFlag} --${options.arch} --publish never`,
       verbose: options.verbose,

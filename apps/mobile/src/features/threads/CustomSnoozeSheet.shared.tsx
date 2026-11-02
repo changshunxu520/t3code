@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { AppText } from "../../components/ui/AppText";
 import { SegmentedControl } from "../../components/ui/SegmentedControl";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 
 export function CustomSnoozeSheet(props: {
   readonly onClose: () => void;
@@ -68,7 +69,9 @@ export function CustomSnoozeSheet(props: {
                 <Pressable
                   key={value}
                   accessibilityRole="button"
-                  accessibilityLabel={value === "date" ? "Choose date" : "Choose time"}
+                  accessibilityLabel={localizeMobileString(
+                    value === "date" ? "Choose date" : "Choose time",
+                  )}
                   className="min-h-12 flex-row items-center justify-between rounded-xl bg-subtle px-3"
                   onPress={() => setPicker(value)}
                 >
@@ -105,7 +108,7 @@ export function CustomSnoozeSheet(props: {
             <View className="gap-3">
               <AppText>Snooze for</AppText>
               <TextInput
-                accessibilityLabel="Duration"
+                accessibilityLabel={localizeMobileString("Duration")}
                 className="min-h-12 rounded-xl bg-subtle px-3 text-base text-foreground"
                 keyboardType="decimal-pad"
                 value={amount}

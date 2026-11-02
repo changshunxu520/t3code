@@ -13,6 +13,8 @@ import {
 } from "@t3tools/contracts/settings";
 import * as Schema from "effect/Schema";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { useI18n } from "../../i18n/WebI18nContext";
+import { translateWebSource } from "../../i18n/messages";
 import { useScopedSettings, useUpdateScopedSettings } from "./useScopedSettings";
 import { isMacPlatform } from "../../lib/utils";
 import { Input } from "../ui/input";
@@ -44,15 +46,18 @@ import {
 } from "./settingsSearch";
 
 function useFontDefaultFamilies() {
+  const { locale } = useI18n();
   const settings = useScopedSettings();
   const [defaults] = useState(() => ({
     sans: resolveDefaultFamilyLabel(DEFAULT_SANS_FONT_STACK) ?? "System default",
     code: resolveDefaultFamilyLabel(DEFAULT_CODE_FONT_STACK) ?? "System monospace",
   }));
+  const sans = translateWebSource(locale, defaults.sans);
+  const code = translateWebSource(locale, defaults.code);
   return {
-    sans: defaults.sans,
-    code: defaults.code,
-    interfaceFamily: settings.fontFamilySans.trim() || defaults.sans,
+    sans,
+    code,
+    interfaceFamily: settings.fontFamilySans.trim() || sans,
   };
 }
 
@@ -201,6 +206,7 @@ function TerminalFontRow() {
 }
 
 function FontSmoothingRow() {
+  const { locale } = useI18n();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   if (!isMacPlatform(navigator.platform)) return null;
@@ -222,7 +228,7 @@ function FontSmoothingRow() {
         <Switch
           checked={settings.fontSmoothing}
           onCheckedChange={(checked) => updateSettings({ fontSmoothing: Boolean(checked) })}
-          aria-label="Font smoothing"
+          aria-label={translateWebSource(locale, "Font smoothing")}
         />
       }
     />
@@ -230,6 +236,7 @@ function FontSmoothingRow() {
 }
 
 function WordWrapRow() {
+  const { locale } = useI18n();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   return (
@@ -248,7 +255,7 @@ function WordWrapRow() {
         <Switch
           checked={settings.wordWrap}
           onCheckedChange={(checked) => updateSettings({ wordWrap: Boolean(checked) })}
-          aria-label="Wrap code, diffs, and file previews by default"
+          aria-label={translateWebSource(locale, "Wrap code, diffs, and file previews by default")}
         />
       }
     />
@@ -273,6 +280,7 @@ function SeparateFontsRow({
   readonly checked: boolean;
   readonly onCheckedChange: (checked: boolean) => void;
 }) {
+  const { locale } = useI18n();
   return (
     <SettingsRow
       {...searchableSetting("separate-fonts")}
@@ -281,7 +289,7 @@ function SeparateFontsRow({
         <Switch
           checked={checked}
           onCheckedChange={(next) => onCheckedChange(Boolean(next))}
-          aria-label="Separate fonts"
+          aria-label={translateWebSource(locale, "Separate fonts")}
         />
       }
     />
@@ -380,6 +388,7 @@ function FontFamilySettingsRow({
     onChange: (v: number) => void;
   };
 }) {
+  const { locale, t } = useI18n();
   const trimmed = value.trim();
   const [draft, setDraft] = useState(value);
   const [draftSettled, setDraftSettled] = useState(true);
@@ -433,10 +442,13 @@ function FontFamilySettingsRow({
     ) : null;
   const fontEnumeration = useFontEnumeration();
   const [inputFocused, setInputFocused] = useState(false);
+  const familyAriaLabel = t("settings.typography.familyLabel", {
+    title: translateWebSource(locale, title),
+  });
   const familyControl =
     fontEnumeration.status === "granted" ? (
       <FontFamilyPicker
-        ariaLabel={`${title} family`}
+        ariaLabel={familyAriaLabel}
         defaultFamily={defaultFamily}
         selectedFamily={trimmed}
         requireMonospace={requireMonospace}
@@ -446,7 +458,7 @@ function FontFamilySettingsRow({
     ) : (
       <Input
         size="sm"
-        aria-label={`${title} family`}
+        aria-label={familyAriaLabel}
         aria-invalid={draftPending || undefined}
         autoCapitalize="off"
         autoComplete="off"
@@ -505,7 +517,11 @@ function FontFamilySettingsRow({
           }
         }}
       >
-        <SelectTrigger size="sm" className="w-22 shrink-0" aria-label={size.label}>
+        <SelectTrigger
+          size="sm"
+          className="w-22 shrink-0"
+          aria-label={translateWebSource(locale, size.label)}
+        >
           <SelectValue>{size.value} px</SelectValue>
         </SelectTrigger>
         <SelectPopup align="end" alignItemWithTrigger={false}>

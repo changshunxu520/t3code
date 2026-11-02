@@ -3,6 +3,8 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebMessage, translateWebSource } from "~/i18n/messages";
 import { textDirection } from "~/textDirection";
 
 import { isCommentSubmitShortcut } from "./commentSubmitShortcut";
@@ -37,12 +39,16 @@ export function DiffCommentAnnotation({
   onCancel,
   onComment,
   onDelete,
-  placeholder = "Add a comment…",
-  submitLabel = "Comment",
+  placeholder,
+  submitLabel,
   pending = false,
   secondaryAction,
   focusOnMount = true,
 }: DiffCommentAnnotationProps) {
+  const { locale, t } = useI18n();
+  const tr = (value: string) => translateWebSource(locale, value);
+  const resolvedPlaceholder = placeholder ? tr(placeholder) : tr("Add a comment…");
+  const resolvedSubmitLabel = submitLabel ? tr(submitLabel) : tr("Comment");
   const [localDraftText, setLocalDraftText] = useState("");
   const displayedText = kind === "draft" && !onTextChange ? localDraftText : text;
   const trimmedText = displayedText.trim();
@@ -77,7 +83,7 @@ export function DiffCommentAnnotation({
             <Button
               variant="ghost-muted"
               size="icon-xs"
-              aria-label="Delete comment"
+              aria-label={tr("Delete comment")}
               onClick={onDelete}
             >
               <Trash2 className="size-3" />
@@ -102,8 +108,8 @@ export function DiffCommentAnnotation({
         size="sm"
         value={displayedText}
         dir={textDirection(displayedText)}
-        placeholder={placeholder}
-        aria-label={`Comment on lines ${rangeLabel}`}
+        placeholder={resolvedPlaceholder}
+        aria-label={t("diff.commentOnLinesAria", { range: rangeLabel })}
         onChange={(event) => (onTextChange ?? setLocalDraftText)(event.target.value)}
         onFocus={(event) => {
           const end = event.currentTarget.value.length;
@@ -121,9 +127,11 @@ export function DiffCommentAnnotation({
         }}
       />
       <div className="mt-1.5 flex items-center gap-1">
-        <span className="mr-auto text-3xs text-muted-foreground/70">⌘/Ctrl Enter to send</span>
+        <span className="mr-auto text-3xs text-muted-foreground/70">
+          {tr("⌘/Ctrl Enter to send")}
+        </span>
         <Button variant="ghost-muted" size="xs" onClick={onCancel}>
-          Cancel
+          {translateWebMessage(locale, "common.cancel")}
         </Button>
         {secondaryAction ? (
           <Button
@@ -133,11 +141,11 @@ export function DiffCommentAnnotation({
             onClick={() => secondaryAction.onAction(trimmedText)}
           >
             {secondaryAction.icon}
-            {secondaryAction.label}
+            {tr(secondaryAction.label)}
           </Button>
         ) : null}
         <Button size="xs" disabled={pending || !trimmedText} onClick={() => onComment(trimmedText)}>
-          {submitLabel}
+          {resolvedSubmitLabel}
         </Button>
       </div>
     </div>

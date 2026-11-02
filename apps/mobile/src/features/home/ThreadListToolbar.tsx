@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { useWorkspaceTabs } from "../workspace/WorkspaceTabsContext";
@@ -81,7 +82,7 @@ export function ThreadListToolbar(props: {
   const searchField = (
     <SearchField
       inputRef={searchRef}
-      accessibilityLabel="Search threads"
+      accessibilityLabel={localizeMobileString("Search threads")}
       clearAccessibilityLabel="Clear search"
       placeholder="Search"
       value={props.searchQuery}
@@ -92,7 +93,7 @@ export function ThreadListToolbar(props: {
     <AndroidAnchoredMenu actions={props.filterActions} onPressAction={props.onFilterAction}>
       {(open) => (
         <AndroidHeaderIconButton
-          accessibilityLabel="Filter threads"
+          accessibilityLabel={localizeMobileString("Filter threads")}
           icon={filterIcon}
           onPress={open}
         />

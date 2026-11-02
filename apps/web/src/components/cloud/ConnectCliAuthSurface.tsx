@@ -7,6 +7,8 @@ import {
   connectCliSignInRedirectUrl,
 } from "../../cloud/connectCliAuth";
 import { isElectron } from "../../env";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
 import { Button } from "../ui/button";
@@ -19,6 +21,7 @@ const invalidLinkMessage = {
 } as const;
 
 export function ConnectCliAuthorizeSurface() {
+  const { locale } = useI18n();
   const [request] = useState(() => readConnectAuthorizeRequest(new URL(window.location.href)));
   const clerk = useClerk();
   const { isLoaded, isSignedIn } = useAuth();
@@ -61,7 +64,11 @@ export function ConnectCliAuthorizeSurface() {
   if (!request) {
     return (
       <StandalonePage>
-        <StandalonePageHeader {...invalidLinkMessage} />
+        <StandalonePageHeader
+          context={translateWebSource(locale, invalidLinkMessage.context)}
+          title={translateWebSource(locale, invalidLinkMessage.title)}
+          description={translateWebSource(locale, invalidLinkMessage.description)}
+        />
       </StandalonePage>
     );
   }
@@ -69,18 +76,19 @@ export function ConnectCliAuthorizeSurface() {
   return (
     <StandalonePage>
       <StandalonePageHeader
-        context="Browser authorization"
-        title="Connecting your terminal"
-        description={
+        context={translateWebSource(locale, "Browser authorization")}
+        title={translateWebSource(locale, "Connecting your terminal")}
+        description={translateWebSource(
+          locale,
           isSignedIn
             ? "Redirecting to authorize T3 Connect for your CLI…"
-            : "Sign in to continue authorizing T3 Connect for your CLI."
-        }
+            : "Sign in to continue authorizing T3 Connect for your CLI.",
+        )}
       />
       {isLoaded && !isSignedIn ? (
         <div className="mt-6">
           <Button type="button" onClick={openSignIn}>
-            Sign in
+            {translateWebSource(locale, "Sign in")}
           </Button>
         </div>
       ) : null}

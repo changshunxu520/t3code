@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../i18n/mobileStrings";
 import { videoMimeType } from "@t3tools/shared/video";
 import { Modal, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -125,7 +126,7 @@ function OpenVideoPreviewModal(props: {
           <MediaActionsMenu media={mediaActions} inModal />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close video"
+            accessibilityLabel={localizeMobileString("Close video")}
             onPress={props.onRequestClose}
             className="size-12 items-center justify-center"
           >
@@ -157,7 +158,7 @@ function OpenVideoPreviewModal(props: {
         ) : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Save or share video"
+          accessibilityLabel={localizeMobileString("Save or share video")}
           disabled={playback.uri === null || mediaActions.sharing}
           onPress={mediaActions.share}
           className="mx-4 my-3 min-h-12 items-center justify-center rounded-xl bg-white/15 px-4"

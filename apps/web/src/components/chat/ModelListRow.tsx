@@ -10,6 +10,8 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "~/lib/utils";
 import { modelPickerModelKey } from "./modelPickerKeys";
 import { ProviderInstanceIcon } from "./ProviderInstanceIcon";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 
 export const ModelListRow = memo(function ModelListRow(props: {
   index: number;
@@ -34,6 +36,7 @@ export const ModelListRow = memo(function ModelListRow(props: {
   disabledReason?: string | null;
   onToggleFavorite: (instanceId: ProviderInstanceId, slug: string) => void;
 }) {
+  const { locale } = useI18n();
   const model = {
     slug: props.slug,
     name: props.name,
@@ -87,14 +90,14 @@ export const ModelListRow = memo(function ModelListRow(props: {
         {props.showNewBadge ? (
           <span
             className="shrink-0 rounded border border-update/35 bg-update/15 px-0.5 py-px text-3xs font-bold uppercase leading-none tracking-wide text-update-foreground"
-            aria-label="New model"
+            aria-label={translateWebSource(locale, "New model")}
           >
-            New
+            {translateWebSource(locale, "New")}
           </span>
         ) : null}
         {props.unavailable ? (
           <Badge variant="outline" size="sm">
-            Unavailable
+            {translateWebSource(locale, "Unavailable")}
           </Badge>
         ) : null}
       </div>
@@ -116,7 +119,10 @@ export const ModelListRow = memo(function ModelListRow(props: {
                   event.stopPropagation();
                 }}
                 disabled={Boolean(props.disabledReason)}
-                aria-label={props.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={translateWebSource(
+                  locale,
+                  props.isFavorite ? "Remove from favorites" : "Add to favorites",
+                )}
               >
                 <StarIcon
                   className={cn(
@@ -130,7 +136,10 @@ export const ModelListRow = memo(function ModelListRow(props: {
             }
           />
           <TooltipPopup side="top" align="center">
-            {props.isFavorite ? "Remove from favorites" : "Add to favorites"}
+            {translateWebSource(
+              locale,
+              props.isFavorite ? "Remove from favorites" : "Add to favorites",
+            )}
           </TooltipPopup>
         </Tooltip>
         {/* Last, and always reserved, so stars and the check keep fixed columns. */}
@@ -150,7 +159,7 @@ export const ModelListRow = memo(function ModelListRow(props: {
     <Tooltip>
       <TooltipTrigger render={row} />
       <TooltipPopup side="left" align="center">
-        {props.disabledReason}
+        {translateWebSource(locale, props.disabledReason)}
       </TooltipPopup>
     </Tooltip>
   );

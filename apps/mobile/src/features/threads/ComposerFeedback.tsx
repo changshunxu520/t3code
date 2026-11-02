@@ -8,6 +8,7 @@ import { Pressable, View } from "react-native";
 import { AppText as Text } from "../../components/ui/AppText";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { copyTextWithHaptic } from "../../lib/copyTextWithHaptic";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 
 export function ComposerFeedback({
   submission,
@@ -27,7 +28,7 @@ export function ComposerFeedback({
           </Text>
           {submission.status !== "uploading" ? (
             <Pressable
-              accessibilityLabel="Dismiss feedback notice"
+              accessibilityLabel={localizeMobileString("Dismiss feedback notice")}
               accessibilityRole="button"
               hitSlop={12}
               onPress={onDismiss}
@@ -52,7 +53,9 @@ export function ComposerFeedback({
             label="Copy ID"
             tone="text"
             onPress={() =>
-              copyTextWithHaptic(submission.feedbackId, { target: "Codex feedback thread ID" })
+              copyTextWithHaptic(submission.feedbackId, {
+                target: localizeMobileString("Codex feedback thread ID"),
+              })
             }
           />
         ) : null}

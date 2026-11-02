@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { NativeScrollView } from "../../native/NativeScrollViewMarker";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { AnimatedLegendList } from "@legendapp/list/reanimated";
@@ -173,7 +174,7 @@ function FileFilterMenu({ filter }: { readonly filter: ChangedFiles["filter"] })
       <View pointerEvents="none">
         <IconButton
           icon="line.3.horizontal.decrease"
-          accessibilityLabel="Filter review files"
+          accessibilityLabel={localizeMobileString("Filter review files")}
           selected={filter.hideTestFiles}
         />
       </View>
@@ -266,7 +267,7 @@ export function usePullRequestFilesSection(params: PullRequestParams) {
         <PullRequestReadStatus pending={false} error={diff.error} terminology={files.terminology} />
         {loading ? (
           <View
-            accessibilityLabel="Loading changed files"
+            accessibilityLabel={localizeMobileString("Loading changed files")}
             accessibilityState={{ busy: true }}
             className="min-h-17 flex-row items-center gap-2 py-3"
           >
@@ -423,7 +424,7 @@ export function PullRequestFilesSheet({ route }: StaticScreenProps<PullRequestDi
       <Toolbar placement="right">
         <Toolbar.Menu
           title="Review files"
-          accessibilityLabel="Filter review files"
+          accessibilityLabel={localizeMobileString("Filter review files")}
           icon="line.3.horizontal.decrease"
         >
           <Toolbar.MenuAction
@@ -502,7 +503,7 @@ export function PullRequestFilesSheet({ route }: StaticScreenProps<PullRequestDi
             loading ? (
               <View
                 accessible
-                accessibilityLabel="Loading changed files"
+                accessibilityLabel={localizeMobileString("Loading changed files")}
                 accessibilityState={{ busy: true }}
               >
                 {Array.from({ length: loadingRowCount(files) }, (_, index) => (

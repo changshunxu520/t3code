@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Platform } from "react-native";
 
 import { useResolveClassNames } from "uniwind";
@@ -10,7 +11,13 @@ export function ListRow(props: ListRowContentProps & { readonly onPress: () => v
   return (
     <RowPressable
       accessibilityRole="button"
-      accessibilityLabel={[props.label, props.description, props.detail].filter(Boolean).join(", ")}
+      accessibilityLabel={[
+        props.localizeLabel === false ? props.label : localizeMobileString(props.label),
+        props.description === undefined ? undefined : localizeMobileString(props.description),
+        props.detail === undefined ? undefined : localizeMobileString(props.detail),
+      ]
+        .filter(Boolean)
+        .join(", ")}
       accessibilityState={{ disabled: Boolean(props.disabled) }}
       disabled={props.disabled}
       onPress={props.onPress}

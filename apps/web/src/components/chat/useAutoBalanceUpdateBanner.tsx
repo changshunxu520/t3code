@@ -3,6 +3,8 @@ import type { ServerUpdateState } from "@t3tools/client-runtime/state/server";
 import { useState } from "react";
 
 import { environmentIdsKey } from "~/state/environmentAtomList";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type { EnvironmentPresentation } from "~/state/environments";
 import { environmentUpdateStatesAtom } from "~/state/server";
 import {
@@ -28,6 +30,7 @@ import { ComposerServerUpdateIcon } from "./ComposerServerUpdateStatus";
 export function useAutoBalanceUpdateBanner(
   environments: readonly EnvironmentPresentation[],
 ): ComposerBannerStackItem | null {
+  const { locale, t } = useI18n();
   const updateStates = useAtomValue(
     environmentUpdateStatesAtom(
       environmentIdsKey(environments.map(({ environmentId }) => environmentId)),
@@ -80,8 +83,12 @@ export function useAutoBalanceUpdateBanner(
   );
   const count = running || failed || machines.length;
   const status = running ? "running" : failed ? "failed" : "idle";
-  const prefix = running ? "Updating" : failed ? "Could not update" : "Update available for";
-  const title = `${prefix} ${count} ${count === 1 ? "machine" : "machines"}`;
+  const noun = count === 1 ? "machine" : "machines";
+  const title = running
+    ? t("update.updatingMachines", { count, noun })
+    : failed
+      ? t("update.couldNotUpdateMachines", { count, noun })
+      : t("update.updateAvailableForMachines", { count, noun });
   return {
     id: `auto-balance-server-updates-${dismissedNotices.size}`,
     variant: failed ? "error" : "default",
@@ -92,7 +99,7 @@ export function useAutoBalanceUpdateBanner(
         <PopoverTrigger
           render={<InlineButton />}
           className="max-w-full"
-          aria-label={`${title}. View machines`}
+          aria-label={t("update.viewMachinesAria", { title })}
         >
           <span className="min-w-0 truncate">{title}</span>
         </PopoverTrigger>
@@ -105,14 +112,16 @@ export function useAutoBalanceUpdateBanner(
                   <ServerUpdateProgress state={machine.state} />
                 ) : !machine.remoteUpdate ? (
                   <>
-                    <div className="text-muted-foreground">Manual update required</div>
+                    <div className="text-muted-foreground">
+                      {translateWebSource(locale, "Manual update required")}
+                    </div>
                     <ServerUpdateAction {...machine} />
                   </>
                 ) : (
                   <div className="text-muted-foreground">
                     {machine.connected
-                      ? `Ready to update to ${machine.targetVersion}`
-                      : "Reconnect this machine to update"}
+                      ? t("update.readyToUpdateTo", { version: machine.targetVersion })
+                      : translateWebSource(locale, "Reconnect this machine to update")}
                   </div>
                 )}
               </div>
@@ -122,7 +131,9 @@ export function useAutoBalanceUpdateBanner(
       </Popover>
     ),
     description:
-      manual > 0 ? `${manual} ${manual === 1 ? "needs" : "need"} a manual update` : undefined,
+      manual > 0
+        ? t("update.needsManualUpdate", { count: manual, verb: manual === 1 ? "needs" : "need" })
+        : undefined,
     actions:
       running === 0 && targets.length > 0 ? (
         <ServerUpdatesAction
@@ -130,14 +141,17 @@ export function useAutoBalanceUpdateBanner(
           variant="ghost"
           label={
             failed > 0
-              ? "Retry"
+              ? translateWebSource(locale, "Retry")
               : targets.length === machines.length
-                ? "Update all"
-                : `Update ${targets.length} ${targets.length === 1 ? "machine" : "machines"}`
+                ? translateWebSource(locale, "Update all")
+                : t("update.updateMachinesButton", {
+                    count: targets.length,
+                    noun: targets.length === 1 ? "machine" : "machines",
+                  })
           }
         />
       ) : undefined,
-    dismissLabel: "Dismiss update notice",
+    dismissLabel: translateWebSource(locale, "Dismiss update notice"),
     ...(running
       ? {}
       : {

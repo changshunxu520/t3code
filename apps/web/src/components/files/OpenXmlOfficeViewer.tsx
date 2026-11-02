@@ -1,3 +1,4 @@
+import { useI18n } from "~/i18n/WebI18nContext";
 import { useStableCallback } from "~/hooks/useStableCallback";
 import type { OfficePreviewKind } from "@t3tools/shared/filePreview";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -39,18 +40,21 @@ export default function OfficeViewer(props: {
   readonly kind: Extract<OfficePreviewKind, "docx" | "xlsx" | "pptx">;
   readonly sizeBytes?: number;
 }) {
+  const { t, tx } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [prepared, setPrepared] = useState<Extract<OfficeWorkerResult, { bytes: ArrayBuffer }>>();
   const [details, setDetails] = useState("");
   const fail = useStableCallback((cause: unknown) =>
-    setError(cause instanceof Error ? cause.message : "Could not render this Office document."),
+    setError(
+      cause instanceof Error ? tx(cause.message) : tx("Could not render this Office document."),
+    ),
   );
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- Own the Open XML fetch, preparation worker, and timeout for this source and release them on cleanup.
   useEffect(() => {
     if ((props.sizeBytes ?? 0) > OFFICE_PREVIEW_MAX_BYTES) {
       // Metadata bounds are checked before fetching or starting an engine.
       // oxlint-disable-next-line react/set-state-in-effect
-      setError("Preview limited to files under 50 MB.");
+      setError(tx("Preview limited to files under 50 MB."));
       return;
     }
     const controller = new AbortController();
@@ -90,35 +94,42 @@ export default function OfficeViewer(props: {
       worker.terminate();
       clearTimeout(timer);
     };
-  }, [props.src, props.kind, props.sizeBytes, fail]);
+  }, [props.src, props.kind, props.sizeBytes, fail, tx]);
   if (error)
     return (
       <div
         role="alert"
         className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-6 text-center"
       >
-        <p className="text-sm font-medium">No preview for this file</p>
+        <p className="text-sm font-medium">{tx("No preview for this file")}</p>
         <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-          {error} Save it or open it in another app.
+          {tx(error)} {tx("Save it or open it in another app.")}
         </p>
       </div>
     );
   if (!prepared) return <FileSurfaceLoading />;
   const Viewer =
     props.kind === "docx" ? WordDocument : props.kind === "xlsx" ? Spreadsheet : Presentation;
+  const pagesMatch = /^(\d+\+?) pages$/.exec(details);
+  const sheetsMatch = /^(\d+) sheets$/.exec(details);
+  const localizedDetails = pagesMatch
+    ? t("files.openxml.pageCount", { count: pagesMatch[1]! })
+    : sheetsMatch
+      ? t("files.openxml.sheetCount", { count: sheetsMatch[1]! })
+      : tx(details);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {details ? (
         <div className={FILE_SURFACE_SUBHEADER_CLASS}>
           <span className="text-xs text-muted-foreground" aria-live="polite">
-            {details}
-            {props.kind !== "xlsx" ? " · Fit to width" : ""}
+            {localizedDetails}
+            {props.kind !== "xlsx" ? tx(" · Fit to width") : ""}
           </span>
         </div>
       ) : null}
       {prepared.truncated ? (
         <FileSurfaceNotice>
-          Preview limited. Save it or open it in another app to read the full document.
+          {tx("Preview limited. Save it or open it in another app to read the full document.")}
         </FileSurfaceNotice>
       ) : null}
       <Suspense fallback={<FileSurfaceLoading />}>

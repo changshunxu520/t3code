@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Button } from "../../components/ui/Button";
 import {
   applyPullRequestDraftFilterChange,
@@ -79,6 +80,7 @@ function PullRequestListError(props: { readonly message: string }) {
         tintColorClassName="accent-icon-muted"
       />
       <Text
+        localize={false}
         selectable={expanded}
         numberOfLines={expanded ? undefined : 1}
         ellipsizeMode="tail"
@@ -355,12 +357,14 @@ export function PullRequestsScreen(
             <View className="items-center py-5">
               <AppActivityIndicator
                 colorClassName="accent-icon"
-                accessibilityLabel="Loading more pull requests"
+                accessibilityLabel={localizeMobileString("Loading more pull requests")}
               />
             </View>
           ) : result.loadMoreError ? (
             <View className="items-center gap-2 px-8 py-4">
-              <Text className="text-xs text-foreground-muted">{result.loadMoreError}</Text>
+              <Text localize={false} className="text-xs text-foreground-muted">
+                {result.loadMoreError}
+              </Text>
               <Button
                 label="Try again"
                 accessibilityLabel="Retry loading more pull requests"

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -269,8 +270,12 @@ function MicrophoneRow(props: {
     <View className="flex-row items-center bg-grouped-card">
       <View
         accessible
-        accessibilityLabel={`${title}, ${kind.label}, ${props.position} of ${props.count}`}
-        accessibilityActions={onForget ? [{ name: "forget", label: "Forget" }] : undefined}
+        accessibilityLabel={localizeMobileString(
+          `${title}, ${kind.label}, ${props.position} of ${props.count}`,
+        )}
+        accessibilityActions={
+          onForget ? [{ name: "forget", label: localizeMobileString("Forget") }] : undefined
+        }
         onAccessibilityAction={({ nativeEvent }) => {
           if (nativeEvent.actionName === "forget") onForget?.();
         }}
@@ -278,6 +283,7 @@ function MicrophoneRow(props: {
       >
         <ListRowLayout
           icon={kind.icon}
+          localizeLabel={!isMicrophoneDevice(entry)}
           label={title}
           description={isMicrophoneDevice(entry) ? kind.label : kind.rowDescription}
         />

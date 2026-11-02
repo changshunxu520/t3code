@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import * as Dialog from "../../components/ui/Dialog";
@@ -158,7 +159,7 @@ function BrowserPreviewScreen({
         <SheetHeader
           title={tab ? browserTabTitle(tab) : "Browser"}
           onClose={onClose}
-          accessibilityLabel="Close browser"
+          accessibilityLabel={localizeMobileString("Close browser")}
         />
       ) : null}
       {tab ? (
@@ -231,18 +232,18 @@ function BrowserAddressBar({
     <View className="flex-row items-center gap-1 px-2 pb-2">
       <ControlPill
         icon="chevron.left"
-        accessibilityLabel="Back"
+        accessibilityLabel={localizeMobileString("Back")}
         disabled={!ready || !tab.canGoBack}
         onPress={() => onCommand({ type: "history", delta: -1 })}
       />
       <ControlPill
         icon="chevron.right"
-        accessibilityLabel="Forward"
+        accessibilityLabel={localizeMobileString("Forward")}
         disabled={!ready || !tab.canGoForward}
         onPress={() => onCommand({ type: "history", delta: 1 })}
       />
       <TextInput
-        accessibilityLabel="Address"
+        accessibilityLabel={localizeMobileString("Address")}
         editable={ready}
         value={draft ?? url}
         onChangeText={setDraft}
@@ -260,7 +261,7 @@ function BrowserAddressBar({
       />
       <ControlPill
         icon="arrow.clockwise"
-        accessibilityLabel="Reload page"
+        accessibilityLabel={localizeMobileString("Reload page")}
         disabled={!ready}
         onPress={() => onCommand({ type: "reload" })}
       />

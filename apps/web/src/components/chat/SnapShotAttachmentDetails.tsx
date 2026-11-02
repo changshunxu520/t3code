@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type { SnapShotSource } from "@t3tools/contracts";
 import { ImageIcon, TextIcon } from "lucide-react";
 import { Suspense } from "react";
@@ -80,10 +82,14 @@ export function SnapShotContentsButton({
   className?: string;
   side?: "top" | "right" | "bottom" | "left";
 }) {
+  const { locale: newCopyLocale } = useI18n();
   const includesAccessibility = snapShotIncludesAccessibility(source);
   const ContentsIcon = includesAccessibility ? TextIcon : ImageIcon;
   const accessibilityDetails = snapShotAccessibilityDetails(source);
-  const tooltip = includesAccessibility ? "Accessibility data" : "No accessibility data";
+  const tooltip = translateWebSource(
+    newCopyLocale,
+    includesAccessibility ? "Accessibility data" : "No accessibility data",
+  );
 
   return (
     <Popover>
@@ -93,9 +99,10 @@ export function SnapShotContentsButton({
             <PopoverTrigger
               render={
                 <Button
-                  aria-label={
-                    includesAccessibility ? "View accessibility data" : "No accessibility data"
-                  }
+                  aria-label={translateWebSource(
+                    newCopyLocale,
+                    includesAccessibility ? "View accessibility data" : "No accessibility data",
+                  )}
                   className={className}
                   onClick={(event) => event.stopPropagation()}
                   size="icon-micro"
@@ -111,7 +118,7 @@ export function SnapShotContentsButton({
       </Tooltip>
       <PopoverPopup side={side} align="center" width="md">
         <div className="max-h-[min(28rem,70vh)] space-y-2 overflow-y-auto">
-          <PopoverTitle>Accessibility data</PopoverTitle>
+          <PopoverTitle>{translateWebSource(newCopyLocale, "Accessibility data")}</PopoverTitle>
           {accessibilityDetails ? (
             <SnapShotAccessibilityData
               details={accessibilityDetails}
@@ -119,12 +126,17 @@ export function SnapShotContentsButton({
             />
           ) : includesAccessibility ? (
             <div className="rounded-md border border-border/70 bg-muted/45 p-2.5 text-muted-foreground text-xs leading-4">
-              Structured accessibility elements were included, but they have no readable names or
-              values.
+              {translateWebSource(
+                newCopyLocale,
+                "Structured accessibility elements were included, but they have no readable names or values.",
+              )}
             </div>
           ) : (
             <div className="rounded-md border border-border/70 bg-muted/45 p-2.5 text-muted-foreground text-xs leading-4">
-              The app or capture backend did not provide verified accessibility data.
+              {translateWebSource(
+                newCopyLocale,
+                "The app or capture backend did not provide verified accessibility data.",
+              )}
             </div>
           )}
         </div>
@@ -140,6 +152,7 @@ export function SnapShotAttachmentDetails({
   source: SnapShotSource;
   className?: string;
 }) {
+  const { locale } = useI18n();
   return (
     <div
       className={cn(
@@ -160,7 +173,7 @@ export function SnapShotAttachmentDetails({
           <SnapShotContentsButton source={source} className="pointer-events-auto" />
         </div>
         <div className="truncate text-3xs leading-3.5 text-white/70">
-          {source.windowTitle || "Captured window"}
+          {source.windowTitle || translateWebSource(locale, "Captured window")}
         </div>
       </div>
     </div>

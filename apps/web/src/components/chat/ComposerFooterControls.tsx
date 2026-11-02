@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type {
   ModelSelection,
   ProviderInstanceId,
@@ -43,6 +45,8 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
   onToggleInteractionMode: () => void;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
+  const { locale: releaseLocale, t: translateRelease } = useI18n();
+  const tx = (source: string) => translateWebSource(releaseLocale, source);
   const size = props.size ?? "sm";
   const accessDisplay = props.accessDisplay ?? "label";
   const composerFloatingLayerProps = useComposerMenuProps();
@@ -54,8 +58,8 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
   const RuntimeModeIcon = runtimeModeOption.icon;
   const interactionModeTooltip =
     props.interactionMode === "plan"
-      ? "Plan mode. Click to return to normal build mode"
-      : "Default mode. Click to enter plan mode";
+      ? translateWebSource(releaseLocale, "Plan mode: click to return to normal build mode")
+      : translateWebSource(releaseLocale, "Default mode: click to enter plan mode");
 
   const interactionModeToggle = props.showInteractionModeToggle ? (
     <Tooltip>
@@ -89,7 +93,9 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
           data-composer-control-label
           className={size === "xs" ? "sr-only" : "sr-only sm:not-sr-only"}
         >
-          {props.interactionMode === "plan" ? "Plan" : "Build"}
+          {props.interactionMode === "plan"
+            ? translateRelease("composer.controls.plan")
+            : translateRelease("projectAction.icon.build")}
         </span>
       </TooltipTrigger>
       <TooltipPopup side="top">{interactionModeTooltip}</TooltipPopup>
@@ -97,7 +103,8 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
   ) : null;
 
   // The chip opens the same Permissions toggle used in the model picker and the overflow menu.
-  const permissionsTooltip = `Permissions: ${runtimeModeOption.label}. ${runtimeModeOption.description}`;
+  const permissionsLabel = `${tx("Permissions")}: ${tx(runtimeModeOption.label)}`;
+  const permissionsTooltip = `${permissionsLabel}. ${tx(runtimeModeOption.description)}`;
   const permissionsChip = (
     <Menu
       open={open}
@@ -117,7 +124,7 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
                   size={size}
                   // Mirrors the model trigger's trailing pe-1 so the gaps on both sides of the chip match.
                   className="ps-1.5"
-                  aria-label={`Permissions: ${runtimeModeOption.label}`}
+                  aria-label={permissionsLabel}
                 />
               }
             />
@@ -133,7 +140,7 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
             data-composer-control-label
             className={accessDisplay === "icon" ? "sr-only" : undefined}
           >
-            {runtimeModeOption.label}
+            {tx(runtimeModeOption.label)}
           </span>
         </TooltipTrigger>
         <TooltipPopup side="top">{permissionsTooltip}</TooltipPopup>
@@ -167,6 +174,8 @@ export function ComposerPermissionsSection(props: {
   runtimeModeOptions: ReadonlyArray<RuntimeModeOption>;
   onRuntimeModeChange: (mode: RuntimeMode) => void;
 }) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   // Hover or keyboard focus previews a mode's name and description before a pick.
   const [previewMode, setPreviewMode] = useState<RuntimeMode | null>(null);
   const shownMode = previewMode ?? props.runtimeMode;
@@ -176,9 +185,9 @@ export function ComposerPermissionsSection(props: {
   const descriptionId = useId();
   return (
     <div data-composer-permissions className="grid w-72 gap-1.5 px-2 py-1.5">
-      <div className="font-medium text-muted-foreground text-xs">Permissions</div>
+      <div className="font-medium text-muted-foreground text-xs">{tx("Permissions")}</div>
       <MenuPrimitive.RadioGroup
-        aria-label="Permissions"
+        aria-label={tx("Permissions")}
         value={props.runtimeMode}
         onValueChange={(value: RuntimeMode) => {
           if (value !== props.runtimeMode) props.onRuntimeModeChange(value);
@@ -205,8 +214,8 @@ export function ComposerPermissionsSection(props: {
               key={option.mode}
               value={option.mode}
               disabled={option.disabledReason !== undefined}
-              label={option.label}
-              aria-label={option.label}
+              label={tx(option.label)}
+              aria-label={tx(option.label)}
               aria-describedby={`${descriptionId}-${option.mode}`}
               closeOnClick
               onPointerEnter={() => setPreviewMode(option.mode)}
@@ -223,7 +232,7 @@ export function ComposerPermissionsSection(props: {
       {/* Static per-mode descriptions for screen readers; the preview below is visual only. */}
       {props.runtimeModeOptions.map((option) => (
         <span key={option.mode} id={`${descriptionId}-${option.mode}`} className="sr-only">
-          {option.disabledReason ?? option.description}
+          {tx(option.disabledReason ?? option.description)}
         </span>
       ))}
       <div className="grid gap-0.5" aria-hidden="true">
@@ -234,11 +243,11 @@ export function ComposerPermissionsSection(props: {
               : "text-muted-foreground text-sm"
           }
         >
-          {shown.label}
+          {tx(shown.label)}
         </span>
         {/* Two lines reserved so the menu does not shift while you preview modes. */}
         <span className="min-h-8 text-muted-foreground text-xs leading-4">
-          {shown.disabledReason ?? shown.description}
+          {tx(shown.disabledReason ?? shown.description)}
         </span>
       </div>
     </div>

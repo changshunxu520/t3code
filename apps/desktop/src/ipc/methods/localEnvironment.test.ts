@@ -10,6 +10,7 @@ import * as ElectronApp from "../../electron/ElectronApp.ts";
 import * as ElectronTheme from "../../electron/ElectronTheme.ts";
 import * as DesktopAppSettings from "../../settings/DesktopAppSettings.ts";
 import * as DesktopWindow from "../../window/DesktopWindow.ts";
+import * as DesktopTray from "../../window/DesktopTray.ts";
 import { getLocalEnvironmentEnabled, setLocalEnvironmentEnabled } from "./localEnvironment.ts";
 
 const layerUnusedLifecycleRuntime = Layer.mergeAll(
@@ -22,6 +23,10 @@ const layerUnusedLifecycleRuntime = Layer.mergeAll(
     ),
   ),
   Layer.mock(DesktopWindow.DesktopWindow, {}),
+  Layer.mock(DesktopTray.DesktopTray, {
+    markQuitRequested: () => undefined,
+    shouldHideOnClose: () => false,
+  }),
   Layer.mock(ElectronApp.ElectronApp, {}),
   Layer.mock(ElectronTheme.ElectronTheme, {}),
 );

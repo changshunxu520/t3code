@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Toolbar } from "../../components/ui/Toolbar";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { Chip } from "../../components/ui/Chip";
@@ -272,7 +273,12 @@ function PullRequestLabels(props: {
             {color ? (
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color }} />
             ) : null}
-            <Text textRole="caption" className="shrink text-foreground-muted" numberOfLines={1}>
+            <Text
+              localize={false}
+              textRole="caption"
+              className="shrink text-foreground-muted"
+              numberOfLines={1}
+            >
               {label.name}
             </Text>
           </View>
@@ -1174,14 +1180,21 @@ function PullRequestFileRouteContent({ route }: PullRequestFileRouteProps) {
               }}
             >
               <View pointerEvents="none">
-                <IconButton icon="ellipsis" accessibilityLabel="Diff options" />
+                <IconButton
+                  icon="ellipsis"
+                  accessibilityLabel={localizeMobileString("Diff options")}
+                />
               </View>
             </Menu>
           }
         />
       ) : null}
       <Toolbar placement="right">
-        <Toolbar.Menu title="Diff options" accessibilityLabel="Diff options" icon="ellipsis">
+        <Toolbar.Menu
+          title="Diff options"
+          accessibilityLabel={localizeMobileString("Diff options")}
+          icon="ellipsis"
+        >
           {permissions.verdicts.length ? (
             <Toolbar.MenuAction
               icon="text.bubble"

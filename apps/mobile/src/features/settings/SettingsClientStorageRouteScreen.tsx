@@ -170,6 +170,7 @@ function CacheEnvironmentRow(props: {
     <View className={props.first ? undefined : "border-t border-border"}>
       <SettingsActionRow
         icon={ENVIRONMENT_MACHINE_SYMBOLS[props.machine]}
+        localizeLabel={false}
         label={props.environmentLabel}
         description={`Clear ${formatBytes(props.environment.payloadBytes)} of cached data`}
         tone="danger"

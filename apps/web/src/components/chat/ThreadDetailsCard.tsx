@@ -17,6 +17,8 @@ import {
   resolveThreadDetailsCardDensity,
 } from "./threadDetailsCardLayout";
 import { observeResize } from "../../lib/observeResize";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { requestWorkspaceFocus } from "../../lib/workspaceFocus";
 
 export function ThreadDetailsCard({
@@ -35,7 +37,12 @@ export function ThreadDetailsCard({
   onContextMenu?: MouseEventHandler<HTMLDivElement>;
   children: (density: "full" | "compact" | "essential") => ReactNode;
 }) {
-  const detailsArea = workspaceAreaProps("details", 3, "Thread details");
+  const { locale } = useI18n();
+  const detailsArea = workspaceAreaProps(
+    "details",
+    3,
+    translateWebSource(locale, "Thread details"),
+  );
   const canvas = useChatCanvas();
   const preferredPlacement = canvas?.preferredDetailsCard ?? null;
   const placement = canvas?.detailsCardPlacement ?? null;

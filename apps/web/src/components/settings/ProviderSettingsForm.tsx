@@ -15,6 +15,8 @@ import {
 import { PlusIcon, XIcon } from "lucide-react";
 
 import { cn } from "../../lib/utils";
+import { useI18n, type WebTranslate } from "../../i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "../../i18n/messages";
 import { Button } from "../ui/button";
 import { DraftInput } from "../ui/draft-input";
 import { Input } from "../ui/input";
@@ -27,6 +29,7 @@ import type { ProviderClientDefinition } from "@t3tools/provider-core/client";
 
 export type SettingsFormDefinition = Pick<ProviderClientDefinition, "settingsSchema"> & {
   readonly driverKind?: ProviderClientDefinition["driverKind"];
+  readonly label?: string;
 };
 import { SettingsRow } from "./settingsLayout";
 
@@ -210,6 +213,7 @@ function ProviderCommandArguments({
 }: Pick<ProviderSettingsFormProps, "value" | "onChange"> & {
   readonly managedReason: string | undefined;
 }) {
+  const { locale, t } = useI18n();
   const args = configuredCommandArgs(value);
   const [storedDraft, setDraft] = useState(() => seedRowsDraft(args, toCommandArgumentRows));
   const draft = reconcileRowsDraft(storedDraft, args, commandArgumentsEqual, toCommandArgumentRows);
@@ -237,7 +241,7 @@ function ProviderCommandArguments({
           onClick={() => updateArguments([...rows, makeCommandArgumentDraftRow("")])}
         >
           <PlusIcon />
-          Add argument
+          {translateWebSource(locale, "Add argument")}
         </Button>
       }
     >
@@ -261,7 +265,7 @@ function ProviderCommandArguments({
                       ),
                     )
                   }
-                  aria-label={`Argument ${index + 1}`}
+                  aria-label={t("settings.providerForm.argumentIndex", { index: index + 1 })}
                   spellCheck={false}
                 />
                 <Button
@@ -271,7 +275,7 @@ function ProviderCommandArguments({
                   onClick={() =>
                     updateArguments(rows.filter((current) => current.id !== argument.id))
                   }
-                  aria-label={`Remove argument ${index + 1}`}
+                  aria-label={t("settings.providerForm.removeArgumentIndex", { index: index + 1 })}
                 >
                   <XIcon />
                 </Button>
@@ -326,6 +330,101 @@ export function nextProviderConfigWithFieldValue(
     base[field.key] = value;
   }
   return Object.keys(base).length > 0 ? base : undefined;
+}
+
+function localizeProviderSettingsField(
+  field: ProviderSettingsFieldModel,
+  definition: SettingsFormDefinition,
+  t: WebTranslate,
+  locale: WebLocale,
+): ProviderSettingsFieldModel {
+  if (field.key === "binaryPath" && definition.label) {
+    return {
+      ...field,
+      label: t("providers.config.binaryPath"),
+      description: t("providers.config.binaryPathDescription", { provider: definition.label }),
+    };
+  }
+  if (field.key === "homePath" && definition.driverKind === "codex") {
+    return {
+      ...field,
+      label: t("providers.config.codexHome"),
+      description: t("providers.config.codexHomeDescription"),
+    };
+  }
+  if (field.key === "homePath" && definition.driverKind === "claudeAgent") {
+    return {
+      ...field,
+      label: t("providers.config.claudeHome"),
+      description: t("providers.config.claudeHomeDescription"),
+    };
+  }
+  if (field.key === "autoCompactWindow" && definition.driverKind === "claudeAgent") {
+    return {
+      ...field,
+      label: t("providers.config.autoCompactWindow"),
+      description: t("providers.config.autoCompactWindowDescription"),
+      placeholder: t("providers.config.autoCompactWindowPlaceholder"),
+    };
+  }
+  if (field.key === "shadowHomePath") {
+    return {
+      ...field,
+      label: t("providers.config.shadowHome"),
+      description: t("providers.config.shadowHomeDescription"),
+    };
+  }
+  if (field.key === "launchArgs") {
+    return {
+      ...field,
+      label: t("providers.config.launchArgs"),
+      description: t(
+        definition.driverKind === "codex"
+          ? "providers.config.codexLaunchArgsDescription"
+          : "providers.config.launchArgsDescription",
+      ),
+    };
+  }
+  if (field.key === "apiEndpoint") {
+    return {
+      ...field,
+      label: t("providers.config.apiEndpoint"),
+      description: t("providers.config.apiEndpointDescription"),
+    };
+  }
+  if (field.key === "serverUrl") {
+    return {
+      ...field,
+      label: t("providers.config.serverUrl"),
+      description: t("providers.config.serverUrlDescription"),
+    };
+  }
+  if (field.key === "serverPassword") {
+    return {
+      ...field,
+      label: t("providers.config.serverPassword"),
+      description: t("providers.config.serverPasswordDescription"),
+      placeholder: t("providers.config.optional"),
+    };
+  }
+  return {
+    ...field,
+    label: translateWebSource(locale, field.label),
+    ...(field.description !== undefined
+      ? { description: translateWebSource(locale, field.description) }
+      : {}),
+    ...(field.placeholder !== undefined
+      ? { placeholder: translateWebSource(locale, field.placeholder) }
+      : {}),
+    ...(field.options !== undefined
+      ? {
+          options: field.options.map((option) => ({
+            ...option,
+            label: translateWebSource(locale, option.label),
+          })),
+        }
+      : {}),
+  };
 }
 
 interface ProviderSettingsFormProps {
@@ -463,6 +562,7 @@ function ProviderSettingsFieldRow({
   managedReason,
   environmentId,
 }: ProviderSettingsFieldRowProps) {
+  const { t } = useI18n();
   const inputId = `${idPrefix}-${field.key}`;
   const descriptionClassName =
     variant === "dialog"
@@ -534,7 +634,7 @@ function ProviderSettingsFieldRow({
               size="icon-sm"
               variant="ghost-destructive"
               onClick={() => onChange(nextProviderConfigWithFieldValue(value, field, ""))}
-              aria-label={`Clear ${field.label}`}
+              aria-label={t("settings.providerForm.clearField", { label: field.label })}
             >
               <XIcon className="size-3.5" />
             </Button>
@@ -678,10 +778,14 @@ export function ProviderSettingsForm({
   managed,
   environmentId,
 }: ProviderSettingsFormProps) {
+  const { locale, t } = useI18n();
   const fields = deriveProviderSettingsFields(definition, value);
   const isLocalAcp =
     definition.driverKind === "acpRegistry" &&
     readProviderConfigString(value, "source") === "local";
+  const localizedFields = fields.map((field) =>
+    localizeProviderSettingsField(field, definition, t, locale),
+  );
 
   if (fields.length === 0) {
     return null;
@@ -689,7 +793,7 @@ export function ProviderSettingsForm({
 
   return (
     <>
-      {fields.map((field) => (
+      {localizedFields.map((field) => (
         <ProviderSettingsFieldRow
           key={field.key}
           field={field}

@@ -22,6 +22,7 @@ import { AppText as Text } from "../../components/ui/AppText";
 import { ControlPill } from "../../components/ui/ControlPill";
 import { Menu } from "../../components/ui/Menu";
 import { ScreenScrollView } from "../../components/ui/ScreenScrollView";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { environmentPresentations } from "../../state/presentation";
 import { useEnvironmentQuery } from "../../state/query";
 import { serverEnvironment } from "../../state/server";
@@ -186,10 +187,10 @@ function ProviderAccount({
   function field(name: string, label: string, secret: boolean) {
     return (
       <TextInput
-        accessibilityLabel={label}
+        accessibilityLabel={localizeMobileString(label)}
         className="rounded-lg border border-border-subtle px-3 py-2 text-base text-foreground"
         placeholderTextColorClassName="accent-foreground-muted"
-        placeholder={label}
+        placeholder={localizeMobileString(label)}
         secureTextEntry={secret}
         autoCapitalize="none"
         autoCorrect={false}

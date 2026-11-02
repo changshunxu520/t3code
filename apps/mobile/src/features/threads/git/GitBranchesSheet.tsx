@@ -228,7 +228,10 @@ export function GitBranchesSheet(_props: GitBranchesSheetProps) {
                   {Platform.OS !== "android" ? (
                     <View className="absolute inset-0 rounded-[18px] bg-card" />
                   ) : null}
-                  <Text className="text-foreground text-base android:font-t3-medium ios:font-t3-bold">
+                  <Text
+                    localize={false}
+                    className="text-foreground text-base android:font-t3-medium ios:font-t3-bold"
+                  >
                     {branch.name}
                   </Text>
                   <Text className="text-foreground-secondary text-xs font-medium">{subtitle}</Text>

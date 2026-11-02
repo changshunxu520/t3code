@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../i18n/mobileStrings";
 import {
   NavigationContext,
   NavigationRouteContext,
@@ -56,6 +57,19 @@ function normalizeScreenOptions(
 
   if (normalized.headerTintColor !== undefined) {
     normalized.headerTintColor = String(normalized.headerTintColor);
+  }
+
+  if (typeof normalized.title === "string") {
+    normalized.title = localizeMobileString(normalized.title);
+  }
+  if (typeof normalized.headerBackTitle === "string") {
+    normalized.headerBackTitle = localizeMobileString(normalized.headerBackTitle);
+  }
+  if (normalized.headerSearchBarOptions?.placeholder) {
+    normalized.headerSearchBarOptions = {
+      ...normalized.headerSearchBarOptions,
+      placeholder: localizeMobileString(normalized.headerSearchBarOptions.placeholder),
+    };
   }
 
   return normalized as NativeStackNavigationOptions;

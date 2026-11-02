@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Toolbar } from "../../components/ui/Toolbar";
 import * as Dialog from "../../components/ui/Dialog";
 import { useOpenPullRequest } from "../../native/useOpenPullRequest";
@@ -447,7 +448,7 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
       ) : null}
       {showActionControls ? (
         <Toolbar.Menu
-          accessibilityLabel="Open terminal"
+          accessibilityLabel={localizeMobileString("Open terminal")}
           icon="terminal"
           disabled={!props.canOpenTerminal}
           separateBackground
@@ -504,7 +505,7 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
       ) : null}
       {showActionControls && props.showDirectFileControl ? (
         <Toolbar.Button
-          accessibilityLabel="Open files"
+          accessibilityLabel={localizeMobileString("Open files")}
           disabled={!props.canOpenFiles}
           icon="folder"
           onPress={model.openFiles}

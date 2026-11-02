@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import {
   mergeDirectPreviewAnnotation,
   resolveBackgroundDraftWorkspaceOptions,
@@ -262,6 +264,8 @@ interface ComposerSendInput {
  * when it fails.
  */
 export function useComposerSend(input: ComposerSendInput) {
+  const { t, locale: uiLocale } = useI18n();
+
   const {
     environmentId,
     routeThreadKey,
@@ -435,8 +439,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "info",
-          title: "Annotation attached to draft",
-          description: "Sending is unavailable right now. Finish the current action, then send.",
+          title: t("chat.annotationAttached"),
+          description: t("chat.annotationSendUnavailable"),
         }),
       );
     };
@@ -464,6 +468,7 @@ export function useComposerSend(input: ComposerSendInput) {
           candidateEnvironmentIds: logicalProjectEnvironments.map(
             (candidate) => candidate.environmentId,
           ),
+          locale: uiLocale,
         }),
       });
       return;
@@ -475,8 +480,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add({
         ...stackedThreadToast({
           type: "warning",
-          title: "Not connected: message not sent",
-          description: "Reconnecting to the environment. Try again once it is connected.",
+          title: t("chat.messageNotSentDisconnected"),
+          description: t("chat.reconnectingDescription"),
         }),
         id: `chat-send-environment-unavailable:${toastSlot}`,
       });
@@ -570,9 +575,11 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Choose models and a base branch",
-          description:
+          title: translateWebSource(uiLocale, "Choose models and a base branch"),
+          description: translateWebSource(
+            uiLocale,
             "Multiple models need a new thread in a Git project. Each gets its own worktree.",
+          ),
         }),
       );
       return;
@@ -675,8 +682,8 @@ export function useComposerSend(input: ComposerSendInput) {
         toastManager.add(
           stackedThreadToast({
             type: "warning",
-            title: "Start a Codex thread first",
-            description: "Send a message before you submit feedback.",
+            title: t("feedback.startThreadTitle"),
+            description: t("feedback.startThreadDescription"),
           }),
         );
         return;
@@ -835,8 +842,8 @@ export function useComposerSend(input: ComposerSendInput) {
       toastManager.add(
         stackedThreadToast({
           type: "warning",
-          title: "Choose a project first",
-          description: "This draft no longer points to an available project.",
+          title: t("chat.chooseProjectFirst"),
+          description: t("chat.draftProjectUnavailable"),
         }),
       );
       return;
@@ -1021,7 +1028,7 @@ export function useComposerSend(input: ComposerSendInput) {
       setThreadError(
         threadIdForSend,
         attachmentCapabilitiesBeforeDispatch.fileBlockReason ??
-          "This connection cannot change threads.",
+          translateWebSource(uiLocale, "This connection cannot change threads."),
       );
       setDockedDraftHeroThreadKey((currentThreadKey) =>
         currentThreadKey === activeThreadKey ? null : currentThreadKey,
@@ -1385,7 +1392,7 @@ export function useComposerSend(input: ComposerSendInput) {
           toastManager.add(
             stackedThreadToast({
               type: "warning",
-              title: "Could not open a fresh composer",
+              title: translateWebSource(uiLocale, "Could not open a fresh composer"),
               description: error instanceof Error ? error.message : undefined,
             }),
           );
@@ -1415,10 +1422,10 @@ export function useComposerSend(input: ComposerSendInput) {
             toastManager.add(
               stackedThreadToast({
                 type: "success",
-                title: "Started in background",
+                title: t("backgroundThread.started"),
                 timeout: 5_000,
                 actionProps: {
-                  children: "Open",
+                  children: t("pullRequestThread.state.open"),
                   onClick: () => {
                     void navigate({
                       to: "/$environmentId/$threadId",
@@ -1478,7 +1485,9 @@ export function useComposerSend(input: ComposerSendInput) {
         const error = squashAtomCommandFailure(failure);
         setThreadError(
           threadIdForSend,
-          error instanceof Error ? error.message : "Failed to send message.",
+          error instanceof Error
+            ? error.message
+            : translateWebSource(uiLocale, "Failed to send message."),
         );
         if (
           draftId &&
@@ -1489,11 +1498,14 @@ export function useComposerSend(input: ComposerSendInput) {
               type: "error",
               title:
                 submissionIntent === "background"
-                  ? "Background task failed"
+                  ? translateWebSource(uiLocale, "Background task failed")
                   : "Could not start thread",
-              description: error instanceof Error ? error.message : "Failed to send message.",
+              description:
+                error instanceof Error
+                  ? error.message
+                  : translateWebSource(uiLocale, "Failed to send message."),
               actionProps: {
-                children: "Open draft",
+                children: translateWebSource(uiLocale, "Open draft"),
                 onClick: () => {
                   void navigate({ to: "/draft/$draftId", params: { draftId } });
                 },

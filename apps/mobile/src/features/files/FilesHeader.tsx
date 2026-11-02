@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useRef, useState, type ReactNode } from "react";
 import { Keyboard, type TextInputInstance, View } from "react-native";
 
@@ -66,7 +67,7 @@ export function FilesHeader(props: {
             >
               {(open) => (
                 <AndroidHeaderIconButton
-                  accessibilityLabel="File options"
+                  accessibilityLabel={localizeMobileString("File options")}
                   icon="ellipsis"
                   onPress={open}
                 />
@@ -79,13 +80,13 @@ export function FilesHeader(props: {
         <View className="absolute inset-0 bg-header px-2" style={{ paddingTop, paddingBottom }}>
           <View className="flex-1 flex-row items-center gap-1">
             <AndroidHeaderIconButton
-              accessibilityLabel="Close file search"
+              accessibilityLabel={localizeMobileString("Close file search")}
               icon="arrow.left"
               onPress={closeSearch}
             />
             <SearchField
               inputRef={searchRef}
-              accessibilityLabel="Search files"
+              accessibilityLabel={localizeMobileString("Search files")}
               clearAccessibilityLabel="Clear file search"
               placeholder="Search files"
               value={props.searchQuery}

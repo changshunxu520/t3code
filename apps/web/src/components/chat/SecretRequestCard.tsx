@@ -16,6 +16,8 @@ import { CheckIcon, LockIcon, MinusIcon, ShieldCheckIcon } from "lucide-react";
 import { useId, useRef, useState, type FormEvent } from "react";
 
 import { serverEnvironment } from "../../state/server";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -26,6 +28,7 @@ export function SecretRequestCard(props: {
   readonly item: SecretRequestItem;
   readonly visibility: OrchestrationV2ProjectedTurnItem["visibility"];
 }) {
+  const { locale } = useI18n();
   const { item } = props;
   const display = secretRequestDisplay(item, props.visibility);
   if (display.kind === "answered" || display.kind === "pending-elsewhere") {
@@ -41,7 +44,7 @@ export function SecretRequestCard(props: {
         icon={<Icon className="size-3.5 text-icon-muted" aria-hidden />}
         label={
           <>
-            {item.label} · {display.label}
+            {item.label} · {translateWebSource(locale, display.label)}
           </>
         }
       />
@@ -54,6 +57,7 @@ function PendingSecretRequestForm(props: {
   readonly environmentId: EnvironmentId;
   readonly item: SecretRequestItem;
 }) {
+  const { locale } = useI18n();
   const { item } = props;
   const inputId = useId();
   const errorId = useId();
@@ -143,12 +147,12 @@ function PendingSecretRequestForm(props: {
           />
         </div>
         <Button type="submit" disabled={submitting || secret.trim().length === 0}>
-          Save securely
+          {translateWebSource(locale, "Save securely")}
         </Button>
       </div>
       {error !== null ? (
         <p id={errorId} role="alert" className="text-xs text-destructive">
-          {error}
+          {translateWebSource(locale, error)}
         </p>
       ) : null}
       <div className="flex min-w-0 items-center justify-between gap-2">
@@ -157,7 +161,7 @@ function PendingSecretRequestForm(props: {
           className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
         >
           <ShieldCheckIcon className="size-3.5 shrink-0" aria-hidden />
-          {secretRequestPrivacyNote(item)}
+          {translateWebSource(locale, secretRequestPrivacyNote(item))}
         </p>
         <Button
           type="button"
@@ -166,7 +170,7 @@ function PendingSecretRequestForm(props: {
           disabled={submitting}
           onClick={() => void send({ type: "decline" })}
         >
-          Decline
+          {translateWebSource(locale, "Decline")}
         </Button>
       </div>
     </form>

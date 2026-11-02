@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { MOBILE_MOTION, MOBILE_SHAPE } from "../../lib/designTokens";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { AccessibilityInfo, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
@@ -96,7 +97,11 @@ function ToastContent(props: ToastProps & { readonly glassReady?: boolean }) {
         </View>
         {inlineAction && action ? <View className="self-center">{action}</View> : null}
         {props.onDismiss && props.dismissMode !== "swipe" ? (
-          <IconButton accessibilityLabel="Dismiss message" icon="xmark" onPress={props.onDismiss} />
+          <IconButton
+            accessibilityLabel={localizeMobileString("Dismiss message")}
+            icon="xmark"
+            onPress={props.onDismiss}
+          />
         ) : null}
       </View>
       {action && !inlineAction ? <View className="mt-2 self-end">{action}</View> : null}

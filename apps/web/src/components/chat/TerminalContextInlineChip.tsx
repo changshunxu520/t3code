@@ -1,5 +1,7 @@
 import { TerminalIcon } from "lucide-react";
 
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type { ContextPresentationCapability } from "../contextPresentationRegistry";
 import { ContextChipPopover, ContextChipShell } from "../contextChipParts";
 
@@ -14,6 +16,7 @@ interface TerminalContextInlineChipProps {
 }
 
 export function TerminalContextInlineChip(props: TerminalContextInlineChipProps) {
+  const { locale, t } = useI18n();
   const { label, terminalLabel, lineStart, lineEnd, text, detailsMode, expired = false } = props;
 
   if (!expired && text.length > 0 && detailsMode === "popover") {
@@ -22,7 +25,7 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
         kind="terminal"
         icon={<TerminalIcon />}
         label={label}
-        accessibleLabel={`Terminal excerpt, ${label}`}
+        accessibleLabel={t("terminal.excerptAria", { label })}
       >
         <div className="overflow-hidden rounded-md border border-border/70 bg-background/80">
           <div className="flex items-center gap-2 border-b border-border/70 px-3 py-2">
@@ -31,12 +34,14 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
               {terminalLabel}
             </span>
             <span className="ml-auto shrink-0 text-secondary-label text-xs">
-              {lineStart === lineEnd ? `Line ${lineStart}` : `Lines ${lineStart}–${lineEnd}`}
+              {lineStart === lineEnd
+                ? t("terminal.lineSingle", { line: lineStart })
+                : t("terminal.lineRange", { start: lineStart, end: lineEnd })}
             </span>
           </div>
           <pre
             className="max-h-80 overflow-auto whitespace-pre bg-muted p-3 font-mono text-foreground text-xs leading-relaxed outline-none [tab-size:4] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-            aria-label="Captured terminal output"
+            aria-label={translateWebSource(locale, "Captured terminal output")}
             tabIndex={0}
           >
             {text}
@@ -52,11 +57,13 @@ export function TerminalContextInlineChip(props: TerminalContextInlineChipProps)
       {...(expired ? { state: "invalid" as const } : {})}
       icon={<TerminalIcon />}
       label={label}
-      aria-label={`Terminal excerpt, ${label}${expired ? ", expired" : ""}`}
+      aria-label={
+        expired ? t("terminal.excerptExpiredAria", { label }) : t("terminal.excerptAria", { label })
+      }
       data-terminal-context-expired={expired ? "true" : undefined}
       tooltip={
         expired
-          ? `Terminal context expired. Remove and re-add ${label} to include it in your message.`
+          ? t("terminal.contextExpiredTooltip", { label })
           : detailsMode === "none"
             ? undefined
             : text

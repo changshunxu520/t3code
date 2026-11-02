@@ -71,6 +71,8 @@ import {
   unplacedGuestMessages,
 } from "./guestStream.logic";
 import { guestTurnItemSource } from "./guestTurnItemSource";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
 
 interface GuestEntry {
   /** Unspent invite from the URL hash, if this load came from a link. */
@@ -141,8 +143,9 @@ const decodeHistoryPage = Schema.decodeUnknownOption(
 async function fetchGuestHistoryPage(
   shareId: string,
   cursor: string,
+  locale: WebLocale,
 ): Promise<OrchestrationV2ThreadHistoryPage | string> {
-  const failed = "Could not load earlier turns. Try again.";
+  const failed = translateWebSource(locale, "Could not load earlier turns. Try again.");
   try {
     const response = await fetch(
       `${GUEST_HISTORY_ROUTE}?${GUEST_SHARE_PARAM}=${encodeURIComponent(shareId)}&cursor=${encodeURIComponent(cursor)}`,
@@ -156,7 +159,7 @@ async function fetchGuestHistoryPage(
     }
     return Option.getOrElse(decodeHistoryPage(json), () => failed);
   } catch {
-    return "Could not reach the server.";
+    return translateWebSource(locale, "Could not reach the server.");
   }
 }
 
@@ -164,6 +167,7 @@ async function fetchGuestHistoryPage(
 async function postGuest(
   path: "redeem" | `messages?${string}`,
   body: typeof GuestRedeemRequest.Encoded | FormData,
+  locale: WebLocale,
 ): Promise<string | null> {
   try {
     const response = await fetch(
@@ -179,11 +183,11 @@ async function postGuest(
     if (response.ok) return null;
     const json: unknown = await response.json().catch(() => null);
     return Option.match(decodeErrorBody(json), {
-      onNone: () => "Something went wrong. Try again.",
+      onNone: () => translateWebSource(locale, "Something went wrong. Try again."),
       onSome: ({ message }) => message,
     });
   } catch {
-    return "Could not reach the server.";
+    return translateWebSource(locale, "Could not reach the server.");
   }
 }
 
@@ -259,6 +263,7 @@ export function GuestPage() {
 }
 
 function GuestSession({ shareId }: { readonly shareId: string }) {
+  const { locale } = useI18n();
   const [stream, dispatch] = useReducer(applyGuestStreamEvent, null, () => ({
     ...initialGuestStreamState,
     awaitingRowIds: readAwaitingRowIds(),
@@ -281,7 +286,7 @@ function GuestSession({ shareId }: { readonly shareId: string }) {
   const loadEarlier = async () => {
     if (historyCursor === null || loadingHistory) return;
     setHistoryLoad({ cursor: historyCursor, error: null });
-    const result = await fetchGuestHistoryPage(shareId, historyCursor);
+    const result = await fetchGuestHistoryPage(shareId, historyCursor, locale);
     if (typeof result === "string") setHistoryLoad({ cursor: historyCursor, error: result });
     else dispatch({ type: "history-page", cursor: historyCursor, page: result });
   };
@@ -341,10 +346,13 @@ function GuestSession({ shareId }: { readonly shareId: string }) {
 }
 
 function Notice({ title, detail }: { readonly title: string; readonly detail?: string }) {
+  const { locale } = useI18n();
   return (
     <div className="m-auto flex max-w-sm flex-col gap-1 p-6 text-center">
-      <p className="text-sm font-medium">{title}</p>
-      {detail ? <p className="text-xs text-muted-foreground">{detail}</p> : null}
+      <p className="text-sm font-medium">{translateWebSource(locale, title)}</p>
+      {detail ? (
+        <p className="text-xs text-muted-foreground">{translateWebSource(locale, detail)}</p>
+      ) : null}
     </div>
   );
 }
@@ -356,6 +364,8 @@ function NameForm({
   readonly credential: string;
   readonly onJoined: () => void;
 }) {
+  const { locale } = useI18n();
+  const tr = (text: string) => translateWebSource(locale, text);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -364,16 +374,16 @@ function NameForm({
     const trimmed = name.trim();
     if (trimmed === "" || submitting) return;
     setSubmitting(true);
-    const failure = await postGuest("redeem", { credential, name: trimmed });
+    const failure = await postGuest("redeem", { credential, name: trimmed }, locale);
     setSubmitting(false);
     if (failure === null) onJoined();
     else setError(failure);
   };
   return (
     <form className="m-auto flex w-full max-w-xs flex-col gap-3 p-6" onSubmit={submit}>
-      <h1 className="text-base font-medium">Join a shared thread</h1>
+      <h1 className="text-base font-medium">{tr("Join a shared thread")}</h1>
       <label className="flex flex-col gap-1.5 text-sm" htmlFor="guest-name">
-        Your name
+        {tr("Your name")}
         <Input
           id="guest-name"
           autoFocus
@@ -389,10 +399,10 @@ function NameForm({
         </p>
       ) : null}
       <Button type="submit" disabled={submitting || name.trim() === ""}>
-        Join
+        {tr("Join")}
       </Button>
       <p className="text-xs text-muted-foreground">
-        The owner sees your name and approves each message before the agent gets it.
+        {tr("The owner sees your name and approves each message before the agent gets it.")}
       </p>
     </form>
   );
@@ -593,12 +603,13 @@ function UnplacedGuestMessage({
   readonly shareId: GuestShareView["shareId"];
   readonly message: ThreadGuestMessage;
 }) {
+  const { locale } = useI18n();
   // A dismissed message's files are deleted, so only their names remain.
   const served = message.status !== "dismissed";
   const url = (attachment: { readonly id: string }) => guestAttachmentUrl(shareId, attachment.id);
   return (
     <div className="flex flex-col items-end gap-1">
-      <GuestMessageName name="You" />
+      <GuestMessageName name={translateWebSource(locale, "You")} />
       <div
         className={cn(
           BUBBLE,
@@ -614,19 +625,22 @@ function UnplacedGuestMessage({
         />
         {message.text ? <span>{message.text}</span> : null}
       </div>
-      <p className="me-1 text-2xs text-muted-foreground">{STATUS_LABEL[message.status]}</p>
+      <p className="me-1 text-2xs text-muted-foreground">
+        {translateWebSource(locale, STATUS_LABEL[message.status])}
+      </p>
     </div>
   );
 }
 
 /** The thread's model, labeled as the owner's composer labels it, with no way to change it. */
 function GuestModelLabel({ model }: { readonly model: GuestThreadModel }) {
+  const { t } = useI18n();
   const label = getTriggerDisplayModelName({ slug: model.name, ...model }, model.driver);
   const fullLabel = getDisplayModelName({ slug: model.name, ...model });
   return (
     <ComposerControl
       render={<span />}
-      aria-label={`Model: ${fullLabel}`}
+      aria-label={t("guest.modelLabel", { label: fullLabel })}
       className="pointer-events-none min-w-0 shrink"
     >
       {model.driver === null ? null : (
@@ -672,6 +686,8 @@ function GuestComposer({
   readonly shareId: GuestShareView["shareId"];
   readonly model: GuestThreadModel;
 }) {
+  const { locale, t } = useI18n();
+  const tr = (value: string) => translateWebSource(locale, value);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<ReadonlyArray<StagedFile>>([]);
   const [sending, setSending] = useState(false);
@@ -701,6 +717,7 @@ function GuestComposer({
     const failure = await postGuest(
       `messages?${GUEST_SHARE_PARAM}=${encodeURIComponent(shareId)}`,
       form,
+      locale,
     );
     setSending(false);
     setError(failure);
@@ -744,7 +761,7 @@ function GuestComposer({
       }}
     >
       {files.length > 0 ? (
-        <ul className="flex flex-wrap gap-2" aria-label="Attached files">
+        <ul className="flex flex-wrap gap-2" aria-label={tr("Attached files")}>
           {files.map((staged) => (
             <li
               key={staged.key}
@@ -766,7 +783,7 @@ function GuestComposer({
               <Button
                 size="icon-xs"
                 variant="ghost-muted"
-                aria-label={`Remove ${staged.file.name}`}
+                aria-label={t("guest.removeFile", { name: staged.file.name })}
                 onClick={() => {
                   setError(null);
                   setFiles((current) => current.filter((candidate) => candidate !== staged));
@@ -779,8 +796,8 @@ function GuestComposer({
         </ul>
       ) : null}
       <textarea
-        aria-label="Message"
-        placeholder="Message"
+        aria-label={tr("Message")}
+        placeholder={tr("Message")}
         rows={2}
         maxLength={GUEST_MESSAGE_MAX_LENGTH}
         value={text}
@@ -795,14 +812,17 @@ function GuestComposer({
           type="file"
           multiple
           hidden
-          aria-label="Files to attach"
+          aria-label={tr("Files to attach")}
           onChange={(event) => {
             addFiles(Array.from(event.target.files ?? []));
             // The same file can be picked again after it is removed.
             event.target.value = "";
           }}
         />
-        <ComposerControl aria-label="Attach files" onClick={() => fileInputRef.current?.click()}>
+        <ComposerControl
+          aria-label={tr("Attach files")}
+          onClick={() => fileInputRef.current?.click()}
+        >
           <ComposerControlIcon icon={PaperclipIcon} />
         </ComposerControl>
         <GuestModelLabel model={model} />
@@ -812,12 +832,12 @@ function GuestComposer({
           </p>
         ) : (
           <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
-            The owner approves each message
+            {tr("The owner approves each message")}
           </p>
         )}
         <button
           type="submit"
-          aria-label="Send"
+          aria-label={tr("Send")}
           disabled={sending || (text.trim() === "" && files.length === 0)}
           className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-message-action text-message-action-foreground shadow-xs hover:bg-message-action-hover focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-64"
         >

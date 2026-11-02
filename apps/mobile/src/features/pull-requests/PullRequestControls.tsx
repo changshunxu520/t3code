@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import Animated from "react-native-reanimated";
 import { PR_ROW_LAYOUT } from "./pullRequestAnimations";
@@ -187,7 +188,11 @@ export function PullRequestActionToolbar(props: {
                 )}
               </View>
             ) : null}
-            <IconButton icon="file.diff" accessibilityLabel="Changed files" onPress={openFiles} />
+            <IconButton
+              icon="file.diff"
+              accessibilityLabel={localizeMobileString("Changed files")}
+              onPress={openFiles}
+            />
           </View>
         </Toolbar>
       </View>
@@ -285,7 +290,7 @@ export function PullRequestActionToolbar(props: {
     <Toolbar.Button
       identifier="workspace-trailing-action"
       icon={{ type: "image", source: require("../../../assets/icons/file-diff.png") }}
-      accessibilityLabel="Changed files"
+      accessibilityLabel={localizeMobileString("Changed files")}
       onPress={openFiles}
       separateBackground
     />

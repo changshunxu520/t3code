@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SheetCloseButton } from "../../components/ui/SheetHeader";
 import { Button } from "../../components/ui/Button";
 import * as Dialog from "../../components/ui/Dialog";
@@ -326,19 +327,22 @@ export function DevicePreviewScreen({
         >
           {inputConnected ? (
             <Pressable
-              accessibilityLabel="Hide device controls"
+              accessibilityLabel={localizeMobileString("Hide device controls")}
               className="absolute inset-0 bg-black/30"
               onPress={() => setControlsVisible(false)}
             />
           ) : null}
           <View className="px-3" style={{ paddingTop: Math.max(insets.top, 12) }}>
             <GlassSurface className="flex-row items-center gap-1 p-1">
-              <SheetCloseButton accessibilityLabel="Close device preview" onClose={onClose} />
+              <SheetCloseButton
+                accessibilityLabel={localizeMobileString("Close device preview")}
+                onClose={onClose}
+              />
               <AppText numberOfLines={1} className="flex-1 text-center font-t3-medium text-base">
                 {preview?.name ?? "Devices"}
               </AppText>
               <ControlPill
-                accessibilityLabel="Home"
+                accessibilityLabel={localizeMobileString("Home")}
                 icon="house"
                 disabled={!inputConnected}
                 onPress={pressHome}
@@ -350,7 +354,7 @@ export function DevicePreviewScreen({
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Show device controls"
+          accessibilityLabel={localizeMobileString("Show device controls")}
           accessibilityHint="Shaking the phone also shows them"
           hitSlop={12}
           className="absolute h-11 w-16 items-center justify-center self-center"
@@ -379,7 +383,7 @@ function DeviceOptionsMenu({ items }: { readonly items: ReadonlyArray<AppBarMenu
       }}
     >
       <Pressable
-        accessibilityLabel="Device options"
+        accessibilityLabel={localizeMobileString("Device options")}
         accessibilityRole="button"
         className="size-11 items-center justify-center rounded-full bg-subtle"
       >

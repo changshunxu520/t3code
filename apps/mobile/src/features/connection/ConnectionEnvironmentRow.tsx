@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import * as Dialog from "../../components/ui/Dialog";
 import { ConnectionTraceId } from "./ConnectionTraceId";
 import { SymbolView } from "../../components/ui/AppSymbol";
@@ -115,6 +116,7 @@ export function ConnectionEnvironmentRow(props: {
               tintColorClassName="accent-foreground-muted"
             />
             <Text
+              localize={false}
               className="min-w-0 flex-shrink text-base font-t3-bold leading-snug text-foreground"
               numberOfLines={1}
             >
@@ -122,7 +124,7 @@ export function ConnectionEnvironmentRow(props: {
             </Text>
           </View>
           {!props.environment.isRelayManaged && props.environment.displayUrl.trim() ? (
-            <Text className="text-xs text-foreground-muted" numberOfLines={1}>
+            <Text localize={false} className="text-xs text-foreground-muted" numberOfLines={1}>
               {props.environment.displayUrl}
             </Text>
           ) : null}
@@ -250,14 +252,14 @@ export function ConnectionEnvironmentRow(props: {
                 </View>
               )}
               <IconButton
-                accessibilityLabel="Reconnect environment"
+                accessibilityLabel={localizeMobileString("Reconnect environment")}
                 icon="arrow.clockwise"
                 variant="tonal"
                 disabled={!enabled}
                 onPress={() => props.onReconnect(props.environment.environmentId)}
               />
               <IconButton
-                accessibilityLabel="Remove environment"
+                accessibilityLabel={localizeMobileString("Remove environment")}
                 icon="trash"
                 variant="danger"
                 onPress={() => props.onRemove(props.environment.environmentId)}

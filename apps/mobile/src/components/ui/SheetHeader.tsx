@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Pressable, View } from "react-native";
 
 import { NativeStackScreenOptions } from "../../native/StackHeader";
@@ -65,7 +66,7 @@ function NativeSheetHeader(props: SheetHeaderProps) {
               <View
                 className="size-11 items-center justify-center"
                 accessible
-                accessibilityLabel={confirmation.label}
+                accessibilityLabel={localizeMobileString(confirmation.label)}
                 accessibilityState={{ busy: true }}
               >
                 <AppActivityIndicator colorClassName="accent-prominent-action" />
@@ -77,7 +78,7 @@ function NativeSheetHeader(props: SheetHeaderProps) {
               variant="prominent"
               visibilityPriority="high"
               tintColor={colors["--color-prominent-action"]}
-              accessibilityLabel={confirmation.label}
+              accessibilityLabel={localizeMobileString(confirmation.label)}
               disabled={confirmation.disabled}
               onPress={confirmation.onPress}
             />
@@ -97,7 +98,7 @@ function InlineConfirmation({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={confirmation.label}
+      accessibilityLabel={localizeMobileString(confirmation.label)}
       accessibilityState={{
         disabled: Boolean(confirmDisabled),
         busy: Boolean(confirmation.loading),
@@ -151,6 +152,7 @@ function InlineSheetHeader(props: SheetHeaderProps) {
         </AppText>
         {props.subtitle ? (
           <AppText
+            localize={false}
             numberOfLines={1}
             ellipsizeMode="middle"
             className="text-xs text-foreground-muted"

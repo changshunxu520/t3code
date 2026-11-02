@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { View } from "react-native";
 
 import { Button } from "../../../components/ui/Button";
@@ -20,7 +21,7 @@ export function SettingsProjectOverridesSection(props: {
         {!props.pending && props.hasOverrides ? (
           <Button
             label="Use defaults"
-            accessibilityHint="Use environment defaults for this project"
+            accessibilityHint={localizeMobileString("Use environment defaults for this project")}
             tone="text"
             disabled={props.disabled}
             onPress={props.onClear}

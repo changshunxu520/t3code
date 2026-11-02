@@ -16,6 +16,7 @@ import { Linking, View } from "react-native";
 import { AppText as Text } from "../../components/ui/AppText";
 import { Button } from "../../components/ui/Button";
 import { environmentCatalog } from "../../connection/catalog";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { cn } from "../../lib/cn";
 import { copyTextWithHaptic } from "../../lib/copyTextWithHaptic";
 
@@ -63,7 +64,7 @@ export function ConnectionDiagnosisDetails(props: {
               hop.result === "failed" ? "text-danger-foreground" : "text-foreground-muted",
             )}
           >
-            {`${HOP_MARK[hop.result]}  ${hop.label}${HOP_NOTE[hop.result]}`}
+            {`${HOP_MARK[hop.result]}  ${localizeMobileString(hop.label)}${localizeMobileString(HOP_NOTE[hop.result])}`}
           </Text>
         ))}
       </View>
@@ -71,12 +72,14 @@ export function ConnectionDiagnosisDetails(props: {
         <Text className="text-sm font-t3-bold text-foreground">What to try</Text>
         {diagnosis.steps.map((step, index) => (
           <Text key={step} className="text-sm text-foreground-muted">
-            {`${index + 1}. ${step}`}
+            {`${index + 1}. ${localizeMobileString(step)}`}
           </Text>
         ))}
       </View>
       <Text selectable className="font-mono text-xs text-foreground-muted">
-        {diagnosis.facts.map(([label, value]) => `${label}: ${value}`).join("\n")}
+        {diagnosis.facts
+          .map(([label, value]) => `${localizeMobileString(label)}: ${value}`)
+          .join("\n")}
       </Text>
       <Button
         label="Copy diagnostics"

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { pipe } from "effect/Function";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -53,7 +54,7 @@ const ACCESS_CHOICES: ReadonlyArray<{
   ...RUNTIME_MODE_CHOICES.map((choice) => ({ ...choice, access: choice.mode })),
 ];
 const accessLabel = (access: AuthMcpClientAccess) =>
-  ACCESS_CHOICES.find((choice) => choice.access === access)?.label ?? access;
+  localizeMobileString(ACCESS_CHOICES.find((choice) => choice.access === access)?.label ?? access);
 
 const LINK_SYMBOL: AppSymbolName = { ios: "link", android: "desktop_windows" };
 
@@ -138,10 +139,16 @@ function PendingLinkRequest(props: {
             : `Link ${target} to this environment`}
         </Text>
         {item.reason.trim() ? (
-          <Text className="font-sans text-sm leading-5 text-foreground-muted">{item.reason}</Text>
+          <Text localize={false} className="font-sans text-sm leading-5 text-foreground-muted">
+            {item.reason}
+          </Text>
         ) : null}
         {item.label !== undefined && item.url !== undefined ? (
-          <Text className="font-sans text-xs text-foreground-muted" numberOfLines={1}>
+          <Text
+            localize={false}
+            className="font-sans text-xs text-foreground-muted"
+            numberOfLines={1}
+          >
             {item.url}
           </Text>
         ) : null}
@@ -339,7 +346,11 @@ function LinkRequestSheet(props: {
             machine's Connections, where it can be revoked.
           </Text>
           {!pickMachine && item.url !== undefined ? (
-            <Text className="font-sans text-xs text-foreground-muted" numberOfLines={1}>
+            <Text
+              localize={false}
+              className="font-sans text-xs text-foreground-muted"
+              numberOfLines={1}
+            >
               {item.url}
             </Text>
           ) : null}
@@ -495,7 +506,11 @@ function MachineRow(props: {
         tintColorClassName="accent-foreground-muted"
       />
       <View className="min-w-0 flex-1 gap-0.5">
-        <Text className="text-lg text-foreground android:text-base" numberOfLines={1}>
+        <Text
+          localize={false}
+          className="text-lg text-foreground android:text-base"
+          numberOfLines={1}
+        >
           {machine.label}
         </Text>
         {status === null ? null : <Text className="text-sm text-foreground-muted">{status}</Text>}

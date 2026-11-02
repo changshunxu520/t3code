@@ -26,6 +26,23 @@ import {
 } from "./toast.logic";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./tooltip";
 import { useThreadRouteTarget } from "~/hooks/useThreadRouteTarget";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
+
+function localizeToast<T extends { readonly title?: unknown; readonly description?: unknown }>(
+  toast: T,
+  locale: WebLocale,
+): T {
+  const title =
+    typeof toast.title === "string" ? translateWebSource(locale, toast.title) : toast.title;
+  const description =
+    typeof toast.description === "string"
+      ? translateWebSource(locale, toast.description)
+      : toast.description;
+  return title === toast.title && description === toast.description
+    ? toast
+    : { ...toast, title, description };
+}
 
 export type ThreadToastData = {
   threadRef?: ScopedThreadRef | null;
@@ -135,8 +152,9 @@ function handleToastDismissClick(
 }
 
 function CopyErrorButton({ text }: { text: string }) {
+  const { locale } = useI18n();
   const { copyToClipboard, isCopied } = useCopyToClipboard({ target: "error-message" });
-  const label = isCopied ? "Copied error" : "Copy error";
+  const label = translateWebSource(locale, isCopied ? "Copied error" : "Copy error");
 
   return (
     <Tooltip>
@@ -171,9 +189,10 @@ function ToastExpandableSection({
   children: ReactNode;
   labels: { expand?: string; collapse?: string };
 }) {
+  const { locale } = useI18n();
   const [open, setOpen] = useState(false);
-  const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const expandLabel = labels.expand ?? translateWebSource(locale, "Show details");
+  const collapseLabel = labels.collapse ?? translateWebSource(locale, "Hide details");
 
   return (
     <div className="min-w-0">
@@ -204,6 +223,7 @@ function ToastDescriptionAndExpandable({
   toastDescription: unknown;
   toastType: unknown;
 }) {
+  const { locale } = useI18n();
   const expandableContent = toastData?.expandableContent;
   const labels = toastData?.expandableLabels ?? {};
   const descriptionTrigger = toastData?.expandableDescriptionTrigger ?? false;
@@ -226,8 +246,8 @@ function ToastDescriptionAndExpandable({
     );
   }
 
-  const expandLabel = labels.expand ?? "Show details";
-  const collapseLabel = labels.collapse ?? "Hide details";
+  const expandLabel = labels.expand ?? translateWebSource(locale, "Show details");
+  const collapseLabel = labels.collapse ?? translateWebSource(locale, "Hide details");
 
   const toggle = () => setOpen((v) => !v);
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -551,6 +571,7 @@ function ToastProvider({ children, position = "top-right", ...props }: ToastProv
 }
 
 function Toasts({ position }: { position: ToastPosition }) {
+  const { locale } = useI18n();
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
   const isTop = position.startsWith("top");
@@ -588,7 +609,8 @@ function Toasts({ position }: { position: ToastPosition }) {
           } as CSSProperties
         }
       >
-        {visibleToastLayout.items.map(({ toast, visibleIndex, offsetY }) => {
+        {visibleToastLayout.items.map(({ toast: rawToast, visibleIndex, offsetY }) => {
+          const toast = localizeToast(rawToast, locale);
           const hideCollapsedContent = shouldHideCollapsedToastContent(
             visibleIndex,
             visibleToastLayout.items.length,
@@ -660,7 +682,7 @@ function Toasts({ position }: { position: ToastPosition }) {
               />
               <div className={toastCornerDismissClass}>
                 <button
-                  aria-label="Dismiss notification"
+                  aria-label={translateWebSource(locale, "Dismiss notification")}
                   className={toastCornerOrbClass}
                   data-slot="toast-close"
                   onClick={() =>
@@ -709,6 +731,7 @@ function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
 }
 
 function AnchoredToasts() {
+  const { locale } = useI18n();
   const { toasts } = Toast.useToastManager<ThreadToastData>();
   const activeThreadRef = useActiveThreadRefFromRoute();
 
@@ -717,7 +740,8 @@ function AnchoredToasts() {
       <Toast.Viewport className="outline-none" data-slot="toast-viewport-anchored">
         {toasts
           .filter((toast) => shouldRenderThreadScopedToast(toast.data, activeThreadRef))
-          .map((toast) => {
+          .map((rawToast) => {
+            const toast = localizeToast(rawToast, locale);
             const tooltipStyle = toast.data?.tooltipStyle ?? false;
             const positionerProps = toast.positionerProps;
             const bodyDescriptor = deriveToastBodyDescriptor(toast);
@@ -751,7 +775,7 @@ function AnchoredToasts() {
                     <>
                       <div className={toastCornerDismissClass}>
                         <button
-                          aria-label="Dismiss notification"
+                          aria-label={translateWebSource(locale, "Dismiss notification")}
                           className={toastCornerOrbClass}
                           data-slot="toast-close"
                           onClick={() =>

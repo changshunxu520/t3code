@@ -25,6 +25,8 @@ import { Atom } from "effect/reactivity";
 import { appAtomRegistry } from "~/rpc/atomRegistry";
 import { expandedImageKey } from "./ExpandedImagePreview";
 import { registerThreadOverlay } from "./threadOverlayRetention";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { mediaReferenceFileName } from "@t3tools/client-runtime/media-reference";
 import { mediaMimeType, mediaMimeTypeFromExtension } from "@t3tools/shared/mediaPreview";
 
@@ -83,6 +85,8 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
   preview,
   onClose,
 }: ExpandedImageDialogProps) {
+  const { locale } = useI18n();
+  const tr = (text: string) => translateWebSource(locale, text);
   const [imageOffset, setImageOffset] = useState(0);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const [accessibilityDetailsSrc, setAccessibilityDetailsSrc] = useState<string | null>(null);
@@ -104,7 +108,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
   const item = preview.images[index];
   const source: MediaActionSource = item?.actionsSource ?? {
     kind: item?.type === "video" ? "video" : "image",
-    name: item?.name ?? "Media",
+    name: item?.name ?? tr("Media"),
     src: item?.src ?? null,
   };
   const openFile = source.onOpenFile;
@@ -144,7 +148,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
   };
 
   if (!item) return null;
-  const mediaLabel = item.type === "video" ? "video" : "image";
+  const isVideo = item.type === "video";
   const openOriginalLink =
     item.originalUrl && resolveExternalWebLinkHost(item.originalUrl) !== null ? (
       <OpenMediaLink originalUrl={item.originalUrl} />
@@ -152,11 +156,13 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
   const accessibilityDetails = item.source ? snapShotAccessibilityDetails(item.source) : undefined;
   const showingAccessibilityDetails =
     Boolean(accessibilityDetails) && accessibilityDetailsSrc === item.src;
-  const contentsLabel = showingAccessibilityDetails
-    ? "Show screenshot"
-    : accessibilityDetails?.format === "json"
-      ? "Show accessibility JSON"
-      : "Show extracted text";
+  const contentsLabel = tr(
+    showingAccessibilityDetails
+      ? "Show screenshot"
+      : accessibilityDetails?.format === "json"
+        ? "Show accessibility JSON"
+        : "Show extracted text",
+  );
 
   return (
     <Dialog
@@ -184,7 +190,9 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
           if (event.target === event.currentTarget) close();
         }}
       >
-        <DialogTitle className="sr-only">Expanded {mediaLabel} preview</DialogTitle>
+        <DialogTitle className="sr-only">
+          {tr(isVideo ? "Expanded video preview" : "Expanded image preview")}
+        </DialogTitle>
         <Button
           type="button"
           ref={closeButtonRef}
@@ -192,7 +200,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
           variant="media-close"
           className="absolute right-0 top-0 z-20"
           onClick={close}
-          aria-label={`Close ${mediaLabel} preview`}
+          aria-label={tr(isVideo ? "Close video preview" : "Close image preview")}
         >
           <XIcon />
         </Button>
@@ -202,7 +210,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
             size="icon"
             variant="media-navigation"
             className="left-0 top-auto bottom-0 translate-y-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2"
-            aria-label="Previous media"
+            aria-label={tr("Previous media")}
             onClick={() => navigateImage(-1)}
           >
             <ChevronLeftIcon className="size-5" />
@@ -222,9 +230,11 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
             ) : item.src === null || failedImageSrc === item.src ? (
               <ExpandedMediaFailure>
                 <p>
-                  {openOriginalLink
-                    ? "This image could not be loaded."
-                    : "Image unavailable. The file may have been moved or deleted."}
+                  {tr(
+                    openOriginalLink
+                      ? "This image could not be loaded."
+                      : "Image unavailable. The file may have been moved or deleted.",
+                  )}
                 </p>
                 {openOriginalLink}
               </ExpandedMediaFailure>
@@ -278,7 +288,7 @@ export const ExpandedImageDialog = memo(function ExpandedImageDialog({
             size="icon"
             variant="media-navigation"
             className="right-0 top-auto bottom-0 translate-y-0 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2"
-            aria-label="Next media"
+            aria-label={tr("Next media")}
             onClick={() => navigateImage(1)}
           >
             <ChevronRightIcon className="size-5" />

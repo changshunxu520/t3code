@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { AppActivityIndicator } from "./AppActivityIndicator";
 import { Column, Row, Text as NativeText, RNHostView } from "@expo/ui/jetpack-compose";
 import { weight } from "@expo/ui/jetpack-compose/modifiers";
@@ -83,7 +84,7 @@ export function AndroidScreenHeader(props: {
             <View collapsable={false} className="flex-row items-center">
               {props.onBack ? (
                 <IconButton
-                  accessibilityLabel="Navigate up"
+                  accessibilityLabel={localizeMobileString("Navigate up")}
                   icon="arrow.left"
                   tintColorClassName="accent-header-foreground"
                   onPress={props.onBack}
@@ -106,7 +107,7 @@ export function AndroidScreenHeader(props: {
               overflow="ellipsis"
               style={titleTypography}
             >
-              {props.title}
+              {localizeMobileString(props.title)}
             </NativeText>
           ) : props.compact ? (
             <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 8 }}>
@@ -116,7 +117,7 @@ export function AndroidScreenHeader(props: {
                 overflow="ellipsis"
                 style={titleTypography}
               >
-                {props.title}
+                {localizeMobileString(props.title)}
               </NativeText>
               <NativeText
                 color={colors["--color-foreground-muted"]}
@@ -136,7 +137,7 @@ export function AndroidScreenHeader(props: {
                 overflow="ellipsis"
                 style={titleTypography}
               >
-                {props.title}
+                {localizeMobileString(props.title)}
               </NativeText>
               {props.subtitle ? (
                 <NativeText
@@ -158,7 +159,7 @@ export function AndroidScreenHeader(props: {
                 action.loading ? (
                   <View
                     key={action.accessibilityLabel}
-                    accessibilityLabel={action.accessibilityLabel}
+                    accessibilityLabel={localizeMobileString(action.accessibilityLabel)}
                     className="size-12 items-center justify-center"
                   >
                     <AppActivityIndicator colorClassName="accent-header-foreground" />
@@ -166,7 +167,7 @@ export function AndroidScreenHeader(props: {
                 ) : (
                   <AndroidHeaderIconButton
                     key={action.accessibilityLabel}
-                    accessibilityLabel={action.accessibilityLabel}
+                    accessibilityLabel={localizeMobileString(action.accessibilityLabel)}
                     disabled={action.disabled}
                     selected={action.selected}
                     icon={action.icon}
@@ -192,7 +193,7 @@ export function AndroidScreenHeader(props: {
                 >
                   {(open) => (
                     <IconButton
-                      accessibilityLabel="More actions"
+                      accessibilityLabel={localizeMobileString("More actions")}
                       icon="ellipsis"
                       tintColorClassName="accent-header-foreground"
                       onPress={open}

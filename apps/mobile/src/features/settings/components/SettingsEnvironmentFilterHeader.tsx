@@ -6,6 +6,7 @@ import { Menu } from "../../../components/ui/Menu";
 import { SymbolView } from "../../../components/ui/AppSymbol";
 import { ENVIRONMENT_MACHINE_SYMBOLS } from "../../../components/EnvironmentMachineSymbol";
 import { NativeStackScreenOptions } from "../../../native/StackHeader";
+import { localizeMobileString } from "../../../i18n/mobileStrings";
 import { withNativeGlassHeaderItem } from "../../layout/native-glass-header-items";
 import { useSettingsEnvironmentFilter } from "../settings-environment-filter";
 
@@ -47,23 +48,25 @@ export function SettingsEnvironmentFilterHeader(props: {
       options={{
         unstable_headerRightItems: () => [
           withNativeGlassHeaderItem({
-            accessibilityLabel: "Filter settings environments and projects",
+            accessibilityLabel: localizeMobileString("Filter settings environments and projects"),
             icon: { name: filterIcon, type: "sfSymbol" },
             label: "",
             type: "menu",
             menu: {
-              title: "Settings scope",
+              title: localizeMobileString("Settings scope"),
               items: [
                 {
                   type: "submenu",
                   label:
                     selectedIds === null
-                      ? "All environments"
-                      : `${selectedTargets.length} ${selectedTargets.length === 1 ? "environment" : "environments"}`,
+                      ? localizeMobileString("All environments")
+                      : localizeMobileString(
+                          `${selectedTargets.length} ${selectedTargets.length === 1 ? "environment" : "environments"}`,
+                        ),
                   items: [
                     {
                       type: "action",
-                      label: "All connected environments",
+                      label: localizeMobileString("All connected environments"),
                       state: selectedIds === null ? "on" : undefined,
                       onPress: selectAll,
                     },
@@ -90,11 +93,13 @@ export function SettingsEnvironmentFilterHeader(props: {
                   label:
                     selectableProjectGroups.find((group) => group.key === selectedProjectKey)
                       ?.label ??
-                    (selectedProjectKey === null ? "All projects" : "Unavailable project"),
+                    (selectedProjectKey === null
+                      ? localizeMobileString("All projects")
+                      : localizeMobileString("Unavailable project")),
                   items: [
                     {
                       type: "action",
-                      label: "All projects",
+                      label: localizeMobileString("All projects"),
                       state: selectedProjectKey === null ? "on" : undefined,
                       onPress: () => selectProject(null),
                     },
@@ -135,7 +140,7 @@ export function AndroidSettingsEnvironmentFilter() {
     <Menu
       accessible
       accessibilityRole="button"
-      accessibilityLabel="Filter settings environments and projects"
+      accessibilityLabel={localizeMobileString("Filter settings environments and projects")}
       title="Settings scope"
       actions={[
         {
@@ -182,7 +187,7 @@ export function AndroidSettingsEnvironmentFilter() {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Filter settings environments and projects"
+        accessibilityLabel={localizeMobileString("Filter settings environments and projects")}
         className="size-11 items-center justify-center rounded-full"
       >
         <SymbolView name={filterIcon} size={22} tintColorClassName="accent-icon" />

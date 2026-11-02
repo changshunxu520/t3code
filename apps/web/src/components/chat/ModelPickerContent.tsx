@@ -52,6 +52,8 @@ import {
   useEnvironmentModelPreferences,
   useToggleEnvironmentModelFavorite,
 } from "~/hooks/useSettings";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { announce } from "~/lib/announce";
 import { cn } from "~/lib/utils";
 import { getVirtualizedScrollFadeClassName } from "../ui/scroll-area";
@@ -205,6 +207,7 @@ function ModelPickerProviderNotices({
   onRequestClose: (() => void) | undefined;
   onOpenProviderSetup: ((instanceId: ProviderInstanceId) => void) | undefined;
 }) {
+  const { locale, t } = useI18n();
   const navigate = useNavigate();
   return (
     <>
@@ -213,7 +216,7 @@ function ModelPickerProviderNotices({
           {setupEntries.map((entry) => (
             <div key={entry.instanceId} className="px-1 py-1.5 text-xs leading-snug">
               <p className="line-clamp-3 text-muted-foreground">
-                {getProviderStatusMessage(entry.snapshot)}
+                {getProviderStatusMessage(entry.snapshot, locale)}
               </p>
               <InlineButton
                 className="mt-1"
@@ -222,7 +225,9 @@ function ModelPickerProviderNotices({
                   onOpenProviderSetup?.(entry.instanceId);
                 }}
               >
-                {setupEntries.length > 1 ? `Set up ${entry.displayName}` : "Open provider setup"}
+                {setupEntries.length > 1
+                  ? t("modelPicker.setUpProvider", { name: entry.displayName })
+                  : translateWebSource(locale, "Open provider setup")}
               </InlineButton>
             </div>
           ))}
@@ -242,7 +247,7 @@ function ModelPickerProviderNotices({
               void navigate({ to: "/settings/providers" });
             }}
           >
-            Provider settings
+            {translateWebSource(locale, "Provider settings")}
           </InlineButton>
         </p>
       ))}
@@ -369,6 +374,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
   /** Closes the list column, inside the popup's fixed height. */
   listFooter?: ReactNode;
 }) {
+  const { locale, t } = useI18n();
   const {
     searchInputRef,
     keybindings: providedKeybindings,
@@ -805,7 +811,9 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
       setSearchQuery("");
       handleSelectInstance(next);
       announce(
-        next === "favorites" ? "Favorites" : (entryByInstanceId.get(next)?.displayName ?? next),
+        next === "favorites"
+          ? translateWebSource(locale, "Favorites")
+          : (entryByInstanceId.get(next)?.displayName ?? next),
         "model-picker",
       );
       return;
@@ -830,7 +838,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
     const name = flatModels.find(
       (item) => item.slug === selectedSlug && item.instanceId === model.instanceId,
     )?.name;
-    announce(`Model: ${name ?? selectedSlug}`, "model-picker");
+    announce(t("modelPicker.announcedModel", { name: name ?? selectedSlug }), "model-picker");
   };
 
   return (
@@ -866,7 +874,9 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
               ? {
                   disabledInstanceIds: lockedDisabledInstanceIds,
                   getDisabledInstanceTooltip: (entry: ProviderInstanceEntry) =>
-                    `${entry.displayName} is unavailable in this thread. Start a new thread to switch providers.`,
+                    t("modelPicker.providerUnavailableInThreadTooltip", {
+                      name: entry.displayName,
+                    }),
                 }
               : {})}
           />
@@ -922,7 +932,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
           >
             <ComboboxSearchInput
               ref={searchInputRef}
-              placeholder="Search models..."
+              placeholder={translateWebSource(locale, "Search models...")}
               value={searchQuery}
               onChange={(e) => {
                 if (!isSearching) setSearchHeight(pickerContentRef.current?.offsetHeight ?? 0);
@@ -1023,7 +1033,10 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
                       className="group w-full cursor-pointer"
                     >
                       <span className="text-sm leading-snug text-muted-foreground group-hover:text-foreground group-data-highlighted:text-foreground">
-                        {legacySection.isExpanded ? "Show less" : "Show more"}
+                        {translateWebSource(
+                          locale,
+                          legacySection.isExpanded ? "Show less" : "Show more",
+                        )}
                       </span>
                     </ComboboxItem>
                   );
@@ -1067,11 +1080,12 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
             <ModelPickerProviderNotices
               setupEntries={providerSetupEntries}
               updateRequiredNotices={updateRequiredNotices}
-              emptyLabel={
+              emptyLabel={translateWebSource(
+                locale,
                 selectedInstanceId === "favorites" && !isSearching
                   ? "No favorites yet"
-                  : "No models found"
-              }
+                  : "No models found",
+              )}
               onRequestClose={onRequestClose}
               onOpenProviderSetup={onOpenProviderSetup}
             />

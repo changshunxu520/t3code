@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import type {
   ProviderInstanceId,
   ServerProvider,
@@ -44,6 +46,7 @@ export function ThreadDetailsUsage({
   providers,
   sources,
 }: Omit<ThreadDetailsUsageInput, "contextWindow">) {
+  const { locale } = useI18n();
   const nowMinute = useNowMinute();
   const now = Date.parse(`${nowMinute}:00Z`);
   const report =
@@ -61,17 +64,17 @@ export function ThreadDetailsUsage({
   return (
     <ThreadDetailsSection
       headingId="thread-details-usage-heading"
-      title="Usage limits"
+      title={translateWebSource(locale, "Usage limits")}
       showHeading={false}
     >
       <div className="grid grid-cols-[auto_minmax(3rem,1fr)_auto] gap-x-3 text-xs">
         {notice ? (
           <UsageRow
-            label="Limits"
+            label={translateWebSource(locale, "Limits")}
             fill={null}
             tone={null}
-            value="Unavailable"
-            tooltip={<span className="text-foreground">{notice}</span>}
+            value={translateWebSource(locale, "Unavailable")}
+            tooltip={<span className="text-foreground">{translateWebSource(locale, notice)}</span>}
           />
         ) : (
           limits.windows.map((window) => <LimitRow key={window.id} window={window} now={now} />)
@@ -83,6 +86,7 @@ export function ThreadDetailsUsage({
 
 /** The thread's context window. The bar fills as context is used; the tick marks auto-compaction. */
 export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowSnapshot }) {
+  const { t, locale } = useI18n();
   const maxTokens = usage.maxTokens != null && usage.maxTokens > 0 ? usage.maxTokens : null;
   const used =
     maxTokens !== null && usage.usedPercentage !== null
@@ -97,12 +101,12 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
   return (
     <ThreadDetailsSection
       headingId="thread-details-context-heading"
-      title="Context window"
+      title={t("contextWindow.title")}
       showHeading={false}
     >
       <div className="grid grid-cols-[auto_minmax(3rem,1fr)_auto] gap-x-3 text-xs">
         <UsageRow
-          label="Context"
+          label={translateWebSource(locale, "Context")}
           fill={used}
           tone={used === null ? null : used >= 90 ? "error" : used >= 80 ? "warning" : null}
           tick={tick}
@@ -112,21 +116,41 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
               ? `${usedTokens} / ${formatContextWindowTokens(maxTokens)}`
               : usedTokens
           }
-          ariaValue={used !== null ? `${used}% used` : `${usedTokens} tokens used`}
+          ariaValue={
+            used !== null
+              ? locale === "zh-CN"
+                ? `已使用 ${used}%`
+                : `${used}% used`
+              : locale === "zh-CN"
+                ? `已使用 ${usedTokens} 个令牌`
+                : `${usedTokens} tokens used`
+          }
           tooltip={
             <>
               <span className="text-foreground">
-                {used !== null ? `Context: ${used}% used` : `Context: ${usedTokens} tokens used`}
+                {used !== null
+                  ? locale === "zh-CN"
+                    ? `上下文：已使用 ${used}%`
+                    : `Context: ${used}% used`
+                  : locale === "zh-CN"
+                    ? `上下文：已使用 ${usedTokens} 个令牌`
+                    : `Context: ${usedTokens} tokens used`}
               </span>
               {maxTokens !== null ? (
                 <span className="text-muted-foreground">
-                  {usage.usedTokens.toLocaleString("en-US")} of {maxTokens.toLocaleString("en-US")}{" "}
-                  tokens
+                  {t("usage.details.tokensOf", {
+                    used: usage.usedTokens.toLocaleString(locale === "zh-CN" ? "zh-CN" : "en-US"),
+                    max: maxTokens.toLocaleString(locale === "zh-CN" ? "zh-CN" : "en-US"),
+                  })}
                 </span>
               ) : null}
               {threshold !== null && threshold > 0 ? (
                 <span className="text-muted-foreground">
-                  {formatContextWindowCompactionMessage(null, threshold)}
+                  {locale === "zh-CN"
+                    ? t("contextWindow.compactsAt", {
+                        tokens: threshold.toLocaleString("zh-CN"),
+                      })
+                    : formatContextWindowCompactionMessage(null, threshold)}
                 </span>
               ) : null}
             </>
@@ -144,29 +168,37 @@ function LimitRow({
   readonly window: ServerProviderUsageWindow;
   readonly now: number;
 }) {
+  const { t, locale } = useI18n();
   const timestampFormat = usePrimarySettings((settings) => settings.timestampFormat);
   const left = remainingPercent(window);
   const pace = paceOf(window, now);
   const resetsAt = window.resetsAt ? Date.parse(window.resetsAt) : Number.NaN;
   return (
     <UsageRow
-      label={window.label}
+      label={translateWebSource(locale, window.label)}
       fill={left}
       tone={left <= 10 ? "error" : left <= 20 ? "warning" : null}
       value={`${left}%`}
-      ariaValue={`${left}% left`}
+      ariaValue={t("usage.details.remaining", { left })}
       tooltip={
         <>
           <span className="text-foreground">
-            {window.label}: {left}% left
+            {t("usage.details.windowRemaining", {
+              label: translateWebSource(locale, window.label),
+              left,
+            })}
           </span>
           {window.resetsAt && resetsAt > now ? (
             <span className="text-muted-foreground">
-              Resets in {formatDuration(resetsAt - now)} ·{" "}
+              {t("usage.details.resetsIn", { duration: formatDuration(resetsAt - now) })} ·{" "}
               {formatUpcomingTimestamp(window.resetsAt, timestampFormat, now)}
             </span>
           ) : null}
-          {pace ? <span className="text-muted-foreground">{PACE_LABEL[pace]}</span> : null}
+          {pace ? (
+            <span className="text-muted-foreground">
+              {translateWebSource(locale, PACE_LABEL[pace])}
+            </span>
+          ) : null}
         </>
       }
     />

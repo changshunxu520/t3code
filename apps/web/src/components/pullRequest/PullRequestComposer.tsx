@@ -9,6 +9,8 @@ import { useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Popover, PopoverClose, PopoverPopup, PopoverTitle, PopoverTrigger } from "../ui/popover";
 import { Toggle, ToggleGroup } from "../ui/toggle-group";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { PullRequestCommentForm } from "./PullRequestCommentForm";
 import { PullRequestReviewForm } from "./PullRequestReviewForm";
 import {
@@ -39,7 +41,10 @@ export function PullRequestComposer({
   onReviewSubmitted: () => void;
   openReviewRequest?: number | undefined;
 }) {
+  const { locale, t } = useI18n();
+  const tx = (text: string) => translateWebSource(locale, text);
   const term = sourceControlClients.get(detail.provider).changeRequest.singular;
+  const localizedTerm = tx(term);
   const [open, setOpen] = useState(false);
   const [reviewPending, setReviewPending] = useState(false);
   const [requestedMode, setRequestedMode] = useState<"comment" | "review">("comment");
@@ -80,10 +85,15 @@ export function PullRequestComposer({
         render={<Button size="icon" variant="glass" />}
         aria-label={
           pendingComments.length > 0
-            ? `Review ${term}, ${pendingComments.length} ${pendingComments.length === 1 ? "comment" : "comments"} pending`
+            ? t(
+                pendingComments.length === 1
+                  ? "pullRequests.composer.reviewPendingOne"
+                  : "pullRequests.composer.reviewPendingMany",
+                { term: localizedTerm, count: pendingComments.length },
+              )
             : reviewStarted || !canComment
-              ? `Review ${term}`
-              : `Comment on ${term}`
+              ? t("pullRequests.composer.reviewTerm", { term: localizedTerm })
+              : t("pullRequests.composer.commentOnTerm", { term: localizedTerm })
         }
       >
         <MessageSquareIcon className="size-4" />
@@ -103,12 +113,14 @@ export function PullRequestComposer({
         sideOffset={8}
         width="lg"
         initialFocus={mode === "review" ? reviewRef : commentRef}
-        aria-label={`${capitalizeTerm(term)} composer`}
+        aria-label={t("pullRequests.composer.ariaLabel", {
+          term: tx(capitalizeTerm(term)),
+        })}
       >
         <div className="mb-3 flex items-center justify-between gap-2">
           {canComment && verdicts.length > 0 ? (
             <ToggleGroup
-              aria-label="Composer mode"
+              aria-label={tx("Composer mode")}
               variant="segmented"
               value={[mode]}
               onValueChange={(next) => {
@@ -116,14 +128,18 @@ export function PullRequestComposer({
                 if (value === "comment" || value === "review") setRequestedMode(value);
               }}
             >
-              <Toggle value="comment">Comment</Toggle>
+              <Toggle value="comment">{tx("Comment")}</Toggle>
               <Toggle value="review">
-                {pendingComments.length > 0 ? `Review (${pendingComments.length})` : "Review"}
+                {pendingComments.length > 0
+                  ? t("pullRequests.composer.reviewCount", { count: pendingComments.length })
+                  : tx("Review")}
               </Toggle>
             </ToggleGroup>
           ) : (
             <PopoverTitle>
-              {mode === "review" ? `Review ${term}` : `Comment on ${term}`}
+              {mode === "review"
+                ? t("pullRequests.composer.reviewTerm", { term: localizedTerm })
+                : t("pullRequests.composer.commentOnTerm", { term: localizedTerm })}
             </PopoverTitle>
           )}
           <div className="flex items-center gap-1">
@@ -131,8 +147,8 @@ export function PullRequestComposer({
               <Button
                 size="icon-xs"
                 variant="ghost"
-                aria-label="Discard pending line comments"
-                title="Discard pending line comments"
+                aria-label={tx("Discard pending line comments")}
+                title={tx("Discard pending line comments")}
                 disabled={reviewPending}
                 onClick={() => clearComments(reviewKey)}
               >
@@ -141,7 +157,7 @@ export function PullRequestComposer({
             ) : null}
             <PopoverClose
               render={<Button size="icon-xs" variant="ghost" />}
-              aria-label="Close composer"
+              aria-label={tx("Close composer")}
             >
               <XIcon className="size-3.5" />
             </PopoverClose>

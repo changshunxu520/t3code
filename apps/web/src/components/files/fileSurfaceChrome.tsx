@@ -4,6 +4,8 @@ import { Spinner } from "~/components/ui/spinner";
 import { Button } from "~/components/ui/button";
 import { Toggle } from "~/components/ui/toggle";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { DIFF_SURFACE_THEME_UNSAFE_CSS } from "~/lib/diffRendering";
 import { cn } from "~/lib/utils";
 
@@ -65,6 +67,8 @@ export function FileSurfaceAction(props: {
   readonly onPress: () => void;
   readonly children: ReactNode;
 }) {
+  const { locale } = useI18n();
+  const label = translateWebSource(locale, props.label);
   const pressed = props.pressed;
   return (
     <Tooltip>
@@ -76,7 +80,7 @@ export function FileSurfaceAction(props: {
               className="shrink-0"
               disabled={props.disabled ?? false}
               onClick={props.onPress}
-              aria-label={props.label}
+              aria-label={label}
               variant="ghost"
               size="icon-sm"
             >
@@ -88,7 +92,7 @@ export function FileSurfaceAction(props: {
               pressed={pressed}
               disabled={props.disabled ?? false}
               onPressedChange={props.onPress}
-              aria-label={props.label}
+              aria-label={label}
               variant="ghost"
               size="sm"
             >
@@ -97,7 +101,7 @@ export function FileSurfaceAction(props: {
           )
         }
       />
-      <TooltipPopup>{props.label}</TooltipPopup>
+      <TooltipPopup>{label}</TooltipPopup>
     </Tooltip>
   );
 }
@@ -114,10 +118,11 @@ export function FileSurfaceNotice(props: { readonly children: ReactNode }) {
 }
 
 export function FileSurfaceLoading(props: { readonly className?: string }) {
+  const { locale } = useI18n();
   return (
     <div
       role="status"
-      aria-label="Loading file"
+      aria-label={translateWebSource(locale, "Loading file")}
       className={cn(
         "flex min-h-0 flex-1 items-center justify-center text-muted-foreground",
         props.className,
@@ -132,19 +137,21 @@ export function FileSurfaceFailure(props: {
   readonly message: string;
   readonly onRetry?: () => void;
 }) {
+  const { locale } = useI18n();
+  const tx = (text: string) => translateWebSource(locale, text);
   return (
     <div
       role="alert"
       className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-xs leading-relaxed"
     >
-      <p className="text-destructive">{props.message}</p>
+      <p className="text-destructive">{tx(props.message)}</p>
       {props.onRetry ? (
         <button
           type="button"
           onClick={props.onRetry}
           className="rounded-md border border-input px-2.5 py-1 text-xs text-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         >
-          Try again
+          {tx("Try again")}
         </button>
       ) : null}
     </div>

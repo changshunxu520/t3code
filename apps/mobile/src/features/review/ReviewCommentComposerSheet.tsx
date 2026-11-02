@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { TextInputWrapper } from "expo-paste-input";
 import type { EnvironmentId, ThreadId } from "@t3tools/contracts";
@@ -266,13 +267,13 @@ export function ReviewCommentComposerSheet(props: ReviewCommentComposerSheetProp
         {!isAndroid && target ? (
           <View className="flex-row items-center gap-3 bg-sheet px-5 py-2">
             <ControlPill
-              accessibilityLabel="Add image"
+              accessibilityLabel={localizeMobileString("Add image")}
               icon="plus"
               onPress={() => void handlePickImages()}
             />
             <View className="flex-1" />
             <ControlPill
-              accessibilityLabel="Comment"
+              accessibilityLabel={localizeMobileString("Comment")}
               icon="arrow.up"
               label="Comment"
               variant="primary"
@@ -292,13 +293,13 @@ export function ReviewCommentComposerSheet(props: ReviewCommentComposerSheetProp
             style={{ paddingBottom: Math.max(insets.bottom, 10) }}
           >
             <ControlPill
-              accessibilityLabel="Add image"
+              accessibilityLabel={localizeMobileString("Add image")}
               icon="plus"
               onPress={() => void handlePickImages()}
             />
             <View className="flex-1" />
             <ControlPill
-              accessibilityLabel="Comment"
+              accessibilityLabel={localizeMobileString("Comment")}
               icon="arrow.up"
               label="Comment"
               variant="primary"

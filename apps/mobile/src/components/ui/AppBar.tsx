@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Toolbar } from "./Toolbar";
 import { AppActivityIndicator } from "./AppActivityIndicator";
 import type { HeaderBarButtonMailSearchToolbarItem } from "react-native-screens";
@@ -26,10 +27,14 @@ type MailMenu = NonNullable<HeaderBarButtonMailSearchToolbarItem["filterMenu"]>;
 function mailMenuItems(items: ReadonlyArray<AppBarMenuItem>): MailMenu["items"] {
   return items.map((item) =>
     "items" in item
-      ? { type: "submenu", title: item.title ?? "", items: mailMenuItems(item.items) }
+      ? {
+          type: "submenu",
+          title: localizeMobileString(item.title ?? ""),
+          items: mailMenuItems(item.items),
+        }
       : {
           type: "action",
-          title: item.title,
+          title: localizeMobileString(item.title),
           state: item.selected ? "on" : "off",
           disabled: item.disabled,
           onPress: item.onPress,
@@ -77,7 +82,9 @@ export function AppBar(props: AppBarProps) {
                   ? () => [
                       createNativeMailSearchToolbarItem({
                         showsSearchDismissButton: true,
-                        placeholder: search.compactPlaceholder ?? search.placeholder,
+                        placeholder: localizeMobileString(
+                          search.compactPlaceholder ?? search.placeholder,
+                        ),
                         onSearchTextChange: search.onChangeText,
                         searchTextChangeId: `${headerId}-search-text`,
                         ...(refresh
@@ -91,7 +98,10 @@ export function AppBar(props: AppBarProps) {
                           ? {
                               filterButtonId: `${headerId}-filter`,
                               filterSystemImageName: iosIcon(menu.icon),
-                              filterMenu: { title: menu.title, items: mailMenuItems(menu.items) },
+                              filterMenu: {
+                                title: localizeMobileString(menu.title),
+                                items: mailMenuItems(menu.items),
+                              },
                             }
                           : undefined),
                       }),

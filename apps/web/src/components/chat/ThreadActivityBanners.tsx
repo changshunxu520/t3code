@@ -1,3 +1,5 @@
+import { readWebI18n } from "~/i18n/readWebI18n";
+import { translateWebSource } from "~/i18n/messages";
 import type {
   EnvironmentId,
   OrchestrationV2PendingBackgroundTask,
@@ -38,6 +40,7 @@ export function childInputNowItem(input: {
   // A task delegated to a linked environment lives there, not where the parent runs.
   readonly onOpenThread: (threadId: ThreadId, environmentId: EnvironmentId) => void;
 }): (ThreadNowItem & { readonly waitingLabel: string }) | null {
+  const { locale: uiLocale } = readWebI18n();
   const { childThreadInputs, onOpenThread } = input;
   const first = childThreadInputs[0];
   if (!first || input.parentAwaitingUser) return null;
@@ -49,10 +52,13 @@ export function childInputNowItem(input: {
     ) : (
       <MessageCircleIcon className="text-info-foreground" />
     ),
-    title: childThreadInputsTitle(childThreadInputs),
-    waitingLabel: childThreadInputs.every((child) => child.lineage.sideChat === true)
-      ? "Side chat waiting"
-      : "Subagent waiting",
+    title: translateWebSource(uiLocale, childThreadInputsTitle(childThreadInputs)),
+    waitingLabel: translateWebSource(
+      uiLocale,
+      childThreadInputs.every((child) => child.lineage.sideChat === true)
+        ? "Side chat waiting"
+        : "Subagent waiting",
+    ),
     description: childThreadInputs.map((child, index) => (
       <Fragment key={child.id}>
         {index > 0 ? " " : null}
@@ -66,7 +72,9 @@ export function childInputNowItem(input: {
     )),
     actions: (
       <InlineButton onClick={() => onOpenThread(first.id, first.environmentId)}>
-        {first.hasPendingApprovals ? "Open approval" : "Open question"}
+        {first.hasPendingApprovals
+          ? translateWebSource(uiLocale, "Open approval")
+          : translateWebSource(uiLocale, "Open question")}
       </InlineButton>
     ),
   };
@@ -79,6 +87,7 @@ export function goalNowItem(input: {
   readonly isWorking: boolean;
   readonly onSendCommand: (text: string, failureMessage: string) => Promise<void>;
 }): ThreadNowItem {
+  const { locale: uiLocale } = readWebI18n();
   const { isWorking, onSendCommand } = input;
   const presentation = presentProviderGoal(input.goal, isWorking);
   return {
@@ -95,18 +104,25 @@ export function goalNowItem(input: {
         {presentation.canResume && !isWorking ? (
           <>
             <InlineButton
-              onClick={() => void onSendCommand("/goal resume", "Failed to resume goal.")}
+              onClick={() =>
+                void onSendCommand(
+                  "/goal resume",
+                  translateWebSource(uiLocale, "Failed to resume goal."),
+                )
+              }
             >
-              Resume
+              {translateWebSource(uiLocale, "Resume")}
             </InlineButton>
             <span aria-hidden>·</span>
           </>
         ) : null}
         <InlineButton
           tone="muted"
-          onClick={() => void onSendCommand("/goal clear", "Failed to clear goal.")}
+          onClick={() =>
+            void onSendCommand("/goal clear", translateWebSource(uiLocale, "Failed to clear goal."))
+          }
         >
-          Clear
+          {translateWebSource(uiLocale, "Clear")}
         </InlineButton>
       </>
     ),
@@ -121,6 +137,7 @@ export function runStopNowItem(input: {
   readonly forceStopping: boolean;
   readonly onForceStop: () => void;
 }): ThreadNowItem {
+  const { locale: uiLocale } = readWebI18n();
   const unresponsive = input.stop.state === "unresponsive";
   const requestedAtMs = Date.parse(input.stop.requestedAt);
   return {
@@ -130,9 +147,9 @@ export function runStopNowItem(input: {
     ) : (
       <CircleStopIcon />
     ),
-    title: unresponsive ? "Agent not responding to Stop" : "Stopping",
+    title: translateWebSource(uiLocale, unresponsive ? "Agent not responding to Stop" : "Stopping"),
     description: unresponsive
-      ? "It may be short on memory. Force stop kills its processes."
+      ? translateWebSource(uiLocale, "It may be short on memory. Force stop kills its processes.")
       : undefined,
     actions: (
       <>
@@ -145,7 +162,7 @@ export function runStopNowItem(input: {
         />
         {unresponsive && input.canForceStop ? (
           <InlineButton disabled={input.forceStopping} onClick={input.onForceStop}>
-            {input.forceStopping ? "Force stopping..." : "Force stop"}
+            {translateWebSource(uiLocale, input.forceStopping ? "Force stopping..." : "Force stop")}
           </InlineButton>
         ) : null}
       </>
@@ -163,6 +180,7 @@ export function backgroundWorkNowItem(input: {
   readonly onStop: () => Promise<void>;
   readonly onOpenThread: (threadId: ThreadId) => void;
 }): ThreadNowItem | null {
+  const { locale: uiLocale } = readWebI18n();
   const { onOpenThread } = input;
   const presentation = presentPendingBackgroundWork(input.tasks);
   if (presentation === null) return null;
@@ -203,10 +221,11 @@ export function backgroundWorkNowItem(input: {
     title:
       only && typeof only.label !== "string" && only.task.label !== only.task.kind ? (
         <>
-          {presentation.waiting ? "Waiting" : "Running"} · {only.label}
+          {translateWebSource(uiLocale, presentation.waiting ? "Waiting" : "Running")} ·{" "}
+          {only.label}
         </>
       ) : (
-        presentation.title
+        translateWebSource(uiLocale, presentation.title)
       ),
     description: only ? (
       only.activity
@@ -235,11 +254,13 @@ export function backgroundWorkNowItem(input: {
         )}
         {onlyThreadId === undefined ? null : (
           <InlineButton tone="muted" onClick={() => onOpenThread(onlyThreadId)}>
-            Open
+            {translateWebSource(uiLocale, "Open")}
           </InlineButton>
         )}
         <InlineButton disabled={input.stopDisabled} onClick={() => void input.onStop()}>
-          {input.stopping ? "Stopping..." : "Stop"}
+          {input.stopping
+            ? translateWebSource(uiLocale, "Stopping...")
+            : translateWebSource(uiLocale, "Stop")}
         </InlineButton>
       </>
     ),
@@ -255,6 +276,8 @@ export function branchMismatchBannerItem(input: {
   readonly onRestore: () => void;
   readonly onDismiss: () => void;
 }): ComposerBannerStackItem {
+  const { locale: uiLocale, t } = readWebI18n();
+
   const { mismatch } = input;
   return {
     id: `branch-mismatch:${input.mismatchKey}`,
@@ -262,7 +285,9 @@ export function branchMismatchBannerItem(input: {
     icon: <GitBranchIcon />,
     title: (
       <span className="flex min-w-0 items-baseline gap-1.5">
-        <span className="shrink-0 font-normal text-muted-foreground">Branch changed from</span>
+        <span className="shrink-0 font-normal text-muted-foreground">
+          {translateWebSource(uiLocale, "Branch changed from")}
+        </span>
         <Tooltip>
           <TooltipTrigger
             render={
@@ -272,18 +297,20 @@ export function branchMismatchBannerItem(input: {
             }
           />
           <TooltipPopup side="top">
-            This thread last ran on {mismatch.threadBranch}. Sending will continue on{" "}
-            {mismatch.currentBranch}.
+            {t("chat.branchChangedDescription", {
+              previous: mismatch.threadBranch,
+              current: mismatch.currentBranch,
+            })}
           </TooltipPopup>
         </Tooltip>
       </span>
     ),
     actions: (
       <Button size="xs" variant="ghost" disabled={input.restoreDisabled} onClick={input.onRestore}>
-        {input.restoring ? "Restoring..." : "Restore branch"}
+        {input.restoring ? t("chat.restoringBranch") : t("chat.restoreBranch")}
       </Button>
     ),
-    dismissLabel: "Dismiss branch change notice",
+    dismissLabel: t("chat.dismissBranchNotice"),
     onDismiss: input.onDismiss,
   };
 }

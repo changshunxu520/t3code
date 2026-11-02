@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import {
   isActiveSubagentStatus,
@@ -64,8 +65,10 @@ export function ThreadWorkflowGroup(props: {
         <View className="flex-row items-center">
           <RowPressable
             accessibilityRole="button"
-            accessibilityLabel={`${label} workflow, ${statusLabel}`}
-            accessibilityHint={open ? "Collapses the workflow" : "Opens the current phase"}
+            accessibilityLabel={localizeMobileString(`${label} workflow, ${statusLabel}`)}
+            accessibilityHint={localizeMobileString(
+              open ? "Collapses the workflow" : "Opens the current phase",
+            )}
             accessibilityState={{ expanded: open !== undefined }}
             disabled={rail.length === 0}
             onPress={() => setSelected(nextWorkflowSelection(rail, selected))}
@@ -106,10 +109,13 @@ export function ThreadWorkflowGroup(props: {
               return (
                 <Chip
                   key={item.key}
+                  localize={false}
                   icon={RAIL_ICON[item.tone]}
                   label={count ? `${count} ${item.title}` : item.title}
                   selected={item.key === selected}
-                  accessibilityLabel={`${item.title} phase, ${item.tone}${count ? `, ${count} completed` : ""}`}
+                  accessibilityLabel={localizeMobileString(
+                    `${item.title} phase, ${item.tone}${count ? `, ${count} completed` : ""}`,
+                  )}
                   onPress={() => setSelected(nextWorkflowSelection(rail, selected, item.key))}
                 />
               );
@@ -166,12 +172,14 @@ function WorkflowMemberRow(props: {
       accessibilityRole={canOpen ? "link" : undefined}
       accessibilityLabel={[
         presentation.title,
-        presentation.statusLabel,
-        ...labels,
-        ...(metadata.speed === null ? [] : [metadata.speed]),
+        localizeMobileString(presentation.statusLabel),
+        ...labels.map((label) => localizeMobileString(label)),
+        ...(metadata.speed === null ? [] : [localizeMobileString(metadata.speed)]),
         ...(error === null ? [] : [error]),
       ].join(", ")}
-      accessibilityHint={canOpen ? "Opens this agent's thread" : "Its thread is not available yet"}
+      accessibilityHint={localizeMobileString(
+        canOpen ? "Opens this agent's thread" : "Its thread is not available yet",
+      )}
       disabled={!canOpen}
       onPress={() => threadId !== null && props.onOpen(threadId)}
       className="min-h-11 flex-row gap-3 border-t border-border-subtle px-4 py-3 active:opacity-70"
@@ -183,6 +191,7 @@ function WorkflowMemberRow(props: {
         <View className="min-h-5 flex-row items-center gap-2">
           <View className="min-w-0 flex-1 flex-row items-baseline gap-1.5">
             <Text
+              localize={false}
               textRole="footnote"
               numberOfLines={1}
               className="min-w-0 shrink font-t3-medium text-foreground"
@@ -238,12 +247,22 @@ function WorkflowMemberRow(props: {
           </View>
         ) : null}
         {detail ? (
-          <Text textRole="label" numberOfLines={1} className="text-foreground-muted">
+          <Text
+            localize={false}
+            textRole="label"
+            numberOfLines={1}
+            className="text-foreground-muted"
+          >
             {detail}
           </Text>
         ) : null}
         {error ? (
-          <Text textRole="label" numberOfLines={1} className={SUBAGENT_TONE_TEXT_CLASS.failed}>
+          <Text
+            localize={false}
+            textRole="label"
+            numberOfLines={1}
+            className={SUBAGENT_TONE_TEXT_CLASS.failed}
+          >
             {error}
           </Text>
         ) : null}
@@ -262,6 +281,7 @@ function WorkflowHeaderLayout(props: {
   return (
     <ListRowLayout
       icon="point.3.connected.trianglepath.dotted"
+      localizeLabel={false}
       label={props.label}
       description={props.statusLabel}
       detail={elapsed ?? undefined}

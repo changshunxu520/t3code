@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import ImageViewing from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { localizeMobileString } from "../i18n/mobileStrings";
 import { useMediaActions } from "../state/mediaActions";
 import { AppText } from "./ui/AppText";
 import { SymbolView } from "./ui/AppSymbol";
@@ -31,7 +32,7 @@ function ImagePreviewHeader(header: { readonly imageIndex: number }) {
         <MediaActionsMenu media={mediaActions} inModal />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close image"
+          accessibilityLabel={localizeMobileString("Close image")}
           onPress={props.onRequestClose}
           className="min-h-11 min-w-11 items-center justify-center"
         >

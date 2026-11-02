@@ -5,6 +5,8 @@ import { ChevronRightIcon } from "lucide-react";
 import { Fragment, type RefObject, useRef } from "react";
 
 import { environmentThreadShells } from "~/state/threads";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -98,11 +100,13 @@ function UpdateEverythingDialogContent({
   onConfirm,
   cancelRef,
   title,
-  confirmLabel = "Update",
+  confirmLabel,
   notes = [],
   disabledReason = null,
   busy = false,
 }: UpdateEverythingDialogContentProps) {
+  const { locale, t } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const stopped = useAtomValue(
     runningThreadCountAtom(
       restarts
@@ -120,7 +124,12 @@ function UpdateEverythingDialogContent({
     ),
   );
   const running = stopped + continuing;
-  const threads = `${running} running ${running === 1 ? "thread" : "threads"}`;
+  const threads = t(
+    running === 1 ? "updateEverything.runningOne" : "updateEverything.runningMany",
+    {
+      count: running,
+    },
+  );
   const restarting = new Set(restarts.map((machine) => machine.environmentId));
   const updating = rows.filter((row) => row.app !== null || row.providers.length > 0);
   const skipped = rows.filter((row) => row.skipped !== null);
@@ -129,7 +138,10 @@ function UpdateEverythingDialogContent({
     <>
       <AlertDialogHeader className="shrink-0">
         <AlertDialogTitle>
-          {title ?? `Update ${updating.length} ${updating.length === 1 ? "machine" : "machines"}?`}
+          {title ??
+            (locale === "zh-CN"
+              ? `更新 ${updating.length} 台机器？`
+              : `Update ${updating.length} ${updating.length === 1 ? "machine" : "machines"}?`)}
         </AlertDialogTitle>
         <AlertDialogDescription>
           {version !== null ? (
@@ -139,7 +151,9 @@ function UpdateEverythingDialogContent({
           ) : null}
           {version !== null && providerCount > 0 ? " · " : null}
           {providerCount > 0
-            ? `${providerCount} provider ${providerCount === 1 ? "update" : "updates"}`
+            ? locale === "zh-CN"
+              ? `${providerCount} 项提供商更新`
+              : `${providerCount} provider ${providerCount === 1 ? "update" : "updates"}`
             : null}
         </AlertDialogDescription>
       </AlertDialogHeader>
@@ -153,9 +167,9 @@ function UpdateEverythingDialogContent({
           {/* Machine names truncate first. Provider lists wrap between names, never inside one. */}
           <div className="grid grid-cols-[minmax(4rem,max-content)_max-content_minmax(min-content,1fr)_max-content] gap-x-4 text-sm">
             <div className="col-span-full grid grid-cols-subgrid border-b pb-1.5 text-muted-foreground text-xs">
-              <span>Machine</span>
+              <span>{tx("Machine")}</span>
               <span>T3 Code</span>
-              <span>Providers</span>
+              <span>{tx("Providers")}</span>
               <span />
             </div>
             {updating.map((row) => (
@@ -167,12 +181,14 @@ function UpdateEverythingDialogContent({
                   <MiddleTruncate value={row.label} />
                 </span>
                 <span>
-                  {row.app !== null ? APP_LABELS[row.app] : null}
+                  {row.app !== null ? tx(APP_LABELS[row.app]) : null}
                   {row.app === null && row.skipped !== null ? (
-                    <span className="text-muted-foreground">Skipped</span>
+                    <span className="text-muted-foreground">{tx("Skipped")}</span>
                   ) : null}
                   {row.app === "this-app" ? (
-                    <span className="block text-muted-foreground text-xs">restarts last</span>
+                    <span className="block text-muted-foreground text-xs">
+                      {tx("restarts last")}
+                    </span>
                   ) : null}
                 </span>
                 <span>
@@ -195,7 +211,7 @@ function UpdateEverythingDialogContent({
             <Collapsible>
               <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground text-xs hover:text-foreground data-panel-open:[&_svg]:rotate-90">
                 <ChevronRightIcon className="size-3.5 transition-transform" aria-hidden />
-                {skipped.length} skipped
+                {locale === "zh-CN" ? `已跳过 ${skipped.length} 项` : `${skipped.length} skipped`}
               </CollapsibleTrigger>
               <CollapsiblePanel>
                 <div className="grid grid-cols-[minmax(0,max-content)_1fr] gap-x-3 gap-y-0.5 pt-1.5 ps-4.5 text-muted-foreground text-xs">
@@ -204,7 +220,7 @@ function UpdateEverythingDialogContent({
                       <span className="max-w-32 min-w-0">
                         <MiddleTruncate value={row.label} />
                       </span>
-                      <span className="wrap-anywhere">{row.skipped}</span>
+                      <span className="wrap-anywhere">{row.skipped ? tx(row.skipped) : null}</span>
                     </Fragment>
                   ))}
                 </div>
@@ -221,17 +237,17 @@ function UpdateEverythingDialogContent({
         ) : running > 0 ? (
           <p className="self-center text-muted-foreground text-sm max-sm:order-1 max-sm:text-center sm:mr-auto">
             {stopped === 0
-              ? `${threads} will be interrupted and can resume after the restart.`
+              ? t("updateEverything.resumeAll", { threads })
               : continuing === 0
-                ? `${threads} will be interrupted.`
-                : `${threads} will be interrupted. ${continuing} can resume after the restart.`}
+                ? t("updateEverything.stopAll", { threads })
+                : t("updateEverything.resumeSome", { threads, count: continuing })}
           </p>
         ) : null}
         <AlertDialogClose ref={cancelRef} render={<Button variant="outline" disabled={busy} />}>
-          Cancel
+          {t("common.cancel")}
         </AlertDialogClose>
         <Button disabled={disabledReason !== null || busy} onClick={onConfirm}>
-          {confirmLabel}
+          {confirmLabel ? tx(confirmLabel) : t("serverUpdate.action")}
         </Button>
       </AlertDialogFooter>
     </>
@@ -239,6 +255,11 @@ function UpdateEverythingDialogContent({
 }
 
 function RunningThreads({ environmentId }: { readonly environmentId: EnvironmentId }) {
+  const { locale } = useI18n();
   const count = useAtomValue(runningThreadCountAtom(environmentId));
-  return count > 0 ? <span className="whitespace-nowrap text-warning">{count} running</span> : null;
+  return count > 0 ? (
+    <span className="whitespace-nowrap text-warning">
+      {locale === "zh-CN" ? `${count} 个运行中` : `${count} running`}
+    </span>
+  ) : null;
 }

@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SymbolView } from "../../components/ui/AppSymbol";
 import { AppText as Text } from "../../components/ui/AppText";
 import { ListRow } from "../../components/ui/ListRow";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { NativeStackScreenOptions } from "../../native/StackHeader";
 import {
@@ -45,6 +46,7 @@ function LicenseRow(props: {
   return (
     <View className="border-b border-border">
       <ListRow
+        localizeLabel={false}
         label={props.entry.name}
         description={[props.entry.version, props.entry.license].filter(Boolean).join(" · ")}
         onPress={props.onPress}
@@ -94,7 +96,7 @@ export function SettingsOpenSourceLicensesRouteScreen() {
               ? () => [
                   createNativeMailSearchToolbarItem({
                     onSearchTextChange: setQuery,
-                    placeholder: "Search packages",
+                    placeholder: localizeMobileString("Search packages"),
                     searchTextChangeId: "open-source-licenses-search-text",
                     showsSearchDismissButton: true,
                   }),
@@ -198,7 +200,9 @@ export function SettingsOpenSourceLicenseRouteScreen({ route }: LicenseDetailPro
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-2 px-1">
-          <Text className="text-2xl font-t3-bold text-foreground">{entry.name}</Text>
+          <Text localize={false} className="text-2xl font-t3-bold text-foreground">
+            {entry.name}
+          </Text>
           <Text className="text-base leading-normal text-foreground-muted">
             {[entry.version, entry.license, formatLicenseBundles(entry.bundles)]
               .filter((value): value is string => Boolean(value))
@@ -206,7 +210,7 @@ export function SettingsOpenSourceLicenseRouteScreen({ route }: LicenseDetailPro
           </Text>
           {sourceUrl ? (
             <Pressable
-              accessibilityHint="Opens the project website"
+              accessibilityHint={localizeMobileString("Opens the project website")}
               accessibilityRole="link"
               onPress={() => void Linking.openURL(sourceUrl)}
               className="min-h-12 flex-row items-center gap-2 self-start py-2 active:opacity-60"
@@ -224,7 +228,11 @@ export function SettingsOpenSourceLicenseRouteScreen({ route }: LicenseDetailPro
         </View>
 
         <View className="overflow-hidden rounded-[24px] border-continuous bg-grouped-card p-4">
-          <Text selectable className="font-mono text-base leading-normal text-foreground">
+          <Text
+            localize={false}
+            selectable
+            className="font-mono text-base leading-normal text-foreground"
+          >
             {entry.noticeText}
           </Text>
         </View>

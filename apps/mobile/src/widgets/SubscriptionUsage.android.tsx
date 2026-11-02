@@ -18,7 +18,31 @@ import type { SubscriptionUsageSnapshot as SubscriptionUsageProps } from "./subs
 
 export function SubscriptionUsage(props: SubscriptionUsageProps, environment: WidgetEnvironment) {
   "widget";
-  // The widget runtime evaluates this function without the app's module scope.
+  // The widget has no app module scope: keep helpers local and let Expo inline the locale.
+  // Android has no timeline; expiry alarms and taps re-render to refresh freshness.
+  const isChinese = process.env.EXPO_PUBLIC_APP_LOCALE === "zh-CN";
+  const copy = (english: string, chinese: string) => (isChinese ? chinese : english);
+  const localizeValue = (value: string) => {
+    if (!isChinese) return value;
+    const messages: Record<string, string> = {
+      "Open T3 to connect": "打开 T3 以连接",
+      "Open T3 to refresh": "打开 T3 以刷新",
+      "No limits available": "暂无可用额度",
+      "Subscription remaining": "订阅剩余额度",
+      "Reset time unavailable": "重置时间不可用",
+      Session: "会话",
+      Weekly: "每周",
+      Daily: "每日",
+      Monthly: "每月",
+    };
+    if (messages[value]) return messages[value];
+    const pooled = /^(\d+) accounts · pooled$/.exec(value);
+    if (pooled) return `${pooled[1]} 个账户 · 合并额度`;
+    const hours = /^(\d+) hours?$/.exec(value);
+    if (hours) return `${hours[1]} 小时`;
+    const reset = /^Next reset (.+)$/.exec(value);
+    return reset ? `下次重置：${reset[1]}` : value;
+  };
   const now = Date.now();
   const limit = 2;
   const mode = props.theme?.mode;
@@ -71,7 +95,7 @@ export function SubscriptionUsage(props: SubscriptionUsageProps, environment: Wi
               </Text>
               {shown.length === 0 ? (
                 <Text color={muted} maxLines={1} style={{ fontSize: 11 }}>
-                  {stale ? "Open T3 to refresh" : provider.detail}
+                  {localizeValue(stale ? "Open T3 to refresh" : provider.detail)}
                 </Text>
               ) : null}
               {shown.map((window) => {
@@ -83,7 +107,7 @@ export function SubscriptionUsage(props: SubscriptionUsageProps, environment: Wi
                       maxLines={1}
                       style={{ fontSize: 11 }}
                     >
-                      {`${window.label} · ${window.remaining}% left`}
+                      {`${localizeValue(window.label)} · ${isChinese ? `剩余 ${window.remaining}%` : `${window.remaining}% left`}`}
                     </Text>
                     <Column modifiers={[fillMaxWidth(), padding(0, 3, 0, 3)]}>
                       <LinearProgressIndicator
@@ -94,14 +118,14 @@ export function SubscriptionUsage(props: SubscriptionUsageProps, environment: Wi
                       />
                     </Column>
                     <Text color={muted} maxLines={1} style={{ fontSize: 10 }}>
-                      {window.reset}
+                      {localizeValue(window.reset)}
                     </Text>
                   </Column>
                 );
               })}
               {hidden > 0 ? (
                 <Text color={muted} maxLines={1} style={{ fontSize: 10 }}>
-                  {`${hidden} more in T3`}
+                  {isChinese ? `在 T3 中查看另外 ${hidden} 项` : `${hidden} more in T3`}
                 </Text>
               ) : null}
             </Column>
@@ -114,8 +138,8 @@ export function SubscriptionUsage(props: SubscriptionUsageProps, environment: Wi
           modifiers={[padding(0, 10, 0, 0)]}
         >
           {props.checkedAt
-            ? `As of ${new Date(props.checkedAt).toLocaleString(undefined, { hour: "numeric", minute: "2-digit", month: "short", day: "numeric" })}`
-            : "Tap to connect in T3"}
+            ? `${copy("As of", "更新于")} ${new Date(props.checkedAt).toLocaleString(isChinese ? "zh-CN" : undefined, { hour: "numeric", minute: "2-digit", month: "short", day: "numeric" })}`
+            : copy("Tap to connect in T3", "点击以在 T3 中连接")}
         </Text>
       </Column>
     </Button>

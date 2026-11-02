@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Button } from "../../components/ui/Button";
 import * as Dialog from "../../components/ui/Dialog";
 import { useOpenPullRequest } from "../../native/useOpenPullRequest";
@@ -400,7 +401,7 @@ function UserMessageCopyButton(props: {
 }) {
   const button = (
     <CopyTextButton
-      accessibilityLabel="Copy message"
+      accessibilityLabel={localizeMobileString("Copy message")}
       text={props.text}
       onCopy={props.onCopy}
       tintColor={props.tintColor}
@@ -450,7 +451,7 @@ function AssistantForkButton(props: {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Fork from this response"
+      accessibilityLabel={localizeMobileString("Fork from this response")}
       disabled={busy}
       onPress={() => {
         const targetThreadId = ThreadId.make(uuidv4());
@@ -841,7 +842,7 @@ function MessageAttachmentFile(props: {
         {props.standaloneFile ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Download ${attachment.name}`}
+            accessibilityLabel={localizeMobileString(`Download ${attachment.name}`)}
             accessibilityState={{ disabled, busy: opening }}
             disabled={disabled}
             className="mr-1 min-h-11 w-11 items-center justify-center rounded-lg active:bg-subtle disabled:opacity-40"
@@ -1292,7 +1293,7 @@ function MarkdownDetailsFold(props: {
           size={12}
           tintColor={iconSubtleColor}
         />
-        <Text className="min-w-0 shrink font-t3-medium text-sm text-foreground">
+        <Text localize={false} className="min-w-0 shrink font-t3-medium text-sm text-foreground">
           {props.summary}
         </Text>
       </Pressable>
@@ -2205,7 +2206,7 @@ function renderFeedEntry(
               entry.pendingMessage.messageId !== props.dispatchingMessageId ? (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Edit pending message"
+                  accessibilityLabel={localizeMobileString("Edit pending message")}
                   hitSlop={8}
                   className="size-7 items-center justify-center"
                   onPress={() => {
@@ -2282,7 +2283,7 @@ function renderFeedEntry(
         {showAssistantMeta ? (
           <View className="mt-1 flex-row items-center gap-1">
             <CopyTextButton
-              accessibilityLabel="Copy message"
+              accessibilityLabel={localizeMobileString("Copy message")}
               text={renderedText}
               tintColor={iconSubtleColor}
               buttonSize={props.replyActionSize.button}
@@ -3838,7 +3839,7 @@ function ThreadFeedLoadEarlierControl(props: ThreadFeedHistoryControls) {
           <Button
             label={props.loading ? "Loading earlier activity…" : "Load earlier activity"}
             tone="secondary"
-            accessibilityLabel="Load earlier activity"
+            accessibilityLabel={localizeMobileString("Load earlier activity")}
             disabled={props.loading}
             onPress={props.onLoadEarlier}
             icon="chevron.up"

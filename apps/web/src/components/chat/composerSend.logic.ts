@@ -1,3 +1,4 @@
+import { translateWebSource, type WebLocale } from "~/i18n/messages";
 import type { EnvironmentId, ThreadContextRecord } from "@t3tools/contracts";
 import { collectInlineContextIds } from "../../lib/composerContextReferences";
 
@@ -16,7 +17,10 @@ export function loadBalancingSendWarning(input: {
   readonly pending: boolean;
   readonly threadContexts: ReadonlyArray<ThreadContextRecord>;
   readonly candidateEnvironmentIds: ReadonlyArray<EnvironmentId>;
+  readonly locale?: WebLocale;
 }) {
+  const uiLocale = input.locale ?? "en";
+
   if (input.pending) {
     return {
       title: "Checking machine resources",
@@ -32,7 +36,10 @@ export function loadBalancingSendWarning(input: {
     title: "Choose a machine to continue",
     description: noMachineReadsEveryThread
       ? "No machine can read every attached thread. Choose a machine in the composer or remove the threads."
-      : "No eligible machine has available resources. Choose a machine in the composer to override.",
+      : translateWebSource(
+          uiLocale,
+          "No eligible machine has available resources. Choose a machine in the composer to override.",
+        ),
   };
 }
 

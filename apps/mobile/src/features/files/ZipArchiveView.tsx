@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { formatAttachmentSize } from "@t3tools/client-runtime/state/attachments";
 import {
   ARCHIVE_ENTRY_MAX_BYTES,
@@ -264,10 +265,16 @@ function ZipTreeRowView(props: {
       <View className="w-5 items-center">
         <PierreEntryIcon path={node.path} kind={entry ? "file" : "directory"} size={17} />
       </View>
-      <Text className="min-w-0 flex-1 text-[15px] text-foreground" numberOfLines={1}>
+      <Text
+        localize={false}
+        className="min-w-0 flex-1 text-[15px] text-foreground"
+        numberOfLines={1}
+      >
         {folder ? (
           <>
-            <Text className="text-[15px] text-foreground-muted">{folder.prefix}</Text>
+            <Text localize={false} className="text-[15px] text-foreground-muted">
+              {folder.prefix}
+            </Text>
             {folder.name}
           </>
         ) : (
@@ -330,7 +337,7 @@ function ZipArchiveHeader(props: {
       ) : (
         <Toolbar placement="right">
           {props.onRemove ? (
-            <Toolbar.Menu accessibilityLabel="ZIP actions" icon="ellipsis">
+            <Toolbar.Menu accessibilityLabel={localizeMobileString("ZIP actions")} icon="ellipsis">
               <Toolbar.MenuAction icon="square.and.arrow.up" onPress={props.onSave}>
                 Save ZIP
               </Toolbar.MenuAction>
@@ -340,7 +347,7 @@ function ZipArchiveHeader(props: {
             </Toolbar.Menu>
           ) : (
             <Toolbar.Button
-              accessibilityLabel="Save ZIP"
+              accessibilityLabel={localizeMobileString("Save ZIP")}
               icon="square.and.arrow.up"
               onPress={props.onSave}
             />
@@ -445,10 +452,12 @@ function ZipArchiveList(props: {
             <View className="h-[38px] flex-row items-center gap-2 rounded-[10px] bg-subtle px-3">
               <SymbolView name="magnifyingglass" size={15} tintColorClassName="accent-icon-muted" />
               <TextInput
-                accessibilityLabel="Filter files in ZIP"
+                accessibilityLabel={localizeMobileString("Filter files in ZIP")}
                 autoCapitalize="none"
                 autoCorrect={false}
-                placeholder={`Filter ${fileCount} ${fileCount === 1 ? "file" : "files"}`}
+                placeholder={localizeMobileString(
+                  `Filter ${fileCount} ${fileCount === 1 ? "file" : "files"}`,
+                )}
                 placeholderTextColorClassName="accent-placeholder"
                 cursorColorClassName="accent-focus"
                 className="min-w-0 flex-1 font-sans text-[15px] text-foreground"
@@ -458,7 +467,7 @@ function ZipArchiveList(props: {
               {query ? (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Clear filter"
+                  accessibilityLabel={localizeMobileString("Clear filter")}
                   hitSlop={10}
                   onPress={() => setQuery("")}
                 >
@@ -790,7 +799,7 @@ function ZipEntryView(props: {
         />
       ) : (
         <Toolbar placement="right">
-          <Toolbar.Menu accessibilityLabel="File actions" icon="ellipsis">
+          <Toolbar.Menu accessibilityLabel={localizeMobileString("File actions")} icon="ellipsis">
             {renderedMode ? (
               <Toolbar.MenuAction
                 icon={rendered ? "doc.text" : "eye"}

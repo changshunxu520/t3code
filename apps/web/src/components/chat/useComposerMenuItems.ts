@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import {
   matchComposerEnvironmentItems,
   matchComposerThreadItems,
@@ -93,6 +95,8 @@ export function useComposerMenuItems({
   readonly workspaceSkillsScanning: boolean;
   readonly questionAttachmentTarget: DraftId | null;
 }) {
+  const { t, locale: releaseLocale } = useI18n();
+
   // Thread mentions rank by recency as of when the composer mounted.
   const [now] = useState(() => Date.now());
   const composerTriggerKind = composerTrigger?.kind ?? null;
@@ -222,7 +226,7 @@ export function useComposerMenuItems({
           type: "slash-command",
           command: "model",
           label: "/model",
-          description: "Switch response model for this thread",
+          description: t("composer.command.modelDescription"),
         },
         ...(planModeUiEnabled
           ? ([
@@ -231,14 +235,14 @@ export function useComposerMenuItems({
                 type: "slash-command",
                 command: "plan",
                 label: "/plan",
-                description: "Switch this thread into plan mode",
+                description: t("composer.command.planDescription"),
               },
               {
                 id: "slash:default",
                 type: "slash-command",
                 command: "default",
                 label: "/default",
-                description: "Switch this thread back to normal build mode",
+                description: t("composer.command.defaultDescription"),
               },
             ] as const)
           : []),
@@ -307,7 +311,7 @@ export function useComposerMenuItems({
         description:
           skill.shortDescription ??
           skill.description ??
-          (skill.scope ? `${skill.scope} skill` : "Run provider skill"),
+          (skill.scope ? `${skill.scope} skill` : t("composer.command.runProviderSkill")),
       }));
     }
     if (
@@ -400,11 +404,11 @@ export function useComposerMenuItems({
       }
       return composerTrigger?.query
         ? `No pull request matches ${composerTrigger.query}.`
-        : "No pull requests found in this repository.";
+        : translateWebSource(releaseLocale, "No pull requests found in this repository.");
     }
     return composerTriggerKind === "path"
-      ? "No matching files or folders."
-      : "No matching command.";
+      ? t("composer.menu.noPaths")
+      : t("composer.menu.noCommands");
   })();
 
   return { items, isLoading, emptyState };

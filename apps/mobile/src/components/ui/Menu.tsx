@@ -1,3 +1,5 @@
+import { localizeMenuActions } from "../../i18n/localizeMenuActions";
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { MenuView } from "@react-native-menu/menu";
 import {
   cloneElement,
@@ -24,7 +26,7 @@ const ThemedMenuView = withUniwind(
   }) {
     const actions = useMemo(
       () =>
-        withMenuActionIconColors(props.actions, {
+        withMenuActionIconColors(localizeMenuActions(props.actions), {
           icon: iconColor,
           destructiveIcon: destructiveIconColor,
         }),
@@ -48,6 +50,7 @@ export function Menu(props: MenuProps) {
   const pendingPress = useRef<(() => void) | null>(null);
 
   const { className: _className, ...menuProps } = props;
+  menuProps.title = props.title === undefined ? undefined : localizeMobileString(props.title);
   let children = menuProps.children;
   if (props.shouldOpenOnLongPress && isValidElement(children)) {
     const child = children as ReactElement<Pick<PressableProps, "onTouchStart" | "onPress">>;

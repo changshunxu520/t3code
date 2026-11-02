@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Pressable, View } from "react-native";
 
 import { AppText } from "../../components/ui/AppText";
@@ -13,7 +14,7 @@ export function BrowserPreviewButton(props: {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={props.count === 1 ? "View browser" : `View ${props.count} browser tabs`}
-      accessibilityHint="Watch and control browser tabs open in this thread"
+      accessibilityHint={localizeMobileString("Watch and control browser tabs open in this thread")}
       onPress={props.onPress}
       className={
         compact

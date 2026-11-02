@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useRef, useState } from "react";
 import { Keyboard, Pressable, TextInput, type TextInputInstance, View } from "react-native";
 import { useHardwareBack } from "../../lib/backHandler";
@@ -45,7 +46,7 @@ export function AppBar(props: AppBarProps) {
     >
       {search?.mode === "inline" ? (
         <Pressable
-          accessibilityLabel={menu.title}
+          accessibilityLabel={localizeMobileString(menu.title)}
           accessibilityRole="button"
           className="items-center justify-center rounded-full bg-subtle"
           style={{ width: buttonSize, height: buttonSize }}
@@ -58,7 +59,10 @@ export function AppBar(props: AppBarProps) {
           />
         </Pressable>
       ) : (
-        <ScreenHeaderButton accessibilityLabel={menu.title} icon={menu.icon} />
+        <ScreenHeaderButton
+          accessibilityLabel={localizeMobileString(menu.title)}
+          icon={menu.icon}
+        />
       )}
     </Menu>
   ));
@@ -90,7 +94,7 @@ export function AppBar(props: AppBarProps) {
           <View className="flex-row items-center gap-2" style={{ minHeight: buttonSize }}>
             {props.onBack ? (
               <Pressable
-                accessibilityLabel="Navigate up"
+                accessibilityLabel={localizeMobileString("Navigate up")}
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={props.onBack}
@@ -121,15 +125,15 @@ export function AppBar(props: AppBarProps) {
                 type="monochrome"
               />
               <TextInput
-                accessibilityLabel={search.placeholder}
+                accessibilityLabel={localizeMobileString(search.placeholder)}
                 autoCapitalize="none"
                 onChangeText={search.onChangeText}
                 value={search.value}
-                placeholder={
+                placeholder={localizeMobileString(
                   search.compactToolbar
                     ? (search.compactPlaceholder ?? search.placeholder)
-                    : search.placeholder
-                }
+                    : search.placeholder,
+                )}
                 placeholderTextColorClassName="accent-placeholder"
                 className="flex-1 text-base font-sans text-header-foreground"
                 style={{ paddingVertical: 7 * scale }}
@@ -207,7 +211,7 @@ export function AppBar(props: AppBarProps) {
                 />
                 <SearchField
                   inputRef={inputRef}
-                  accessibilityLabel={search.placeholder}
+                  accessibilityLabel={localizeMobileString(search.placeholder)}
                   clearAccessibilityLabel={search.clearAccessibilityLabel ?? "Clear search"}
                   placeholder={search.placeholder}
                   value={search.value}

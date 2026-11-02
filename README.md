@@ -1,153 +1,69 @@
-# T3 Code
+# T3 Code 简体中文社区版
 
-T3 Code is an "agent harness control surface". It enables control of the agents on your machine with a best-in-class mobile app ([iOS](https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824), [Android](https://play.google.com/store/apps/details?id=com.t3tools.t3code)), [web app](https://app.t3.codes) and [Electron-based desktop app](https://t3.codes).
+**用中文管理你的 AI 编程工作流。**
 
-Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCode, Google Antigravity, and fx. If they're set up on your computer, T3 Code can control them.
+在 T3 Code 中使用已有的 Codex、Claude Code 等智能体，管理项目、对话与代码变更。本项目在官方稳定版基础上持续完善简体中文界面，保留英文和“跟随系统”选项。
 
-## "Wait, what are you selling me?"
+**[下载中文版](#下载中文版) · [首次使用](#首次使用) · [汉化范围与升级说明](./README.zh-CN.md) · [反馈问题](https://github.com/ZhiweiXiao98/t3code/issues)**
 
-Nothing. We built T3 Code because we wanted the best possible development experience with agents. We were inspired by existing solutions like the Codex desktop app, Conductor, Claude Desktop and Cursor Glass, but none met our bar.
+> 非官方社区汉化版，与 T3 Code 官方团队没有隶属关系。产品与核心能力来自 [pingdotgg/t3code](https://github.com/pingdotgg/t3code)，本仓库负责中文适配与社区客户端维护。
 
-We wanted something performant, remote-ready, and truly open. If we ever go the wrong direction, we want you to have everything you need to fork and build the editor that you want.
+## 下载中文版
 
-## Installation
+当前桌面版本：**[v0.1.5-zh.1](https://github.com/ZhiweiXiao98/t3code/releases/tag/v0.1.5-zh.1)**，发布于 **2026 年 10 月 31 日**，基于官方稳定版 **v0.1.5**。Android **[0.1.5-zh.1](https://github.com/ZhiweiXiao98/t3code/releases/tag/android-v0.1.5-zh.1)** 已于同日正式发布，面向 ARM64 手机。
 
-> [!WARNING]
-> T3 Code currently supports Codex, Claude, Cursor, Grok Build, OpenCode, Antigravity, and fx. Install and authenticate at least one provider before use:
->
-> - Codex: install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`
-> - Claude: install [Claude Code](https://claude.com/product/claude-code) and run `claude auth login`
-> - Cursor: install [Cursor CLI](https://cursor.com/cli) and run `agent login`
-> - Grok Build: install [Grok Build CLI](https://x.ai/cli) and run `grok login`
-> - OpenCode: install [OpenCode](https://opencode.ai) and run `opencode auth login`
-> - Antigravity: enable it in Settings, then use **Install Antigravity** and **Sign in with Google**. No CLI is required.
-> - fx: install [fx](https://fx.sh) and run `fx login` on the machine running the T3 Code server ([setup guide](./docs/user/providers-fx.md))
+| 你的系统                     | 直接下载                                                                                                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows x64                  | [下载安装程序 .exe](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/T3-Code-0.1.5-zh.1-x64.exe)                           |
+| Mac：Apple Silicon（M 系列） | [下载 .dmg](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/T3-Code-0.1.5-zh.1-arm64.dmg)                                 |
+| Mac：Intel                   | [下载 .dmg](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/T3-Code-0.1.5-zh.1-x64.dmg)                                   |
+| Linux x64：Debian / Ubuntu   | [下载 .deb](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/T3-Code-0.1.5-zh.1-amd64.deb)                                 |
+| Linux x64：AppImage          | [下载 .AppImage](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/T3-Code-0.1.5-zh.1-x86_64.AppImage)                      |
+| Android ARM64                | [下载已签名 .apk](https://github.com/ZhiweiXiao98/t3code/releases/download/android-v0.1.5-zh.1/T3-Code-zh-CN-Android-0.1.5-zh.1-arm64-v8a.apk) |
 
-### Command line
+[桌面文件与发布说明](https://github.com/ZhiweiXiao98/t3code/releases/tag/v0.1.5-zh.1) · [SHA-256 校验值](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/SHA256SUMS.txt) · [构建来源](https://github.com/ZhiweiXiao98/t3code/releases/download/v0.1.5-zh.1/BUILD-PROVENANCE.json)
 
-```bash
-curl -fsSL https://t3.codes/install.sh | sh
-```
+> **安装方式：** 下载对应系统的安装包并安装。当前暂不提供自动更新，请从本仓库下载安装新版本。
 
-On Windows, in PowerShell:
+**Android 已发布可安装的汉化 APK。** [Android 发布说明](https://github.com/ZhiweiXiao98/t3code/releases/tag/android-v0.1.5-zh.1) · [Android SHA-256 校验值](https://github.com/ZhiweiXiao98/t3code/releases/download/android-v0.1.5-zh.1/SHA256SUMS.txt)。新版沿用已完成云端恢复验证的固定社区签名，**可覆盖安装 `android-v0.1.3-zh.1` 固定签名版**；更早使用其他签名的 APK 不能直接覆盖。需要卸载异签名旧版时，请先保存配置，卸载可能丢失本地数据。已通过云端构建、原生回归及签名验证，未宣称完成实体手机上的人工安装测试。**iOS 仅有[官方原版（未汉化）](https://apps.apple.com/us/app/t3-code-remote-claude-more/id6787819824)**，不属于本社区安装包。
 
-```powershell
-irm https://t3.codes/install.ps1 | iex
-```
+## 为什么选择这个版本
 
-Then run `t3` to start the server and open the local web app. `t3 service install` keeps it running in the background, `t3 update` moves to a newer release, and `t3 --help` has the full reference.
+- **常用工作流看中文：** 项目与会话、设置中心、命令面板、Pull Request、用量与常见提示等界面持续完善汉化。
+- **保留准确的技术信息：** Provider 与模型名称、命令、快捷键、路径、URL、Git 标识符保留原文，方便操作与排错。
+- **跟进官方稳定版：** 保留已有翻译，增量补齐新功能和新文案；通过验证后再发布，不把未发布的 main 或 nightly 当稳定更新。
+- **下载与验证可查：** 已发布桌面与 Android 均对应[源码 `40fd1d26`](https://github.com/ZhiweiXiao98/t3code/commit/40fd1d260c26c77d347de42b7315dd6380c8fb4d)，完整 15 项云端验证任务全部通过；Linux、两种 Mac 架构和 Windows 的实际桌面产物启动检查通过。发布页分别提供文件校验值和构建来源。后续文档提交不是二进制来源；云端验证不等于所有系统上的人工安装测试。
 
-To try it once without installing, run `npx t3@latest` instead.
+[完整构建记录](https://github.com/ZhiweiXiao98/t3code/actions/runs/41193465754) · [桌面发布记录](https://github.com/ZhiweiXiao98/t3code/actions/runs/41196620658) · [Android 签名与发布](https://github.com/ZhiweiXiao98/t3code/actions/runs/41196654710) · [查看汉化范围及已知限制](./README.zh-CN.md#已覆盖界面)
 
-### Desktop app
+## 首次使用
 
-Install the latest version of the desktop app from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), or from your favorite package registry:
+1. **按上表选择系统与架构下载安装包。** 不确定 Mac 架构时，在“关于本机”查看“芯片”或“处理器”。
+2. **在桌面端或服务端所在机器配置至少一个已安装并登录的智能体。** 例如 [Codex CLI](https://developers.openai.com/codex/cli) 或 [Claude Code](https://claude.com/product/claude-code)。本客户端不附送模型额度，也不替代服务提供方账号。
+3. **打开应用，进入“设置 → 常规 → 语言”，选择“简体中文”。** 添加项目后，选择已配置的 Provider 开始使用。Windows 托盘菜单切换语言后需重启应用同步。Android 社区版固定使用简体中文，配对连接兼容的新版 T3 Code 服务端；不需要在手机上安装 Provider CLI。
 
-#### Windows (`winget`)
+> 官方的 `t3.codes` 安装脚本、`npx t3@latest`、Homebrew、winget 等入口安装的是**官方原版**，不是本仓库的汉化安装包。想使用中文版，请使用上方下载入口。
 
-```bash
-winget install T3Tools.T3Code
-```
+## 从旧版升级：先备份
 
-#### Windows (`scoop`)
+- V2 首次启动会复制并导入 V1 数据；之后两套数据**不会互相同步**。
+- V1 与 V2 的服务器、桌面端和移动客户端**不能互连**，请同步升级连接的设备。
+- V1 历史社区 Android APK 不能连接 V2 服务端；请使用上方新版 Android APK。`android-v0.1.3-zh.1` 固定签名版可直接覆盖升级，更早异签名版本需先保存配置再卸载。
+- OpenCode 2 会迁移共享数据库，不要与 OpenCode 1 在同一台机器上并行运行。
 
-```bash
-scoop install extras/t3code
-```
+[详细升级说明](./README.zh-CN.md#升级前必读) · [上游迁移指南](https://github.com/pingdotgg/t3code/issues/14871)
 
-#### macOS (Homebrew)
+## 反馈与维护
 
-```bash
-brew install --cask t3-code
-```
+发现漏译、翻译不自然或界面问题？欢迎[提交 Issue](https://github.com/ZhiweiXiao98/t3code/issues/new)，附上版本号、系统、复现步骤，以及已遮挡敏感信息的截图。请勿上传访问令牌、密钥或私人对话。
 
-#### Debian, Ubuntu (`.deb`)
+维护流程：**官方稳定版更新 → 同步改动 → 增量完善汉化 → 测试与构建 → 发布客户端**。历史分支和发布保留；当前维护分支为 `maintenance/v0.1.5-zh-cloud`，仓库默认分支暂仍为 `maintenance/v0.1.3-zh-cloud`，未调整默认分支设置。[当前维护源码](https://github.com/ZhiweiXiao98/t3code/tree/maintenance/v0.1.5-zh-cloud)。
 
-Download the `.deb` from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), then:
+## 文档与源码
 
-```bash
-sudo apt install ./T3-Code-*.deb
-```
+- [中文版说明、平台状态和语言设置](./README.zh-CN.md)
+- [权限模式](./docs/user/permission-modes.md) · [键盘快捷键](./docs/user/keybindings.md) · [项目设置](./docs/user/project-settings.md)
+- [远程访问](./docs/user/remote-access.md) · [服务端与客户端版本同步](./docs/user/updating.md)
+- [上游项目与官方安装方式](https://github.com/pingdotgg/t3code) · [源码开发说明](./docs/internals/overview.md) · [贡献指南](./CONTRIBUTING.md)
 
-#### Arch Linux (AUR)
-
-Stable:
-
-```bash
-yay -S t3code-bin
-```
-
-Nightly:
-
-```bash
-yay -S t3code-nightly-bin
-```
-
-The AUR packaging is maintained in this repository under [`packaging/aur`](./packaging/aur).
-
-#### Nix (nixpkgs)
-
-```bash
-nix profile add github:NixOS/nixpkgs/nixos-unstable#t3code
-```
-
-The package is maintained in [nixpkgs](https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/by-name/t3/t3code)
-and includes the desktop app (`t3code-desktop`) and the `t3` command.
-See [Nix installation](./docs/user/install.md#nix-nixpkgs) for NixOS configuration and updates.
-
-## Some notes
-
-We are very very early in this project. Expect bugs.
-
-We are (mostly) not accepting contributions yet. Small fixes may be considered. Big features will not be.
-
-## Documentation
-
-Full docs live in [docs/](./docs). There's no docs site yet.
-
-- [FAQ](./docs/user/faq.md)
-- [Install and first run](./docs/user/install.md)
-- [Permission modes](./docs/user/permission-modes.md)
-- [Keyboard shortcuts](./docs/user/keybindings.md)
-- [Project settings](./docs/user/project-settings.md)
-- [Appearance preferences](./docs/user/appearance.md)
-- [Remote access from a phone or another machine](./docs/user/remote-access.md)
-- [Connect Claude Code, Codex, ChatGPT and other agents over MCP](./docs/user/outside-agents.md)
-- [Keeping app and server in sync](./docs/user/updating.md)
-- [Source control integrations](./docs/user/source-control.md)
-- Multiple accounts: [Codex](./docs/user/providers-codex.md) · [Claude](./docs/user/providers-claude.md)
-- [Run T3 Code as a background service](./docs/user/background-service.md)
-
-Building from source? Start at [docs/internals/overview.md](./docs/internals/overview.md).
-
-## If you REALLY want to contribute still.... read this first
-
-### Install `vp`
-
-T3 Code uses Vite+ so you'll need to install the global `vp` command-line tool.
-
-#### macOS / Linux
-
-```bash
-curl -fsSL https://vite.plus | bash
-```
-
-#### Windows
-
-```bash
-irm https://vite.plus/ps1 | iex
-```
-
-Checkout their getting started guide for more information: https://viteplus.dev/guide/
-
-### Install dependencies
-
-```bash
-vp i
-```
-
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before reporting a bug or opening a PR.
-
-Have a feature request? Start an [Ideas discussion](https://github.com/pingdotgg/t3code/discussions/categories/ideas).
-
-Need support? Join the [Discord](https://discord.gg/jn4EGJjrvv).
+本项目沿用上游的 [MIT License](./LICENSE)。感谢 T3 Code 上游团队及贡献者；汉化维护：肖志伟。

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { Button } from "../../components/ui/Button";
 import {
   worktreeSetupStageLabel,
@@ -65,7 +66,7 @@ export function WorktreeSetupCard(props: WorktreeSetupCardProps) {
               : "Worktree ready";
 
   return (
-    <View accessibilityLabel="Worktree setup" className="py-1">
+    <View accessibilityLabel={localizeMobileString("Worktree setup")} className="py-1">
       <View className="min-h-11 flex-row items-center gap-2 border-b border-border px-1">
         <HeaderLabel
           label={label}
@@ -82,11 +83,11 @@ export function WorktreeSetupCard(props: WorktreeSetupCardProps) {
         ) : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
+          accessibilityLabel={localizeMobileString(
             backgroundSetup
               ? `Background setup is still running: ${scriptName}. Show setup progress.`
-              : "Worktree setup details"
-          }
+              : "Worktree setup details",
+          )}
           accessibilityState={{ expanded: detailsOpen }}
           onPress={() => setDetailsOpen(true)}
           className="min-h-11 max-w-[55%] justify-center px-2"
@@ -224,7 +225,7 @@ function SetupDetailsSheet({
             </View>
           ))}
         {snapshot.phase === "failed" && snapshot.error ? (
-          <Text selectable className="ml-8 mt-2 text-xs text-danger-foreground">
+          <Text localize={false} selectable className="ml-8 mt-2 text-xs text-danger-foreground">
             {snapshot.error}
           </Text>
         ) : null}
@@ -283,7 +284,7 @@ function StageRow({
           : stage.detail;
   return (
     <View
-      accessibilityLabel={`${label}, ${stage.status}`}
+      accessibilityLabel={localizeMobileString(`${label}, ${stage.status}`)}
       className={compact ? "min-h-8 flex-row items-center" : "min-h-11 flex-row items-center"}
       style={{ columnGap: 8, opacity: stage.status === "pending" ? 0.4 : 1 }}
     >
@@ -349,7 +350,7 @@ const OUTPUT_TAIL_SLOTS = [0, 1, 2, 3] as const;
 function OutputTail({ lines, failed }: { lines: ReadonlyArray<string>; failed: boolean }) {
   return (
     <View
-      accessibilityLabel="Setup script output"
+      accessibilityLabel={localizeMobileString("Setup script output")}
       className={
         failed
           ? "mb-2 ml-8 rounded-md border border-danger-border bg-danger px-3 py-2"
@@ -359,6 +360,7 @@ function OutputTail({ lines, failed }: { lines: ReadonlyArray<string>; failed: b
       {OUTPUT_TAIL_SLOTS.map((slot) => (
         <Text
           key={slot}
+          localize={false}
           selectable
           numberOfLines={1}
           className={

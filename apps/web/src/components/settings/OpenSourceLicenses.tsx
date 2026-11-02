@@ -16,6 +16,8 @@ import {
   type ThirdPartyLicenseEntry,
 } from "@t3tools/shared/thirdPartyLicenses";
 
+import { useI18n } from "../../i18n/WebI18nContext";
+import { translateWebSource } from "../../i18n/messages";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../ui/collapsible";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
@@ -71,6 +73,7 @@ function LicenseNoticeRow({
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
 }) {
+  const { locale, t } = useI18n();
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
       <article>
@@ -92,11 +95,11 @@ function LicenseNoticeRow({
           </CollapsibleTrigger>
           {entry.sourceUrl ? (
             <Button
-              aria-label={`View project source for ${entry.name}`}
+              aria-label={t("settings.openSourceLicenses.viewProjectSource", { name: entry.name })}
               className="me-3 shrink-0 sm:me-4"
               render={<a href={entry.sourceUrl} rel="noreferrer noopener" target="_blank" />}
               size="icon-micro"
-              title="Project source"
+              title={translateWebSource(locale, "Project source")}
               variant="ghost-muted"
             >
               <ExternalLinkIcon aria-hidden className="size-3" />
@@ -124,11 +127,15 @@ function LicenseCount({
   filteredCount: number;
   totalCount: number;
 }) {
+  const { t } = useI18n();
   return (
     <p className="whitespace-nowrap text-xs font-normal text-muted-foreground tabular-nums">
       {filteredCount === totalCount
-        ? `${String(totalCount)} notices`
-        : `${String(filteredCount)} of ${String(totalCount)}`}
+        ? t("settings.openSourceLicenses.noticeCount", { count: totalCount })
+        : t("settings.openSourceLicenses.filteredCount", {
+            filtered: filteredCount,
+            total: totalCount,
+          })}
     </p>
   );
 }
@@ -148,6 +155,7 @@ function LicenseHeaderAction({
   filteredCount: number;
   totalCount: number;
 }) {
+  const { locale } = useI18n();
   if (!searchOpen) {
     return (
       <div className="flex items-center gap-1.5">
@@ -156,7 +164,7 @@ function LicenseHeaderAction({
           <TooltipTrigger
             render={
               <Button
-                aria-label="Search open-source licenses"
+                aria-label={translateWebSource(locale, "Search open-source licenses")}
                 onClick={() => onSearchOpenChange(true)}
                 size="icon-micro"
                 type="button"
@@ -166,7 +174,7 @@ function LicenseHeaderAction({
               </Button>
             }
           />
-          <TooltipPopup side="top">Search licenses</TooltipPopup>
+          <TooltipPopup side="top">{translateWebSource(locale, "Search licenses")}</TooltipPopup>
         </Tooltip>
       </div>
     );
@@ -182,7 +190,7 @@ function LicenseHeaderAction({
           <SearchIcon aria-hidden className="size-3" />
         </InputGroupAddon>
         <InputGroupInput
-          aria-label="Search open-source licenses"
+          aria-label={translateWebSource(locale, "Search open-source licenses")}
           autoFocus
           onBlur={() => {
             if (query.length === 0) onSearchOpenChange(false);
@@ -194,7 +202,7 @@ function LicenseHeaderAction({
             onQueryChange("");
             onSearchOpenChange(false);
           }}
-          placeholder="Search licenses"
+          placeholder={translateWebSource(locale, "Search licenses")}
           size="sm"
           type="search"
           value={query}
@@ -205,22 +213,30 @@ function LicenseHeaderAction({
 }
 
 function LicenseManifestError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { locale, t } = useI18n();
+  const statusMatch = /^The license manifest request failed with status (\d+)\.$/.exec(message);
+  const localizedMessage = statusMatch
+    ? t("settings.openSourceLicenses.requestFailed", { status: statusMatch[1]! })
+    : translateWebSource(locale, message);
   return (
     <div className="flex flex-col items-start gap-3 px-3 py-5 sm:px-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-medium text-foreground">Open-source notices are unavailable</h3>
+        <h3 className="text-sm font-medium text-foreground">
+          {translateWebSource(locale, "Open-source notices are unavailable")}
+        </h3>
         <p className="max-w-[70ch] text-pretty text-xs leading-normal text-muted-foreground/80">
-          {message}
+          {localizedMessage}
         </p>
       </div>
       <Button type="button" size="xs" variant="outline" onClick={onRetry}>
-        Try again
+        {translateWebSource(locale, "Try again")}
       </Button>
     </div>
   );
 }
 
 export function OpenSourceLicensesPanel() {
+  const { locale } = useI18n();
   const result = useAtomValue(licenseManifestAtom);
   const retry = useAtomRefresh(licenseManifestAtom);
   const [query, setQuery] = useState("");
@@ -270,7 +286,7 @@ export function OpenSourceLicensesPanel() {
               })
             ) : (
               <p className="px-3 py-8 text-center text-sm/6 text-muted-foreground sm:px-4">
-                No licenses match that search.
+                {translateWebSource(locale, "No licenses match that search.")}
               </p>
             )}
           </div>
@@ -278,7 +294,7 @@ export function OpenSourceLicensesPanel() {
           <LicenseManifestError message={errorMessage} onRetry={retry} />
         ) : (
           <p className="px-3 py-5 text-sm/6 text-muted-foreground sm:px-4">
-            Loading open-source notices…
+            {translateWebSource(locale, "Loading open-source notices…")}
           </p>
         )}
       </SettingsSection>

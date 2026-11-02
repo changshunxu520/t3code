@@ -1,4 +1,6 @@
 import { useScopedSettingsWriteAllowed } from "./useScopedSettings";
+import { useI18n } from "../../i18n/WebI18nContext";
+import { translateWebSource } from "../../i18n/messages";
 import { AuthSettingsWriteScope } from "@t3tools/contracts";
 import { EnvironmentId, type T3ProjectFileScript } from "@t3tools/contracts";
 import {
@@ -34,6 +36,7 @@ import { SettingsRow, SettingsSection } from "./settingsLayout";
 import { useSettingsScope } from "./SettingsScopeContext";
 
 export function ProjectActionsSettings() {
+  const { locale } = useI18n();
   const { scope, targets, target } = useSettingsScope();
   const { environments } = useEnvironments();
   const isProjectScope = scope.kind === "project" || scope.kind === "checkout";
@@ -101,7 +104,10 @@ export function ProjectActionsSettings() {
       setRequest({
         scriptId: null,
         initial: payload,
-        error: error instanceof Error ? error.message : "Failed to import action.",
+        error:
+          error instanceof Error
+            ? error.message
+            : translateWebSource(locale, "Failed to import action."),
       });
     }
   };
@@ -130,14 +136,19 @@ export function ProjectActionsSettings() {
                     />
                   }
                 >
-                  Import scripts
+                  {translateWebSource(locale, "Import scripts")}
                   <ChevronDownIcon className="size-3.5" />
                 </MenuTrigger>
                 <MenuPopup align="end">
                   <MenuGroup>
-                    <MenuGroupLabel>Import from t3.json</MenuGroupLabel>
+                    <MenuGroupLabel>
+                      {translateWebSource(locale, "Import from t3.json")}
+                    </MenuGroupLabel>
                     <p className="px-2 pb-2 text-pretty text-sm text-muted-foreground">
-                      Add actions declared by this checkout without editing them first.
+                      {translateWebSource(
+                        locale,
+                        "Add actions declared by this checkout without editing them first.",
+                      )}
                     </p>
                   </MenuGroup>
                   <MenuSeparator />
@@ -165,7 +176,7 @@ export function ProjectActionsSettings() {
               onClick={() => setRequest({ scriptId: null, initial: EMPTY_PROJECT_SCRIPT_INPUT })}
             >
               <PlusIcon className="size-3.5" />
-              Add action
+              {translateWebSource(locale, "Add action")}
             </Button>
           </div>
         }

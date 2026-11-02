@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import { translateWebMessage, translateWebSource } from "~/i18n/messages";
+import { useI18n } from "~/i18n/WebI18nContext";
+
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
 import {
   AlertDialog,
@@ -18,6 +21,7 @@ import { searchableSetting } from "./settingsSearch";
 
 // Toggling relaunches desktop; the switch reflects startup state.
 export function LocalEnvironmentSetting() {
+  const { locale } = useI18n();
   const setEnabled = window.desktopBridge?.setLocalEnvironmentEnabled;
   const [enabled] = useState(() => !isLocalEnvironmentDisabled());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -31,7 +35,11 @@ export function LocalEnvironmentSetting() {
     try {
       await setEnabled(!enabled);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Couldn't change this setting.");
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : translateWebSource(locale, "Couldn't change this setting."),
+      );
       setIsUpdating(false);
     }
   };
@@ -50,7 +58,7 @@ export function LocalEnvironmentSetting() {
             checked={enabled}
             disabled={isUpdating}
             onCheckedChange={() => setConfirmOpen(true)}
-            aria-label="Local environment"
+            aria-label={translateWebSource(locale, "Local environment")}
           />
         }
       />
@@ -65,18 +73,26 @@ export function LocalEnvironmentSetting() {
         <AlertDialogPopup>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {enabled ? "Turn off local environment?" : "Turn on local environment?"}
+              {enabled
+                ? translateWebSource(locale, "Turn off local environment?")
+                : translateWebSource(locale, "Turn on local environment?")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {enabled
-                ? "T3 Code will restart without running a server on this computer. Any agents and terminals running here will stop, and other devices will no longer be able to connect to this computer. Your projects, history, and remote environments are unaffected."
-                : "T3 Code will restart and start running a server on this computer again."}
+                ? translateWebSource(
+                    locale,
+                    "T3 Code will restart without running a server on this computer. Any agents and terminals running here will stop, and other devices will no longer be able to connect to this computer. Your projects, history, and remote environments are unaffected.",
+                  )
+                : translateWebSource(
+                    locale,
+                    "T3 Code will restart and start running a server on this computer again.",
+                  )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error ? <p className="px-6 pb-4 text-sm text-destructive">{error}</p> : null}
           <AlertDialogFooter>
             <AlertDialogClose disabled={isUpdating} render={<Button variant="outline" />}>
-              Cancel
+              {translateWebMessage(locale, "common.cancel")}
             </AlertDialogClose>
             <Button
               variant={enabled ? "destructive" : "default"}
@@ -86,12 +102,12 @@ export function LocalEnvironmentSetting() {
               {isUpdating ? (
                 <>
                   <Spinner size="sm" />
-                  Restarting…
+                  {translateWebSource(locale, "Restarting…")}
                 </>
               ) : enabled ? (
-                "Restart and turn off"
+                translateWebSource(locale, "Restart and turn off")
               ) : (
-                "Restart and turn on"
+                translateWebSource(locale, "Restart and turn on")
               )}
             </Button>
           </AlertDialogFooter>

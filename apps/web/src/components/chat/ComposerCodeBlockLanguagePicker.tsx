@@ -20,6 +20,8 @@ import {
   ComboboxTrigger,
 } from "../ui/combobox";
 import { PierreEntryIcon } from "./PierreEntryIcon";
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 
 function LanguageIcon(props: { language: string; theme: "light" | "dark" }) {
   const fileName = props.language ? syntheticFileNameForLanguageId(props.language) : "file.txt";
@@ -34,6 +36,8 @@ export function ComposerCodeBlockLanguagePicker(props: {
   disabled: boolean;
   onChange: (language: string) => void;
 }) {
+  const { locale, t } = useI18n();
+  const tr = (text: string) => translateWebSource(locale, text);
   const [query, setQuery] = useState("");
   const current = codeLanguageEntry(props.language)?.id ?? props.language;
   const items: CodeBlockLanguage[] = CODE_BLOCK_LANGUAGES.some((entry) => entry.id === current)
@@ -42,10 +46,14 @@ export function ComposerCodeBlockLanguagePicker(props: {
   const needle = query.trim().toLowerCase();
   const filteredItems = needle
     ? items.filter(
-        (entry) => entry.label.toLowerCase().includes(needle) || entry.id.includes(needle),
+        (entry) =>
+          entry.label.toLowerCase().includes(needle) ||
+          tr(entry.label).toLowerCase().includes(needle) ||
+          entry.id.includes(needle),
       )
     : items;
   const selected = items.find((entry) => entry.id === current) ?? null;
+  const currentLabel = tr(codeLanguageLabel(props.language));
 
   return (
     <span className="-ml-1.5 flex min-w-0">
@@ -53,7 +61,7 @@ export function ComposerCodeBlockLanguagePicker(props: {
         items={items}
         filteredItems={filteredItems}
         autoHighlight
-        itemToStringLabel={(entry) => entry.label}
+        itemToStringLabel={(entry) => tr(entry.label)}
         isItemEqualToValue={(a, b) => a.id === b.id}
         value={selected}
         onOpenChange={(open) => {
@@ -70,27 +78,27 @@ export function ComposerCodeBlockLanguagePicker(props: {
               variant="ghost-muted"
               size="xs"
               disabled={props.disabled}
-              aria-label={`Code language: ${codeLanguageLabel(props.language)}`}
+              aria-label={t("composer.codeLanguageAria", { language: currentLabel })}
             />
           }
         >
           <LanguageIcon language={current} theme={props.theme} />
-          <span className="max-w-40 truncate">{codeLanguageLabel(props.language)}</span>
+          <span className="max-w-40 truncate">{currentLabel}</span>
           <ChevronDownIcon className="opacity-60" />
         </ComboboxTrigger>
         <ComboboxPopup align="start" className="w-56">
           <ComboboxSearchInput
-            aria-label="Search languages"
-            placeholder="Search languages"
+            aria-label={tr("Search languages")}
+            placeholder={tr("Search languages")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <ComboboxEmpty>No matching languages.</ComboboxEmpty>
+          <ComboboxEmpty>{tr("No matching languages.")}</ComboboxEmpty>
           <ComboboxList>
             {(entry: CodeBlockLanguage) => (
               <ComboboxItem key={entry.id || "plain"} value={entry}>
                 <LanguageIcon language={entry.id} theme={props.theme} />
-                <span className="min-w-0 flex-1 truncate">{entry.label}</span>
+                <span className="min-w-0 flex-1 truncate">{tr(entry.label)}</span>
                 {entry.id === current ? <CheckIcon className="ml-auto" /> : null}
               </ComboboxItem>
             )}

@@ -1,3 +1,4 @@
+import { localizeMobileString } from "../../i18n/mobileStrings";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { SheetHeader } from "../../components/ui/SheetHeader";
 import { IconButton } from "../../components/ui/IconButton";
@@ -70,14 +71,14 @@ function ConfiguredConnectOnboardingRouteScreen() {
               <View
                 className="size-12 items-center justify-center"
                 accessible
-                accessibilityLabel="Refreshing environments"
+                accessibilityLabel={localizeMobileString("Refreshing environments")}
                 accessibilityState={{ busy: true }}
               >
                 <AppActivityIndicator />
               </View>
             ) : (
               <IconButton
-                accessibilityLabel="Refresh environments"
+                accessibilityLabel={localizeMobileString("Refresh environments")}
                 icon="arrow.clockwise"
                 onPress={handleRefresh}
               />
