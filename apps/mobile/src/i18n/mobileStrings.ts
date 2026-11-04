@@ -1926,6 +1926,26 @@ const ZH_CN_MESSAGES = {
   "Waiting for the T3 Connect sign-in to load.": "正在等待 T3 Connect 登录状态加载。",
   "Your cloud sign-in changed. Sign in again to authorize the environment.":
     "你的云端登录状态已变更，请重新登录以授权此环境。",
+  "This device is still loading its T3 Connect sign-in": "此设备仍在加载 T3 Connect 登录状态",
+  "Wait a moment. T3 Code retries on its own.": "请稍候，T3 Code 会自动重试。",
+  "If it keeps waiting, reload or restart T3 Code on this device.":
+    "如果一直处于等待状态，请在此设备上重新加载或重启 T3 Code。",
+  "Working…": "处理中…",
+  "Reconnect to merge": "重新连接后才能合并",
+  "Reconnect to merge.": "重新连接后才能合并。",
+  "Merge unavailable": "无法合并",
+  "Enable auto-merge": "启用自动合并",
+  "Enable auto-merge?": "要启用自动合并吗？",
+  "Disable auto-merge": "停用自动合并",
+  "Disable auto-merge?": "要停用自动合并吗？",
+  "Checking stack membership…": "正在检查堆栈归属…",
+  "Refresh the stack before merging.": "请先刷新堆栈再合并。",
+  "This environment can display stacks but cannot merge them.":
+    "此环境可以显示堆栈，但无法合并堆栈。",
+  "Couldn't check stack membership. Refresh before merging.": "无法检查堆栈归属，请刷新后再合并。",
+  "Couldn't complete the merge action": "无法完成合并操作",
+  "Voice input prefers the first connected microphone in this list. Wired and Bluetooth devices are added by name after you use voice input with them connected; until then, the Other row ranks them. Swipe a device left to forget it.":
+    "语音输入会优先使用此列表中第一个已连接的麦克风。有线和蓝牙设备在连接状态下使用过语音输入后会按名称加入列表；在此之前由“其他”行决定其优先级。向左滑动设备可将其忽略。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [

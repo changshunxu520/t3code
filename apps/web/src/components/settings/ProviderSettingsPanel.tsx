@@ -140,10 +140,11 @@ function providerInstanceName(instance: ProviderInstanceConfig): string {
 }
 
 async function confirmProviderInstanceRemoval(
+  locale: Parameters<typeof translateWebSource>[0],
   question: string,
   consequence = "",
 ): Promise<boolean> {
-  const message = `${question}\nIts saved settings, including any custom binary path, will be removed.${consequence}`;
+  const message = `${question}\n${translateWebSource(locale, "Its saved settings, including any custom binary path, will be removed.")}${consequence}`;
   const confirmed = await settlePromise(() =>
     ensureLocalApi().dialogs.confirm(message, { variant: "destructive" }),
   );
@@ -880,7 +881,10 @@ export function EnvironmentProviderSettings({
   const deleteInstance = useStableCallback(
     async (instanceId: ProviderInstanceId, instance: ProviderInstanceConfig) => {
       const confirmed = await confirmProviderInstanceRemoval(
-        `Remove the ${providerInstanceName(instance)} provider instance?`,
+        locale,
+        locale === "zh-CN"
+          ? `要移除 ${providerInstanceName(instance)} 提供商实例吗？`
+          : `Remove the ${providerInstanceName(instance)} provider instance?`,
       );
       if (!confirmed) return;
       const updateResult = await persistProviderInstance({
@@ -931,8 +935,15 @@ export function EnvironmentProviderSettings({
       resolveProviderInstanceEnabled(instance) &&
       !resolveProviderInstanceEnabled({ driver: driverKind });
     const confirmed = await confirmProviderInstanceRemoval(
-      `Reset the ${providerInstanceName(instance)} provider to its defaults?`,
-      turnsOff ? " It will also be turned off." : "",
+      locale,
+      locale === "zh-CN"
+        ? `要将 ${providerInstanceName(instance)} 提供商恢复为默认设置吗？`
+        : `Reset the ${providerInstanceName(instance)} provider to its defaults?`,
+      turnsOff
+        ? locale === "zh-CN"
+          ? "该提供商也将被关闭。"
+          : " It will also be turned off."
+        : "",
     );
     if (!confirmed) return;
     const result = await persistProviderInstance({ operation: "remove", instanceId });

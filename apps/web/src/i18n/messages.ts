@@ -11023,6 +11023,12 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "Your cloud sign-in changed. Sign in again to authorize the environment.":
     "你的云端登录状态已变更，请重新登录以授权此环境。",
   "Refreshing...": "正在刷新...",
+  "Its saved settings, including any custom binary path, will be removed.":
+    "其已保存的设置（包括自定义可执行文件路径）将被移除。",
+  "This device is still loading its T3 Connect sign-in": "此设备仍在加载 T3 Connect 登录状态",
+  "Wait a moment. T3 Code retries on its own.": "请稍候，T3 Code 会自动重试。",
+  "If it keeps waiting, reload or restart T3 Code on this device.":
+    "如果一直处于等待状态，请在此设备上重新加载或重启 T3 Code。",
 };
 
 /** Translate static UI copy supplied by upstream components as English source text. */
