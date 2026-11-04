@@ -10992,6 +10992,37 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "Unable to open pull request link": "无法打开拉取请求链接",
   "Marking...": "正在标记...",
   "Could not download": "无法下载",
+  "Signed in, but the token saved below is used while it can be read.":
+    "已登录，但只要下方保存的令牌可读取，将优先使用该令牌。",
+  "Enter a valid secret reference.": "请输入有效的密钥引用。",
+  "Open this thread": "打开此任务",
+  "It opens in T3 Code if you're connected to the machine it runs on.":
+    "如果你已连接到运行该任务的设备，它将在 T3 Code 中打开。",
+  "Star on GitHub": "在 GitHub 上点 Star",
+  "Starring…": "正在点 Star…",
+  "Thanks for the star!": "感谢你的 Star！",
+  "It really helps T3 Code grow.": "这能帮助 T3 Code 持续成长。",
+  "Open GitHub": "打开 GitHub",
+  "Could not save grouping rule": "无法保存分组规则",
+  "Use global default": "使用全局默认设置",
+  "Grouping rule decides how each checkout joins project groups in the sidebar. Changing it can move a checkout to a different project.":
+    "分组规则决定每个检出副本如何加入侧边栏中的项目分组。修改后可能会将该检出移至其他项目。",
+  "Path to the Kiro CLI binary.": "Kiro CLI 可执行文件的路径。",
+  "Kiro API key": "Kiro API 密钥",
+  "Optional. Signs in without `kiro-cli login` (Kiro Pro and above).":
+    "可选。无需运行 `kiro-cli login` 即可登录（需 Kiro Pro 及以上订阅）。",
+  "Kiro CLI (`kiro-cli`) is not installed or not on PATH.":
+    "Kiro CLI（`kiro-cli`）未安装或不在 PATH 中。",
+  "Failed to run `kiro-cli --version`.": "运行 `kiro-cli --version` 失败。",
+  "Kiro CLI is installed but failed to run.": "Kiro CLI 已安装，但运行失败。",
+  "Kiro CLI is installed but not signed in. Run `kiro-cli login`.":
+    "Kiro CLI 已安装但尚未登录。请运行 `kiro-cli login`。",
+  "Could not confirm the Kiro sign-in. Run `kiro-cli whoami` to check.":
+    "无法确认 Kiro 登录状态。请运行 `kiro-cli whoami` 检查。",
+  "Waiting for the T3 Connect sign-in to load.": "正在等待 T3 Connect 登录状态加载。",
+  "Your cloud sign-in changed. Sign in again to authorize the environment.":
+    "你的云端登录状态已变更，请重新登录以授权此环境。",
+  "Refreshing...": "正在刷新...",
 };
 
 /** Translate static UI copy supplied by upstream components as English source text. */

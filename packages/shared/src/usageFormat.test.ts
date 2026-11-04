@@ -96,6 +96,20 @@ describe("usage source messages", () => {
       cursor.message,
       "1 malformed or inconsistent usage record(s) were skipped; usage may be incomplete.",
     ]);
+    expect(
+      usageSourceMessages(
+        [
+          { ...source, message: `${readFailure} ${source.message}` },
+          { ...source, malformedRecords: 0, message: readFailure },
+          cursor,
+        ],
+        "zh-CN",
+      ),
+    ).toEqual([
+      readFailure,
+      cursor.message,
+      "已跳过 1 条格式错误或不一致的用量记录；用量数据可能不完整。",
+    ]);
   });
 
   it("includes cached diagnostics when a transcript directory is missing", () => {

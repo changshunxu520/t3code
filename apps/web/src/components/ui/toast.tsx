@@ -29,19 +29,49 @@ import { useThreadRouteTarget } from "~/hooks/useThreadRouteTarget";
 import { useI18n } from "~/i18n/WebI18nContext";
 import { translateWebSource, type WebLocale } from "~/i18n/messages";
 
-function localizeToast<T extends { readonly title?: unknown; readonly description?: unknown }>(
-  toast: T,
-  locale: WebLocale,
-): T {
+function localizeToast<
+  T extends {
+    readonly title?: unknown;
+    readonly description?: unknown;
+    readonly actionProps?: { readonly children?: ReactNode } | undefined;
+    readonly data?: ThreadToastData | undefined;
+  },
+>(toast: T, locale: WebLocale): T {
   const title =
     typeof toast.title === "string" ? translateWebSource(locale, toast.title) : toast.title;
   const description =
     typeof toast.description === "string"
       ? translateWebSource(locale, toast.description)
       : toast.description;
-  return title === toast.title && description === toast.description
+  const actionChildren =
+    typeof toast.actionProps?.children === "string"
+      ? translateWebSource(locale, toast.actionProps.children)
+      : toast.actionProps?.children;
+  const actionProps =
+    toast.actionProps && actionChildren !== toast.actionProps.children
+      ? { ...toast.actionProps, children: actionChildren }
+      : toast.actionProps;
+  const secondaryChildren =
+    typeof toast.data?.secondaryActionProps?.children === "string"
+      ? translateWebSource(locale, toast.data.secondaryActionProps.children)
+      : toast.data?.secondaryActionProps?.children;
+  const data =
+    toast.data?.secondaryActionProps &&
+    secondaryChildren !== toast.data.secondaryActionProps.children
+      ? {
+          ...toast.data,
+          secondaryActionProps: {
+            ...toast.data.secondaryActionProps,
+            children: secondaryChildren,
+          },
+        }
+      : toast.data;
+  return title === toast.title &&
+    description === toast.description &&
+    actionProps === toast.actionProps &&
+    data === toast.data
     ? toast
-    : { ...toast, title, description };
+    : { ...toast, title, description, actionProps, data };
 }
 
 export type ThreadToastData = {

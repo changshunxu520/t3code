@@ -14,6 +14,8 @@ import { useState, type ComponentProps, type ComponentType, type ReactNode } fro
 
 import { isSecretsFeatureEnabled } from "../../env";
 import { useEnvironmentSettings } from "../../hooks/useSettings";
+import { translateWebSource } from "../../i18n/messages";
+import { useI18n } from "../../i18n/WebI18nContext";
 import { OnePasswordIcon } from "../Icons";
 import { serverEnvironment } from "../../state/server";
 import { DraftInput } from "../ui/draft-input";
@@ -64,6 +66,8 @@ type SecretSourceInputProps = Omit<ComponentProps<typeof SecretInput>, "value" |
   readonly value: string | SecretReference;
   readonly sources: ReadonlyArray<SecretSource>;
   readonly onSecretChange: (secret: SecretReference | undefined) => void;
+  /** Whether the selected source and committed field can be saved or used. */
+  readonly onValidityChange?: (valid: boolean) => void;
   /** Places the parts in the caller's layout; `source` is null when there is nothing to pick. */
   readonly children?: (parts: {
     readonly source: ReactNode;
@@ -76,9 +80,12 @@ export function SecretSourceInput({
   value,
   sources,
   onSecretChange,
+  onValidityChange,
   children,
   ...rest
 }: SecretSourceInputProps) {
+  const { locale } = useI18n();
+  const tx = (text: string) => translateWebSource(locale, text);
   // A provider picked here applies once a reference for it is committed.
   const [pendingProvider, setPendingProvider] = useState<SecretProviderId | null>(null);
   const [rejectedReference, setRejectedReference] = useState<string | null>(null);
@@ -102,10 +109,12 @@ export function SecretSourceInput({
           setRejectedReference(null);
           if (value === STORED_VALUE || value === null) {
             setPendingProvider(null);
+            onValidityChange?.(true);
             if (secret !== undefined) onSecretChange(undefined);
             return;
           }
           const next = value as SecretProviderId;
+          onValidityChange?.(next === secret?.provider);
           setPendingProvider(next === secret?.provider ? null : next);
         }}
       >
@@ -113,7 +122,7 @@ export function SecretSourceInput({
           size="sm"
           className="w-auto min-w-0 shrink-0"
           aria-label={`${label} source`}
-          title={provider === null ? "Value" : providerLabel(provider)}
+          title={provider === null ? tx("Value") : providerLabel(provider)}
         >
           <SelectValue>
             <SourceIcon icon={provider === null ? TypeIcon : providerIcon(provider)} />
@@ -121,7 +130,7 @@ export function SecretSourceInput({
         </SelectTrigger>
         <SelectPopup align="start" alignItemWithTrigger={false}>
           <SelectItem value={STORED_VALUE}>
-            <SourceLabel icon={TypeIcon} label="Value" />
+            <SourceLabel icon={TypeIcon} label={tx("Value")} />
           </SelectItem>
           {sources.map((source) => (
             <SelectItem key={source.id} value={source.id}>
@@ -150,6 +159,7 @@ export function SecretSourceInput({
           onCommit={(next) => {
             if (next.trim().length === 0) {
               setRejectedReference(null);
+              onValidityChange?.(pendingProvider === null && secret !== undefined);
               if (pendingProvider === null && secret !== undefined) onSecretChange(undefined);
               return;
             }
@@ -159,10 +169,12 @@ export function SecretSourceInput({
               definition?.isReference(decoded.value.reference) === false
             ) {
               setRejectedReference(next);
+              onValidityChange?.(false);
               return;
             }
             setRejectedReference(null);
             setPendingProvider(null);
+            onValidityChange?.(true);
             onSecretChange(decoded.value);
           }}
           autoComplete="off"
@@ -173,7 +185,7 @@ export function SecretSourceInput({
         />
         {rejectedReference !== null ? (
           <p className="text-2xs text-destructive">
-            {definition?.invalidReferenceMessage ?? "Enter a valid secret reference."}
+            {tx(definition?.invalidReferenceMessage ?? "Enter a valid secret reference.")}
           </p>
         ) : null}
       </div>

@@ -1911,6 +1911,21 @@ const ZH_CN_MESSAGES = {
   "Provider not allowed": "不允许使用该提供商",
   "Model turned off for this project": "此项目已停用该模型",
   "Antigravity model unavailable": "Antigravity 模型不可用",
+  "Resolve conflicts to merge": "请先解决冲突后再合并",
+  "Checking stack…": "正在检查堆栈…",
+  "Auto-merge pending": "等待自动合并",
+  "Auto-merge pending (squash)": "等待自动合并（压缩合并）",
+  "Auto-merge pending (merge)": "等待自动合并（创建合并提交）",
+  "Auto-merge pending (rebase)": "等待自动合并（变基合并）",
+  "Earbuds, headsets, and cars, including Android Auto, not listed":
+    "未列出的耳机、耳麦及车载设备（含 Android Auto）",
+  "T3 Code's voice input uses Google's on-device speech recognition, which needs Android 12 or later with compatible Google speech services for the device language. Without it, the composer has no microphone button, and allowing microphone access won't add one. Keyboard voice typing is separate and isn't affected.":
+    "T3 Code 的语音输入使用 Google 设备端语音识别，需要 Android 12 或更高版本，并配备支持当前设备语言的 Google 语音服务。若不支持，输入框将不显示麦克风按钮，授予麦克风权限也不会显示。系统键盘自带的语音输入相互独立，不受影响。",
+  "Voice input prefers the first connected microphone in this list. Wired and Bluetooth devices are added by name after you use voice input with them connected; until then, the Other row ranks them. Swipe a device left to forget it. Android may use another input when the preferred microphone cannot be routed.":
+    "语音输入会优先使用此列表中第一个已连接的麦克风。有线和蓝牙设备在连接状态下使用过语音输入后会按名称加入列表；在此之前由“其他”行决定其优先级。向左滑动设备可将其忽略。当首选麦克风无法路由时，Android 可能会改用其他输入设备。",
+  "Waiting for the T3 Connect sign-in to load.": "正在等待 T3 Connect 登录状态加载。",
+  "Your cloud sign-in changed. Sign in again to authorize the environment.":
+    "你的云端登录状态已变更，请重新登录以授权此环境。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
