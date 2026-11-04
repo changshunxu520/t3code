@@ -1,3 +1,5 @@
+import { useI18n } from "~/i18n/WebI18nContext";
+import { translateWebSource } from "~/i18n/messages";
 import { ThreadDetailsControl } from "./chat/ThreadDetailsControl";
 import { ComposerContextLabel } from "./ComposerContextLabel";
 import { useSupportsMultiplePullRequests } from "~/hooks/useSupportsMultiplePullRequests";
@@ -111,6 +113,8 @@ export function BranchToolbarBranchSelector({
   onCheckoutPullRequestRequest,
   onComposerFocusRequest,
 }: BranchToolbarBranchSelectorProps) {
+  const { locale } = useI18n();
+  const tx = (source: string) => translateWebSource(locale, source);
   const composerFloatingLayerProps = useComposerMenuProps();
   const canWriteSourceControl = useEnvironmentScope(environmentId, AuthSourceControlWriteScope);
   const canOperateThread = useEnvironmentScope(environmentId, AuthOrchestrationOperateScope);
@@ -319,11 +323,13 @@ export function BranchToolbarBranchSelector({
   const [isBranchActionPending, startBranchActionTransition] = useTransition();
   const totalBranchCount = branchRefState.data?.totalCount ?? 0;
   const branchStatusText = isInitialBranchesLoadPending
-    ? "Loading refs..."
+    ? tx("Loading refs...")
     : isFetchingNextPage
-      ? "Loading more refs..."
+      ? tx("Loading more refs...")
       : hasNextPage
-        ? `Showing ${refs.length} of ${totalBranchCount} refs`
+        ? locale === "zh-CN"
+          ? `显示 ${refs.length} / ${totalBranchCount} 个引用`
+          : `Showing ${refs.length} of ${totalBranchCount} refs`
         : null;
 
   const copyBranchName = (branchName: string) => {
@@ -530,13 +536,25 @@ export function BranchToolbarBranchSelector({
     [handleOpenChange, isBranchActionPending, isInitialBranchesLoadPending],
   );
 
-  const triggerLabel = resolveBranchTriggerLabel({
+  const rawTriggerLabel = resolveBranchTriggerLabel({
     activeWorktreePath,
     effectiveEnvMode,
     resolvedActiveBranch,
     resolvedActiveBranchIsRemote,
     startFromOrigin,
   });
+  const triggerLabel =
+    rawTriggerLabel === "Select ref"
+      ? tx("Select ref")
+      : rawTriggerLabel.startsWith("From ") && resolvedActiveBranch
+        ? rawTriggerLabel.endsWith(" (remote)")
+          ? locale === "zh-CN"
+            ? `基于 ${resolvedActiveBranch}（远端）`
+            : rawTriggerLabel
+          : locale === "zh-CN"
+            ? `基于 ${resolvedActiveBranch}`
+            : rawTriggerLabel
+        : rawTriggerLabel;
 
   const branchPrBranch = resolveBranchToolbarPrBranch({
     activeThreadBranch,
@@ -600,7 +618,7 @@ export function BranchToolbarBranchSelector({
             <SourceControlIcon className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="flex min-w-0 flex-col items-start">
               <span className="truncate font-medium">
-                Checkout {sourceControlPresentation.terminology.singular}
+                {tx(`Checkout ${sourceControlPresentation.terminology.singular}`)}
               </span>
               <span className="truncate text-muted-foreground text-xs">{prReference}</span>
             </span>
@@ -617,7 +635,9 @@ export function BranchToolbarBranchSelector({
           value={itemValue}
           onClick={() => selectPickerItem(itemValue)}
         >
-          <span className="truncate">Create new ref &quot;{newRefName}&quot;</span>
+          <span className="truncate">
+            {locale === "zh-CN" ? `新建引用 "${newRefName}"` : `Create new ref "${newRefName}"`}
+          </span>
         </ComboboxItem>
       );
     }
