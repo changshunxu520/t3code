@@ -68,6 +68,7 @@ export function useComposerMenuItems({
   planModeUiEnabled,
   sideChatAvailable,
   sideChatDisabledReason,
+  freshSessionAvailable,
   compactSlashCommandAvailable,
   selectedProvider,
   selectedProviderSkills,
@@ -87,6 +88,7 @@ export function useComposerMenuItems({
   readonly planModeUiEnabled: boolean;
   readonly sideChatAvailable: boolean;
   readonly sideChatDisabledReason: string | null;
+  readonly freshSessionAvailable: boolean;
   readonly compactSlashCommandAvailable: boolean;
   readonly selectedProvider: ProviderDriverKind;
   readonly selectedProviderSkills: ServerProvider["skills"];
@@ -253,14 +255,31 @@ export function useComposerMenuItems({
                 type: "slash-command",
                 command: "side",
                 label: "/side",
-                description: sideChatDisabledReason ?? "Ask a side question in a new side chat",
+                description:
+                  sideChatDisabledReason ??
+                  translateWebSource(releaseLocale, "Ask a side question in a new side chat"),
               },
               {
                 id: "slash:btw",
                 type: "slash-command",
                 command: "btw",
                 label: "/btw",
-                description: sideChatDisabledReason ?? "Same as /side",
+                description:
+                  sideChatDisabledReason ?? translateWebSource(releaseLocale, "Same as /side"),
+              },
+            ] as const)
+          : []),
+        ...(freshSessionAvailable
+          ? ([
+              {
+                id: "slash:clear",
+                type: "slash-command",
+                command: "clear",
+                label: "/clear",
+                description: translateWebSource(
+                  releaseLocale,
+                  "Start a fresh session; earlier messages stay visible",
+                ),
               },
             ] as const)
           : []),
@@ -292,8 +311,11 @@ export function useComposerMenuItems({
           skill.description ??
           (skill.scope ? `${skill.scope} skill` : ""),
       }));
+      // T3's `/clear` replaces the provider's, which would clear a session T3 still treats as live.
       const visibleProviderSlashCommandItems = providerSlashCommandItems.filter(
-        (item) => item.command.name !== "compact" || compactSlashCommandAvailable,
+        (item) =>
+          (item.command.name !== "compact" || compactSlashCommandAvailable) &&
+          (item.command.name !== "clear" || !freshSessionAvailable),
       );
       const slashCommandItems = slashCommandItemsForPromptPosition(
         [...builtInSlashCommandItems, ...visibleProviderSlashCommandItems, ...skillItems],
@@ -390,20 +412,31 @@ export function useComposerMenuItems({
         exactPullRequestLookup.isPending));
   const emptyState = (() => {
     if (composerTriggerKind === "skill") {
-      return "No skills found. Try / to browse provider commands.";
+      return translateWebSource(
+        releaseLocale,
+        "No skills found. Try / to browse provider commands.",
+      );
     }
     if (composerTriggerKind === "pull-request") {
       if (pullRequestProjectId === null || pullRequestRepository === null) {
-        return "Pull requests are not available for this project.";
+        return translateWebSource(
+          releaseLocale,
+          "Pull requests are not available for this project.",
+        );
       }
       if (
         pullRequestLookup.error !== null ||
         pullRequestLookup.data?.errors.some((error) => error.projectId === pullRequestProjectId)
       ) {
-        return "Pull requests could not be read for this project.";
+        return translateWebSource(
+          releaseLocale,
+          "Pull requests could not be read for this project.",
+        );
       }
       return composerTrigger?.query
-        ? `No pull request matches ${composerTrigger.query}.`
+        ? releaseLocale === "zh-CN"
+          ? `没有匹配 ${composerTrigger.query} 的拉取请求。`
+          : `No pull request matches ${composerTrigger.query}.`
         : translateWebSource(releaseLocale, "No pull requests found in this repository.");
     }
     return composerTriggerKind === "path"

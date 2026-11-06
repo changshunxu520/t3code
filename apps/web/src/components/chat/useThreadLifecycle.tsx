@@ -100,6 +100,8 @@ interface ThreadLifecycleInput {
   readonly threadDetailRef: ScopedThreadRef | null;
   readonly activeThreadKey: string | null;
   readonly activeThreadShell: EnvironmentThreadShell | null;
+  /** The usage-limit recovery banner shows this snooze and its Wake now. */
+  readonly limitRecoveryHoldsSnooze: boolean;
   readonly activeLatestRun: EnvironmentThreadShell["latestRun"];
   readonly activeProjectCwd: string | null;
   readonly serverConfig: EnvironmentServerConfig | null;
@@ -154,6 +156,7 @@ export function useThreadLifecycle(input: ThreadLifecycleInput) {
     activeThreadKey,
     activeThreadShell,
     activeLatestRun,
+    limitRecoveryHoldsSnooze,
     activeProjectCwd,
     serverConfig,
     runtimeMode,
@@ -616,18 +619,20 @@ export function useThreadLifecycle(input: ThreadLifecycleInput) {
     ? snoozeWakeLabel(snoozedUntil, { now: `${nowMinute}:00.000Z` })
     : null;
   const threadStatusLine = activeThreadSnoozed ? (
-    <ThreadStatusLine
-      icon={<AlarmClockIcon />}
-      label={
-        snoozeWake && snoozeWake !== "now"
-          ? `${t("sidebar.snoozedTitle")}, ${snoozeWake} ${translateWebSource(uiLocale, "left")}`
-          : t("sidebar.snoozedTitle")
-      }
-      clockMinute={nowMinute}
-      actionLabel={isUnsnoozing ? t("composer.banner.waking") : t("composer.banner.wakeNow")}
-      actionDisabled={!canOperateThread || isUnsnoozing}
-      onAction={() => void handleUnsnoozeActiveThreadStable()}
-    />
+    limitRecoveryHoldsSnooze ? null : (
+      <ThreadStatusLine
+        icon={<AlarmClockIcon />}
+        label={
+          snoozeWake && snoozeWake !== "now"
+            ? `${t("sidebar.snoozedTitle")}, ${snoozeWake} ${translateWebSource(uiLocale, "left")}`
+            : t("sidebar.snoozedTitle")
+        }
+        clockMinute={nowMinute}
+        actionLabel={isUnsnoozing ? t("composer.banner.waking") : t("composer.banner.wakeNow")}
+        actionDisabled={!canOperateThread || isUnsnoozing}
+        onAction={() => void handleUnsnoozeActiveThreadStable()}
+      />
+    )
   ) : activeThreadSettled ? (
     <ThreadStatusLine
       icon={<CheckCircle2Icon />}

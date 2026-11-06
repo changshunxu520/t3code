@@ -1946,6 +1946,107 @@ const ZH_CN_MESSAGES = {
   "Couldn't complete the merge action": "无法完成合并操作",
   "Voice input prefers the first connected microphone in this list. Wired and Bluetooth devices are added by name after you use voice input with them connected; until then, the Other row ranks them. Swipe a device left to forget it.":
     "语音输入会优先使用此列表中第一个已连接的麦克风。有线和蓝牙设备在连接状态下使用过语音输入后会按名称加入列表；在此之前由“其他”行决定其优先级。向左滑动设备可将其忽略。",
+  Voice: "语音",
+  "Transcribe on": "转写设备",
+  "Audio stays on this device and is transcribed here.": "音频保留在此设备上并在本地完成转写。",
+  "Previously selected environment": "之前选择的环境",
+  "No longer paired": "已取消配对",
+  "Transcription unavailable": "转写不可用",
+  "No transcription model installed": "未安装转写模型",
+  "Send finished recordings to this environment.": "将完成的录音发送到此环境进行转写。",
+  "Use environment": "使用此环境",
+  "Could not save transcription choice": "无法保存转写设置",
+  "Dictation on an environment is off for this session. Save again before closing the app, or your previous choice may return when it restarts.":
+    "本次会话已关闭环境端语音听写。请在关闭应用前重新保存，否则重启后可能会恢复为您之前的选择。",
+  "Headsets and USB microphones not listed here": "未在此列出的耳麦和 USB 麦克风",
+  "Earbuds, headsets, and cars, including Android Auto, not listed here":
+    "未在此列出的耳机、耳麦及车载设备（含 Android Auto）",
+  "AirPods, headsets, and cars not listed here": "未在此列出的 AirPods、耳麦及车载设备",
+  "Dictation on this device needs Android 12 or later and Google speech services that support your language. Your keyboard’s voice typing is separate.":
+    "在此设备上进行语音听写需要 Android 12 或更高版本，以及支持您所用语言的 Google 语音服务。系统键盘自带的语音输入相互独立。",
+  "Dictation on this device needs iOS 26 or later, a supported device, and a supported language. Your keyboard’s dictation is separate.":
+    "在此设备上进行语音听写需要 iOS 26 或更高版本、受支持的设备及语言。系统键盘自带的听写功能相互独立。",
+  "Allow microphone access to record and to see your microphones.":
+    "允许访问麦克风以进行录音并查看可用麦克风列表。",
+  "Turn on microphone access for T3 Code in Settings to use voice input.":
+    "请在系统“设置”中为 T3 Code 开启麦克风权限以使用语音输入。",
+  "Voice input uses the first connected microphone in this list. A wired or Bluetooth microphone is added by name the first time you dictate with it connected; until then it falls under Other. Swipe left on a named microphone to forget it.":
+    "语音输入会优先使用此列表中第一个已连接的麦克风。有线或蓝牙麦克风在连接状态下首次使用语音听写后会按名称加入列表；在此之前归入“其他”。向左滑动已命名的麦克风可将其忽略。",
+  "Voice input uses the first connected microphone in this list. A wired or Bluetooth microphone is added by name the first time you dictate with it connected; until then it falls under Other. Swipe left on a named microphone to forget it. Android may still use a different microphone if the preferred one can’t be routed.":
+    "语音输入会优先使用此列表中第一个已连接的麦克风。有线或蓝牙麦克风在连接状态下首次使用语音听写后会按名称加入列表；在此之前归入“其他”。向左滑动已命名的麦克风可将其忽略。当首选麦克风无法路由时，Android 仍可能改用其他麦克风。",
+  "Could not download the model": "无法下载模型",
+  "Could not select the model": "无法选择模型",
+  "Could not cancel the download": "无法取消下载",
+  "Verifying download…": "正在校验下载文件…",
+  "No model selected": "未选择模型",
+  "Choose a transcription model to dictate on this environment.":
+    "请选择一个转写模型以在此环境上使用语音听写。",
+  "Voice transcription requires a supported device with iOS 26 or later.":
+    "语音转写需要搭载 iOS 26 或更高版本的受支持设备。",
+  "Voice transcription does not support any of your languages.": "语音转写不支持您当前的任何语言。",
+  "Checking for updates timed out. Try again.": "检查更新超时，请重试。",
+  "Your transcription choice changed.": "您的转写设备选择已变更。",
+  "Install a transcription model for this environment in Settings → Voice, then try again.":
+    "请先在“设置 → 语音”中为此环境安装转写模型，然后重试。",
+  "Update T3 Code to transcribe on an environment.": "请更新 T3 Code 以在远程环境上进行语音转写。",
+  "This recording couldn’t be read. Try recording again.": "无法读取此段录音，请重新录制。",
+  "Beta: Tool calls in chat": "测试版：对话中的工具调用",
+  "Show all": "全部显示",
+  "Hide successful": "隐藏成功项",
+  "Hide all": "全部隐藏",
+  Zen: "禅定模式",
+  "Hide the commands, edits, and searches agents run. Hide successful keeps failures. Zen shows only final answers. Approvals, questions, and errors always show.":
+    "隐藏智能体执行的命令、编辑和搜索操作。“隐藏成功项”仅保留失败记录，“禅定模式”仅显示最终回答。审批、提问和错误始终显示。",
+  "Mention a user": "提及用户",
+  "Searching users...": "正在搜索用户...",
+  "Couldn't search users on the host": "无法在代码托管平台上搜索用户",
+  "No matching users": "无匹配用户",
+  "Reference an issue or change request": "引用议题或变更请求",
+  "Searching...": "正在搜索...",
+  "Couldn't search the host": "无法搜索代码托管平台",
+  "No matching issues or change requests": "无匹配的议题或变更请求",
+  "Ask a side question in a new side chat": "在新的旁路对话中提问",
+  "Same as /side": "同 /side",
+  "Start a fresh session": "开启全新会话",
+  "Side chat": "旁路对话",
+  "Side chat not started": "未能开启旁路对话",
+  "Could not start a side chat.": "无法开启旁路对话。",
+  "The side chat was created, but it did not reach this device.":
+    "旁路对话已创建，但尚未同步到此设备。",
+  "The side chat is no longer available.": "该旁路对话已不可用。",
+  "Could not send the side chat message.": "无法发送旁路对话消息。",
+  "This app cannot call that tool.": "此应用无法调用该工具。",
+  "Declined by the user.": "用户已拒绝。",
+  "The link could not be opened.": "无法打开该链接。",
+  "Sharing is not available on this device.": "此设备不支持分享功能。",
+  "Could not sign DPoP proof.": "无法签名 DPoP 凭证。",
+  "Clone into host folders": "按代码托管域名目录结构克隆",
+  "Runs go to": "运行结果发送至",
+  "Add Claude account": "添加 Claude 账号",
+  "Use a Claude config folder that is already signed in on this server.":
+    "使用此服务器上已登录的 Claude 配置目录。",
+  "Could not save the Claude account.": "无法保存 Claude 账号。",
+  "Turned off": "已关闭",
+  "Default config folder": "默认配置目录",
+  "Account name": "账号名称",
+  "Name, e.g. Work": "名称，例如：工作",
+  "Claude config folder": "Claude 配置目录",
+  "Config folder, e.g. ~/.claude-work": "配置目录，例如：~/.claude-work",
+  "Transcription models": "转写模型",
+  "Search models or languages": "搜索模型或语言",
+  "Close transcription models": "关闭转写模型",
+  "No models match": "无匹配的模型",
+  "No transcription models": "无转写模型",
+  "Try another name or language.": "请尝试其他名称或语言。",
+  "T3 Code, Threads": "T3 Code，任务列表",
+  "T3 Code, Pull requests": "T3 Code，拉取请求",
+  "Hide sidebar": "隐藏侧边栏",
+  "This folder does not exist yet. Cloning creates it.": "此文件夹尚不存在，克隆时将自动创建。",
+  "New session": "新会话",
+  "Close thread": "关闭任务",
+  "Your next message starts a fresh session. The agent won't see earlier messages in this thread.":
+    "下一条消息将开启全新会话，智能体将不会看到此任务中的早期消息。",
+  "Close inspector": "关闭检查器",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
@@ -2410,6 +2511,35 @@ function translateDynamicMessage(value: string): string | null {
 
   const linkedDate = /^Linked (.+)$/.exec(value);
   if (linkedDate) return `已关联于 ${linkedDate[1]}`;
+
+  const sendAudioTo = /^Send microphone audio to (.+)\?$/.exec(value);
+  if (sendAudioTo) return `要将麦克风音频发送到 ${sendAudioTo[1]} 吗？`;
+
+  const finishedRecordingsSent =
+    /^Finished recordings will be sent to (.+) for transcription\. You can switch back to This device at any time\.$/.exec(
+      value,
+    );
+  if (finishedRecordingsSent)
+    return `录制完成的音频将发送到 ${finishedRecordingsSent[1]} 进行转写。你可以随时切回“此设备”。`;
+
+  const transcriptionModelOn = /^Transcription model on (.+)$/.exec(value);
+  if (transcriptionModelOn) return `${transcriptionModelOn[1]} 上的转写模型`;
+
+  const cannotChangeVoiceSettings =
+    /^This connection can’t change settings on (.+)\. Add a transcription model using T3 Code on that machine\.$/.exec(
+      value,
+    );
+  if (cannotChangeVoiceSettings)
+    return `此连接无权更改 ${cannotChangeVoiceSettings[1]} 上的设置。请在该设备上的 T3 Code 中添加转写模型。`;
+
+  const verifyingModel = /^Verifying (.+)…$/.exec(value);
+  if (verifyingModel) return `正在校验 ${verifyingModel[1]}…`;
+
+  const downloadingModel = /^Downloading (.+) · (\d+)%$/.exec(value);
+  if (downloadingModel) return `正在下载 ${downloadingModel[1]} · ${downloadingModel[2]}%`;
+
+  const downloadedTapToCancel = /^(\d+)% downloaded · Tap to cancel$/.exec(value);
+  if (downloadedTapToCancel) return `已下载 ${downloadedTapToCancel[1]}% · 轻触取消`;
 
   return null;
 }

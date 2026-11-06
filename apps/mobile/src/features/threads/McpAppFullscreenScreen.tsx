@@ -1,15 +1,14 @@
-import { localizeMobileString } from "../../i18n/mobileStrings";
 import { useIsFocused, useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { EnvironmentId, ThreadId, TurnItemId } from "@t3tools/contracts";
 import type { EnvironmentThreadShell } from "@t3tools/client-runtime/state/shell";
 import { turnItemDetailRevision } from "@t3tools/client-runtime/work-log/item-detail";
 import { mcpAppFromToolItem } from "@t3tools/shared/toolOutput";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText as Text } from "../../components/ui/AppText";
-import { SymbolView } from "../../components/ui/AppSymbol";
+import { AppBar } from "../../components/ui/AppBar";
 import { orchestrationEnvironment } from "../../state/orchestration";
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { useThreadShell, useThreadShells } from "../../state/entities";
@@ -109,20 +108,12 @@ export function McpAppFullscreenScreen({ route }: McpAppFullscreenScreenProps) {
   }, [awaitingUser, focused, navigation]);
 
   return (
-    <View className="flex-1 bg-screen" style={{ paddingTop: insets.top }}>
-      <View className="h-11 flex-row items-center justify-between px-3">
-        <Text className="text-base font-semibold text-foreground" numberOfLines={1}>
-          {app?.server ?? "App"}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={localizeMobileString("Exit full screen")}
-          hitSlop={8}
-          onPress={onClose}
-        >
-          <SymbolView name="xmark" size={18} tintColor="gray" />
-        </Pressable>
-      </View>
+    <View className="flex-1 bg-screen">
+      <AppBar
+        title={app?.server ?? "App"}
+        onClose={onClose}
+        closeAccessibilityLabel="Exit full screen"
+      />
       <View
         className="flex-1"
         style={{ paddingBottom: insets.bottom }}
