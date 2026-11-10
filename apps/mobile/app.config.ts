@@ -15,7 +15,7 @@ if (APP_VARIANT === "community") {
   process.env.EXPO_PUBLIC_APP_LOCALE = "zh-CN";
 }
 const appVersion =
-  repoEnv.T3CODE_MOBILE_VERSION?.trim() || (APP_VARIANT === "community" ? "0.1.5" : "2.2.0");
+  repoEnv.T3CODE_MOBILE_VERSION?.trim() || (APP_VARIANT === "community" ? "0.1.7" : "2.3.0");
 const androidVersionCode = Number.parseInt(
   APP_VARIANT === "community" ? (repoEnv.T3CODE_MOBILE_VERSION_CODE?.trim() ?? "1000412") : "1",
   10,
@@ -227,7 +227,12 @@ const widgetsPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
           "显示活跃 T3 Code 智能体的当前状态。",
         ),
         android: null,
-        ios: { supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"] },
+        ios: {
+          supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"],
+          // Embeds the layout so the gallery preview and a new widget render
+          // before the app has run once; the app replaces it on publish.
+          initialLayout: "./src/widgets/AgentActivityWidget.tsx",
+        },
       },
     ],
   },
@@ -360,7 +365,6 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-asset",
-    "react-native-pdf-jsi",
     [
       "expo-font",
       {
@@ -495,11 +499,16 @@ const config: ExpoConfig = {
     "./plugins/withAndroidModernPopupMenu.cjs",
     "./plugins/withAndroidModernAlertDialog.cjs",
     "./plugins/withAndroidPredictiveBackCompat.cjs",
+    // MainActivity mods run in reverse order; extend the tablet-orientation override.
+    "./plugins/withAndroidWindowDisplayMetrics.cjs",
     "./plugins/withAndroidTabletOrientation.cjs",
     ...(isIosPersonalTeamBuild ? ["./plugins/withoutIosPersonalTeamCapabilities.cjs"] : []),
   ],
   extra: {
     appVariant: APP_VARIANT,
+    secretsFeatureEnabled: ["1", "true"].includes(
+      process.env.T3CODE_FEATURE_SECRETS?.trim().toLowerCase() ?? "",
+    ),
     iosPersonalTeamBuild: isIosPersonalTeamBuild,
     relay: {
       url: repoEnv.T3CODE_RELAY_URL ?? null,

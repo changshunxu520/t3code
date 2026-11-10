@@ -969,9 +969,7 @@ function DeviceIntegrationControls({
             >
               {pending === `update-${tool}`
                 ? translateWebSource(locale, "Updating…")
-                : t("settings.integrations.devices.updateToVersion", {
-                    version: version.requiredVersion,
-                  })}
+                : translateWebSource(locale, "Update")}
             </Button>
           ) : null}
           {state.supportsToolInspection ? (

@@ -2047,6 +2047,36 @@ const ZH_CN_MESSAGES = {
   "Your next message starts a fresh session. The agent won't see earlier messages in this thread.":
     "下一条消息将开启全新会话，智能体将不会看到此任务中的早期消息。",
   "Close inspector": "关闭检查器",
+  Document: "文档",
+  "Search OpenRouter models": "搜索 OpenRouter 模型",
+  "Search transcription models": "搜索转写模型",
+  "No transcription model matches.": "没有匹配的转写模型。",
+  "Cloud providers": "云端提供商",
+  "Ask an administrator to add an OpenRouter key": "请联系管理员添加 OpenRouter 密钥",
+  "Remove key from environment": "从环境中移除密钥",
+  "Back to providers": "返回提供商列表",
+  "Everyone using it for dictation will lose access.":
+    "所有使用此密钥进行听写的用户都将失去访问权限。",
+  "Remove key": "移除密钥",
+  "Clear thread search": "清除任务搜索",
+  "No matching threads": "没有匹配的任务",
+  "Mermaid diagram": "Mermaid 图表",
+  "Opens the diagram full screen": "全屏打开图表",
+  "The diagram renderer failed to load.": "图表渲染器加载失败。",
+  "Linked environments": "关联环境",
+  "Let agents on a machine work on your other machines, and theirs on it. Turn it on for each machine. While off, nothing new starts over a link; running tasks finish.":
+    "允许一台机器上的智能体在你的其他机器上工作，反之亦然。请在每台机器上分别开启。关闭期间不会通过关联发起新任务，正在运行的任务会继续完成。",
+  "Fast worktree checkout": "快速工作树检出",
+  "On a Mac, clone new worktrees from a checkout cached in the T3 home folder instead of writing every file. Uses Git’s normal checkout when it can’t. Turning it off deletes the cache.":
+    "在 Mac 上，从 T3 主目录缓存的检出副本克隆新工作树，而非逐一写入每个文件；不满足条件时自动回退到 Git 常规检出。关闭此项会删除缓存。",
+  "Tool calls in chat": "对话中的工具调用",
+  "Select text": "选择文本",
+  "Settled threads": "已收起的任务",
+  "Remove incomplete connection": "移除未完成的连接",
+  "Follow settings": "跟随设置",
+  "Copy model reference": "复制模型引用",
+  "Share model reference": "分享模型引用",
+  "Stored DPoP proof key is invalid.": "已存储的 DPoP 证明密钥无效。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
@@ -2540,6 +2570,15 @@ function translateDynamicMessage(value: string): string | null {
 
   const downloadedTapToCancel = /^(\d+)% downloaded · Tap to cancel$/.exec(value);
   if (downloadedTapToCancel) return `已下载 ${downloadedTapToCancel[1]}% · 轻触取消`;
+
+  const removeKeyFromEnv = /^Remove the (.+) key from (.+)\?$/.exec(value);
+  if (removeKeyFromEnv) return `要从 ${removeKeyFromEnv[2]} 中移除 ${removeKeyFromEnv[1]} 密钥吗？`;
+
+  const unableToRenderDiagram = /^Unable to render diagram: (.+)$/.exec(value);
+  if (unableToRenderDiagram) return `无法渲染图表：${unableToRenderDiagram[1]}`;
+
+  const filterFilesCount = /^Filter (\d+) files?$/.exec(value);
+  if (filterFilesCount) return `筛选 ${filterFilesCount[1]} 个文件`;
 
   return null;
 }

@@ -31,16 +31,19 @@ import { useEffect, useState } from "react";
 import { AppState, useWindowDimensions } from "react-native";
 
 import { OverlayPortal } from "../../components/ui/OverlayPortal";
+import { localizeMobileString, MOBILE_LOCALE } from "../../i18n/mobileStrings";
 import { useAppearancePreferences } from "../settings/appearance/AppearancePreferencesProvider";
 import { useScaledTextRole } from "../settings/appearance/useScaledTextRole";
-import type { CustomSnoozeSheet as SharedCustomSnoozeSheet } from "./CustomSnoozeSheet.shared";
 import {
   applySnoozePickerDate,
   applySnoozePickerTime,
   snoozeDateToPickerDate,
 } from "./customSnoozeDate";
 
-type Props = Parameters<typeof SharedCustomSnoozeSheet>[0];
+type Props = {
+  readonly onClose: () => void;
+  readonly onSnooze: (snoozedUntil: string) => void;
+};
 
 const roundedCorner = Shape.RoundedCorner;
 
@@ -142,7 +145,7 @@ export function CustomSnoozeSheet(props: Props) {
                 verticalArrangement={{ spacedBy: 16 }}
                 modifiers={[fillMaxWidth(), padding(24, 24, 24, 16)]}
               >
-                <Text style={titleTypography}>Custom snooze</Text>
+                <Text style={titleTypography}>{localizeMobileString("Custom snooze")}</Text>
                 <RNHostView matchContents={{ vertical: true }} modifiers={[fillMaxWidth()]}>
                   <SegmentedControl
                     variant="card"
@@ -161,11 +164,14 @@ export function CustomSnoozeSheet(props: Props) {
                       options={[
                         {
                           value: "date",
-                          label: date.toLocaleDateString([], { month: "short", day: "numeric" }),
+                          label: date.toLocaleDateString(MOBILE_LOCALE, {
+                            month: "short",
+                            day: "numeric",
+                          }),
                         },
                         {
                           value: "time",
-                          label: date.toLocaleTimeString([], {
+                          label: date.toLocaleTimeString(MOBILE_LOCALE, {
                             hour: "numeric",
                             minute: "2-digit",
                             hourCycle: is24Hour ? "h23" : "h12",
@@ -248,7 +254,7 @@ export function CustomSnoozeSheet(props: Props) {
               >
                 {error ? (
                   <Text style={bodyTypography} color={colors["--color-danger-foreground"]}>
-                    {error}
+                    {localizeMobileString(error)}
                   </Text>
                 ) : null}
                 <Row horizontalArrangement="end" modifiers={[fillMaxWidth()]}>
@@ -256,13 +262,13 @@ export function CustomSnoozeSheet(props: Props) {
                     onClick={props.onClose}
                     colors={{ contentColor: colors["--color-foreground"] }}
                   >
-                    <Text style={bodyTypography}>Cancel</Text>
+                    <Text style={bodyTypography}>{localizeMobileString("Cancel")}</Text>
                   </TextButton>
                   <TextButton
                     onClick={submit}
                     colors={{ contentColor: colors["--color-foreground"] }}
                   >
-                    <Text style={bodyTypography}>Snooze</Text>
+                    <Text style={bodyTypography}>{localizeMobileString("Snooze")}</Text>
                   </TextButton>
                 </Row>
               </Column>
@@ -292,7 +298,10 @@ function SnoozeDateTimePicker(props: {
       is24Hour={props.is24Hour}
       showVariantToggle={false}
       elementColors={props.colors}
-      onDateSelected={props.onChange}
+      // Null marks incomplete input; keep the last valid date.
+      onDateSelected={(date) => {
+        if (date) props.onChange(date);
+      }}
     />
   );
 }

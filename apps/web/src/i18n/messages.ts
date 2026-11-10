@@ -11302,13 +11302,458 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "The Office engine sent an unreadable reply": "Office 引擎返回了无法读取的响应",
   "The call was aborted": "调用已中止",
   "The Office engine was closed": "Office 引擎已关闭",
+  "macOS, Linux": "macOS、Linux",
+  "Windows (PowerShell)": "Windows（PowerShell）",
+  Then: "然后运行",
+  "This sign-in link is incomplete": "此登录链接不完整",
+  "Open this page in its own window": "在独立窗口中打开此页面",
+  "For your safety, agent sign-ins cannot be approved inside another site.":
+    "出于安全考虑，不能在其他网站内嵌页面中批准智能体登录。",
+  "Connecting to T3 Connect": "正在连接 T3 Connect",
+  "One moment while your account loads.": "正在加载你的账号，请稍候。",
+  "Sign in to approve": "登录以批准",
+  "Sign in to T3 Connect with the account this environment is linked to.":
+    "请使用与此环境关联的账号登录 T3 Connect。",
+  "Use a sign-in code instead": "改用登录验证码",
+  "Use another account": "使用其他账号",
+  "· name set by the app": "· 名称由应用设置",
+  "Access goes to": "授权对象：",
+  "on the computer that opened this page": "（位于打开此页面的电脑上）",
+  "· whoever runs it gets this access": "· 运行它的任何人都会获得此权限",
+  "Only approve a sign-in you just started.": "请仅批准你刚刚亲自发起的登录请求。",
+  "Sign-in code": "登录验证码",
+  "Paste a code": "粘贴验证码",
+  "Choose what it may do": "选择允许它执行的操作",
+  "Background work": "后台任务",
+  "Loading transcription models…": "正在加载转写模型…",
+  "Retry loading models": "重试加载模型",
+  "https://… or myapp://": "https://… 或 myapp://",
+  "Liquid Glass": "液态玻璃",
+  VoiceOver: "旁白 (VoiceOver)",
+  "Face ID": "面容 ID (Face ID)",
+  "Connect to an environment first.": "请先连接到一个环境。",
+  "T3 Connect is not available in this build.": "当前构建版本不支持 T3 Connect。",
+  "the app": "该应用",
+  "Runs commands and edits files without asking": "无需确认即可运行命令并编辑文件",
+  "Checking T3 Connect…": "正在检查 T3 Connect…",
+  "Sign in to T3 Connect": "登录 T3 Connect",
+  "Only apps you approve can use it. You can turn it off in Settings.":
+    "只有经你批准的应用才能使用它。你可以随时在“设置”中将其关闭。",
+  "Turn on": "开启",
+  "Your T3 Connect account is out of tunnels.": "你的 T3 Connect 账号可用隧道数已达上限。",
+  "Which app?": "连接到哪个应用？",
+  "Something else…": "其他应用…",
+  URL: "网址 (URL)",
+  Message: "消息",
+  "Apps that require their own client ID cannot connect.":
+    "要求使用专属客户端 ID 的应用暂不支持连接。",
+  "Back to commands": "返回命令方式",
+  "Back to one click": "返回一键连接",
+  "Set up another way": "使用其他方式设置",
+  "Could not copy": "无法复制",
+  "Use Set up another way.": "请改用“使用其他方式设置”。",
+  "Getting code…": "正在获取验证码…",
+  "Get code": "获取验证码",
+  "New code": "重新获取",
+  "Code to approve": "用于批准",
+  "The code expired.": "验证码已过期。",
+  "Manage access": "管理访问权限",
+  "Open poke.com/integrations/new.": "打开 poke.com/integrations/new。",
+  "Paste the URL and add the integration.": "粘贴 URL 并添加集成。",
+  "In Claude, open Customize, then Connectors.":
+    "在 Claude 中打开 Customize，然后进入 Connectors。",
+  "Choose Add custom connector and paste the URL.": "选择 Add custom connector 并粘贴 URL。",
+  "The Free plan allows one custom connector.": "免费版计划支持添加一个自定义连接器。",
+  "Open chatgpt.com/plugins on the web, then + and Add custom MCP server.":
+    "在网页端打开 chatgpt.com/plugins，点击 + 并选择 Add custom MCP server。",
+  "Paste the URL. Choose OAuth.": "粘贴 URL，并选择 OAuth。",
+  "Create it as a plugin, then install it.": "将其创建为插件并安装。",
+  "Send this message to any of your Grok Bots.": "将此消息发送给你的任意 Grok Bot。",
+  "Shared with all your Grok Bots.": "将与你的所有 Grok Bot 共享。",
+  "In Gemini, open Settings, then Connected apps.":
+    "在 Gemini 中打开“设置”，然后进入“已连接的应用”。",
+  "Choose Custom apps, then Add, and paste the URL.": "选择“自定义应用”，点击“添加”并粘贴 URL。",
+  "Send this message to Muse.": "将此消息发送给 Muse。",
+  "In Instinct, open Settings, then MCP connections, if your account has it.":
+    "在 Instinct 中打开 Settings，然后进入 MCP connections（如账号已开通）。",
+  "Open the Control UI, then + and Plugins, and choose Add MCP server.":
+    "打开控制界面（Control UI），点击 + 进入 Plugins，然后选择 Add MCP server。",
+  "Paste the URL, and choose Streamable HTTP and OAuth.":
+    "粘贴 URL，并选择 Streamable HTTP 与 OAuth。",
+  "Select Sign in for it under Settings → MCP.": "在 Settings → MCP 下为其选择 Sign in。",
+  "Add t3code under mcp_servers in ~/.hermes/config.yaml, with the URL and auth: oauth.":
+    "在 ~/.hermes/config.yaml 的 mcp_servers 下添加 t3code，填入该 URL 并设置 auth: oauth。",
+  "Run hermes mcp login t3code.": "运行 hermes mcp login t3code。",
+  "On a remote host, paste the final URL back when asked.":
+    "如果在远程主机上运行，请按提示将最终跳转 URL 粘贴回终端。",
+  "Add a remote MCP server with OAuth.": "使用 OAuth 添加远程 MCP 服务器。",
+  "URL copied": "已复制 URL",
+  "Message copied": "已复制消息",
+  "Could not reach T3 Connect.": "无法连接到 T3 Connect。",
+  "Use T3 Code in another app (MCP)": "在其他应用中使用 T3 Code (MCP)",
+  "this computer": "这台电脑",
+  "Finishing setup": "正在完成设置",
+  "One moment.": "请稍候。",
+  "Welcome to T3 Code": "欢迎使用 T3 Code",
+  "Start without an agent": "暂不配置智能体，直接开始",
+  "Set up one agent to start.": "请先设置至少一个智能体以开始使用。",
+  "Importing…": "正在导入…",
+  "Import threads and start": "导入任务并开始使用",
+  Start: "开始使用",
+  "T3 Code collects anonymous usage data to improve the app.":
+    "T3 Code 会收集匿名使用数据以改进应用体验。",
+  "Set up": "设置",
+  "This connection cannot manage agents.": "当前连接无权管理智能体。",
+  "Add more agents": "添加更多智能体",
+  "Set up an agent": "设置智能体",
+  "More agents in the ACP Registry": "在 ACP 注册表中浏览更多智能体",
+  Browse: "浏览",
+  "Import projects and their threads": "导入项目及其任务",
+  "Use T3 Code on your phone": "在手机上使用 T3 Code",
+  "Scan with your phone to get the app.": "使用手机扫码下载应用。",
+  "T3 Code app for iPhone and Android": "适用于 iPhone 和 Android 的 T3 Code 应用",
+  "Could not check T3 Connect.": "无法检查 T3 Connect 状态。",
+  "Check T3 Connect": "检查 T3 Connect",
+  "Your phone can reach this computer. Sign in to the app with the same account.":
+    "手机已可访问这台电脑。请在手机端应用中使用同一账号登录。",
+  "T3 Connect is on for this computer. Sign in to the app with the same account.":
+    "这台电脑已开启 T3 Connect。请在手机端应用中使用同一账号登录。",
+  "T3 Connect is on, but the app cannot reach this computer.":
+    "T3 Connect 已开启，但应用暂时无法访问这台电脑。",
+  "Signed in. Share this computer so the app can reach it.":
+    "已登录。请共享这台电脑，以便手机端应用访问。",
+  "Set up T3 Connect": "设置 T3 Connect",
+  "Sign in to T3 Connect here, then in the app with the same account.":
+    "请先在此处登录 T3 Connect，然后在手机端应用中使用同一账号登录。",
+  "Could not save Codex setup": "无法保存 Codex 设置",
+  "Add to PATH": "添加到 PATH",
+  "OpenRouter model": "OpenRouter 模型",
+  "No transcription model matches.": "没有匹配的转写模型。",
+  "Couldn’t save this change. Check your connection and try again.":
+    "无法保存此更改，请检查连接后重试。",
+  "Replace API key": "替换 API 密钥",
+  "API key": "API 密钥",
+  "Enter API key": "输入 API 密钥",
+  "Enter an API key, not a URL or secret reference.": "请输入 API 密钥，而非 URL 或密钥引用。",
+  "Updating the key keeps dictation enabled.": "更新密钥后将继续保持听写功能开启。",
+  "Leave blank to keep the saved key.": "留空则保留已保存的密钥。",
+  "Manage OpenRouter dictation": "管理 OpenRouter 听写",
+  "Retry loading API key": "重试加载 API 密钥",
+  "Checking for an API key…": "正在检查 API 密钥…",
+  "This choice applies only to this device. Choose Off to stop sharing.":
+    "此选择仅对当前设备生效。选择“关闭”即可停止共享。",
+  "Remove key…": "移除密钥…",
+  "Remove key": "移除密钥",
+  "Save and enable": "保存并启用",
+  "Save key": "保存密钥",
+  "Restart and reclaim": "重启并回收空间",
+  "Reclaim disk space": "回收磁盘空间",
+  "Rebuilds the database file to return unused space to your disk.":
+    "重建数据库文件以将未使用的空间归还给磁盘。",
+  "Reclaiming…": "正在回收…",
+  "Reclaim space": "回收空间",
+  "Reclaim database space?": "确定回收数据库空间吗？",
+  "Suggest next prompt": "建议下一条提示词",
+  "Show a grey prompt suggestion in the composer after a turn completes. Press Tab or Right Arrow to accept it. Supported by Claude Code and Codex.":
+    "在轮次完成后于输入框中显示灰色的下一条提示词建议，按 Tab 或右方向键即可采纳。支持 Claude Code 与 Codex。",
+  "Show folder threads on two lines: the title, then the branch, pull request, and agent.":
+    "将文件夹中的任务分两行显示：第一行显示标题，第二行显示分支、拉取请求和智能体。",
+  "Show a predicted next message in the empty composer after a Claude or Codex turn. Tab uses it. Each is an extra cached request on your plan. Needs Codex 0.165+. Claude threads update on restart.":
+    "在 Claude 或 Codex 轮次结束后，于空白输入框中显示预测的下一条消息，按 Tab 键即可使用。每次预测会额外消耗一次计划内的缓存请求。需要 Codex 0.165+，Claude 任务在重启后生效。",
+  "On a Mac, clone new worktrees from a checkout cached in the T3 home folder instead of writing every file. Uses Git’s normal checkout when it can’t. Turning it off deletes the cache.":
+    "在 Mac 上，从 T3 主目录缓存的检出副本克隆新工作树，而非逐一写入每个文件；不满足条件时自动回退到 Git 常规检出。关闭此项会删除缓存。",
+  "Fast worktree checkout": "快速工作树检出",
+  "Started by the first run": "首次运行时自动创建",
+  "Destination thread": "目标任务",
+  "Search all threads...": "搜索所有任务...",
+  "No threads found.": "未找到任务。",
+  "tool calls in chat": "对话中的工具调用",
+  "Text generators": "文本生成器",
+  "Add generator": "添加生成器",
+  "No text generators yet": "暂无文本生成器",
+  "Add a model API to write thread titles, commit messages, and other short text without starting a coding agent.":
+    "添加模型 API，以便在不启动编程智能体的情况下生成任务标题、提交说明和其他短文本。",
+  "Show models": "显示模型",
+  "Use it": "投入使用",
+  "Thread titles and other generated text": "任务标题及其他生成文本",
+  "Commit messages, pull requests, and branch names": "提交说明、拉取请求与分支名称",
+  "Voice transcript cleanup": "语音转写润色",
+  "Add a text generator": "添加文本生成器",
+  "Writes thread titles, commit messages, and other short text without starting a coding agent. Your API key is stored on this environment.":
+    "无需启动编程智能体即可生成任务标题、提交说明和其他短文本。你的 API 密钥保存在当前环境中。",
+  Service: "服务类型",
+  "Base URL": "基础 URL (Base URL)",
+  "API key (optional)": "API 密钥（可选）",
+  "Name (optional)": "名称（可选）",
+  "e.g. My local model": "例如：我的本地模型",
+  "Save and continue": "保存并继续",
+  "Follows the text generation model": "跟随文本生成模型",
+  "Follow text generation": "跟随文本生成",
+  Test: "测试",
+  "The model list couldn't load.": "无法加载模型列表。",
+  "Loading the model list.": "正在加载模型列表。",
+  "Custom (OpenAI-compatible)": "自定义（兼容 OpenAI）",
+  "Use a separate cleanup model": "使用独立的润色模型",
+  "Smallest download": "下载体积最小",
+  "Fastest transcription": "转写速度最快",
+  "Sort by": "排序方式",
+  "Downloaded only": "仅显示已下载",
+  "Transcribe with": "转写方式",
+  Use: "使用",
+  "unavailable environment": "不可用的环境",
+  "On an environment": "在环境中转写",
+  "The cloud provider can detect your language automatically.":
+    "云端提供商可自动检测你所说的语言。",
+  "Clean up transcripts": "润色转写文本",
+  "Remove connection": "移除连接",
+  "Run `t3 connect link` on the host, then restart T3 Code there.":
+    "请在主机上运行 `t3 connect link`，然后重启主机上的 T3 Code。",
+  "For thread titles and other generated text. Source control has its own setting. Text generators from Providers also appear here.":
+    "用于生成任务标题及其他短文本（源代码管理拥有独立设置）。在“提供商”中添加的文本生成器也会显示在此处。",
+  "See your agents, import projects, and set up your phone.":
+    "查看智能体、导入项目并设置手机端连接。",
+  "Commits & pull requests": "提交与拉取请求",
+  "Commit and pull request writing": "提交与拉取请求撰写",
+  "Follow pull request templates": "遵循拉取请求模板",
+  "Must be a coding agent: it reads the pull request over many steps. Off uses the writer model, or Codex or Claude if that model is a text generator.":
+    "必须为编程智能体：它会分多步读取拉取请求。关闭时将使用撰写模型；若该模型是文本生成器，则改用 Codex 或 Claude。",
+  "Model for commit messages, pull request text, and branch or bookmark names. When disabled, use the text generation model configured for this environment.":
+    "用于生成提交说明、拉取请求文本以及分支或书签名称的模型。关闭时，使用为此环境配置的文本生成模型。",
+  "Welcome page": "欢迎页",
+  "Could not check provider updates": "无法检查提供商更新",
+  "Could not apply model selection": "无法应用模型选择",
+  "Voice transcription failed. Check the destination in Settings → Voice.":
+    "语音转写失败。请在“设置 → 语音”中检查转写目标配置。",
+  "Choose an OpenRouter model in Settings → Voice.":
+    "请在“设置 → 语音”中选择一个 OpenRouter 模型。",
+  "Follow settings": "跟随设置",
 };
+
+function translateDynamicWebSource(source: string): string | null {
+  let match = /^Model (.+)$/.exec(source);
+  if (match) return `模型 ${match[1]}`;
+
+  match = /^Use T3 Code in another app \(MCP\) · (.+)$/.exec(source);
+  if (match) return `在其他应用中使用 T3 Code (MCP) · ${match[1]}`;
+
+  match = /^What can (.+) do\?$/.exec(source);
+  if (match) return `允许 ${match[1]} 执行哪些操作？`;
+
+  match =
+    /^Apps like Poke and Claude run in the cloud\. They need a public address to reach (.+)\.$/.exec(
+      source,
+    );
+  if (match) return `Poke 和 Claude 等云端应用需要通过公网地址才能访问 ${match[1]}。`;
+
+  match = /^T3 Connect gives (.+) that address\. Each app still needs your approval\.$/.exec(
+    source,
+  );
+  if (match)
+    return `T3 Connect 会为 ${match[1]} 提供该公网地址，且每个应用仍需经你批准后才可接入。`;
+
+  match = /^Connect to (.+) first\.$/.exec(source);
+  if (match) return `请先连接到 ${match[1]}。`;
+
+  match = /^(.+)'s T3 Connect is offline$/.exec(source);
+  if (match) return `${match[1]} 的 T3 Connect 处于离线状态`;
+
+  match = /^Can't check T3 Connect on (.+)$/.exec(source);
+  if (match) return `无法检查 ${match[1]} 上的 T3 Connect 状态`;
+
+  match = /^Update T3 Code on (.+)$/.exec(source);
+  if (match) return `请更新 ${match[1]} 上的 T3 Code`;
+
+  match = /^This device needs the View relay permission on (.+)\.$/.exec(source);
+  if (match) return `当前设备需要 ${match[1]} 上的“查看中继 (View relay)”权限。`;
+
+  match = /^Fix: (.+)$/.exec(source);
+  if (match) return `修复方法：${translateWebSource("zh-CN", match[1]!)}`;
+
+  match = /^Turn on T3 Connect for (.+)$/.exec(source);
+  if (match) return `为 ${match[1]} 开启 T3 Connect`;
+
+  match = /^(.+) gets a public https address, with no router setup\.$/.exec(source);
+  if (match) return `无需配置路由器，即可为 ${match[1]} 分配公网 HTTPS 地址。`;
+
+  match = /^Restart T3 Code on (.+)\.$/.exec(source);
+  if (match) return `请重启 ${match[1]} 上的 T3 Code。`;
+
+  match =
+    /^When (.+) opens the sign-in page, choose what it may do and approve with your T3 Connect account\.$/.exec(
+      source,
+    );
+  if (match)
+    return `当 ${match[1]} 打开登录页面时，请选择允许它执行的操作，并使用你的 T3 Connect 账号批准。`;
+
+  match = /^(.+) help$/.exec(source);
+  if (match) return `${match[1]} 帮助文档`;
+
+  match = /^Run these where (.+) runs\.$/.exec(source);
+  if (match) return `请在运行 ${match[1]} 的环境中执行以下命令。`;
+
+  match = /^Open in (.+)$/.exec(source);
+  if (match) return `在 ${match[1]} 中打开`;
+
+  match = /^Copy URL and open (.+)$/.exec(source);
+  if (match) return `复制 URL 并打开 ${match[1]}`;
+
+  match = /^Copy message and open (.+)$/.exec(source);
+  if (match) return `复制消息并打开 ${match[1]}`;
+
+  match = /^Open (.+) on the web$/.exec(source);
+  if (match) return `在网页中打开 ${match[1]}`;
+
+  match = /^Open (.+)$/.exec(source);
+  if (match) return `打开 ${match[1]}`;
+
+  match = /^Could not get a code from (.+)\. Try again\.$/.exec(source);
+  if (match) return `无法从 ${match[1]} 获取验证码，请重试。`;
+
+  match = /^Expires (\d+:\d{2}) · one use$/.exec(source);
+  if (match) return `${match[1]} 后过期 · 一次性有效`;
+
+  match = /^Copy (.+)$/.exec(source);
+  if (match) return `复制 ${translateWebSource("zh-CN", match[1]!)}`;
+
+  match = /^Linked: (.+)$/.exec(source);
+  if (match) return `已关联：${match[1]}`;
+
+  match = /^Imported (\d+) threads?$/.exec(source);
+  if (match) return `已导入 ${match[1]} 个任务`;
+
+  match = /^Import (\d+) projects? and start$/.exec(source);
+  if (match) return `导入 ${match[1]} 个项目并开始使用`;
+
+  match = /^Import (\d+) projects? and their threads$/.exec(source);
+  if (match) return `导入 ${match[1]} 个项目及其任务`;
+
+  match = /^Could not turn on (.+)$/.exec(source);
+  if (match) return `无法启用 ${match[1]}`;
+
+  match = /^Turn on: (.+)$/.exec(source);
+  if (match) return `开启：${match[1]}`;
+
+  match = /^Set up: (.+)$/.exec(source);
+  if (match) return `设置：${match[1]}`;
+
+  match = /^Checking (.+)…$/.exec(source);
+  if (match) return `正在检查 ${match[1]}…`;
+
+  match = /^Looking for projects in your (.+) history…$/.exec(source);
+  if (match) return `正在从你的 ${match[1]} 历史记录中查找项目…`;
+
+  match = /^From your (.+) history$/.exec(source);
+  if (match) return `来自你的 ${match[1]} 历史记录`;
+
+  match = /^Could not check projects(?: again)?\. (.+)$/.exec(source);
+  if (match) return `无法检查项目：${match[1]}`;
+
+  match = /^Review all (\d+)$/.exec(source);
+  if (match) return `查看全部 ${match[1]} 项`;
+
+  match = /^(\d+) of (\d+) selected$/.exec(source);
+  if (match) return `已选 ${match[1]} / ${match[2]} 项`;
+
+  match = /^Install (.+)$/.exec(source);
+  if (match) return `安装 ${match[1]}`;
+
+  match = /^(\d+) folders?$/.exec(source);
+  if (match) return `${match[1]} 个文件夹`;
+
+  match =
+    /^OpenRouter no longer lists (.+)\. Dictation stays off until you choose another model\.$/.exec(
+      source,
+    );
+  if (match) return `OpenRouter 已不再提供 ${match[1]}。在你选择其他模型前，听写功能将保持关闭。`;
+
+  match = /^(.+) API key reference$/.exec(source);
+  if (match) return `${match[1]} API 密钥引用`;
+
+  match = /^(.+) API key$/.exec(source);
+  if (match) return `${match[1]} API 密钥`;
+
+  match = /^Anyone with dictation access to (.+) can (?:bill this|use this API) key\.$/.exec(
+    source,
+  );
+  if (match) return `任何拥有 ${match[1]} 听写权限的人都可以使用此 API 密钥。`;
+
+  match = /^Remove the (.+) key\?$/.exec(source);
+  if (match) return `要移除 ${match[1]} 密钥吗？`;
+
+  match = /^Manage (.+) key$/.exec(source);
+  if (match) return `管理 ${match[1]} 密钥`;
+
+  match = /^Use (.+) for dictation\?$/.exec(source);
+  if (match) return `要使用 ${match[1]} 进行听写吗？`;
+
+  match = /^Everyone using (.+) for dictation on (.+) will lose access\.$/.exec(source);
+  if (match) return `${match[2]} 上所有使用 ${match[1]} 听写的用户都将失去访问权限。`;
+
+  match = /^Connect to (.+) with dictation access to continue\.$/.exec(source);
+  if (match) return `请使用具备听写权限的连接访问 ${match[1]} 以继续。`;
+
+  match = /^Update (.+) to use OpenRouter dictation\.$/.exec(source);
+  if (match) return `请更新 ${match[1]} 以使用 OpenRouter 听写功能。`;
+
+  match = /^Ask an administrator on (.+) to add an API key\.$/.exec(source);
+  if (match) return `请联系 ${match[1]} 的管理员添加 API 密钥。`;
+
+  match = /^Uses the API key saved on (.+)\. This choice applies only to this device\.$/.exec(
+    source,
+  );
+  if (match) return `使用保存在 ${match[1]} 上的 API 密钥。此选择仅对当前设备生效。`;
+
+  match = /^Use (.+)$/.exec(source);
+  if (match) return `使用 ${match[1]}`;
+
+  match = /^More actions for (.+)$/.exec(source);
+  if (match) return `${match[1]} 的更多操作`;
+
+  match = /^Enable (.+)$/.exec(source);
+  if (match) return `启用 ${match[1]}`;
+
+  match = /^Remove (.+)\?$/.exec(source);
+  if (match) return `要移除 ${match[1]} 吗？`;
+
+  match =
+    /^This deletes the API key stored on (.+)\. Anything set to use this generator falls back to the text generation model\.$/.exec(
+      source,
+    );
+  if (match)
+    return `这将删除保存在 ${match[1]} 上的 API 密钥。所有配置为使用此生成器的功能都将回退到默认文本生成模型。`;
+
+  match = /^Edit (.+)$/.exec(source);
+  if (match) return `编辑 ${match[1]}`;
+
+  match =
+    /^(.+) is connected and lists (\d+) models?\. Switch any of these to it, or keep what they use now\.$/.exec(
+      source,
+    );
+  if (match)
+    return `${match[1]} 已连接并列出 ${match[2]} 个模型。你可以将下方任意功能切换为使用它，或保留当前设置。`;
+
+  match = /^(.+) answered\. It works\.$/.exec(source);
+  if (match) return `${match[1]} 已正常响应，连接可用。`;
+
+  match = /^Couldn't load (.+) models$/.exec(source);
+  if (match) return `无法加载 ${match[1]} 模型列表`;
+
+  match = /^(\d+) models? available\. Pick one in a text generation model picker\.$/.exec(source);
+  if (match) return `共有 ${match[1]} 个可用模型。请在文本生成模型选择器中进行选择。`;
+
+  match = /^(.+) models$/.exec(source);
+  if (match) return `${match[1]} 模型`;
+
+  return null;
+}
 
 /** Translate static UI copy supplied by upstream components as English source text. */
 export function translateWebSource(locale: ResolvedAppLocale, source: string): string {
   if (locale === "zh-CN") {
     const translatedSource = ZH_CN_SOURCE_MESSAGES[source];
     if (translatedSource !== undefined) return translatedSource;
+    const dynamicTranslated = translateDynamicWebSource(source);
+    if (dynamicTranslated !== null) return dynamicTranslated;
   }
   const key = WEB_MESSAGE_KEY_BY_ENGLISH_SOURCE.get(source);
   return key === undefined ? source : WEB_MESSAGES[locale][key];

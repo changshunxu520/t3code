@@ -9,28 +9,38 @@ import {
   updateEnvironmentSpeechModelUnloadTimeout,
 } from "@t3tools/client-runtime/voice-input";
 import type { PreparedConnection } from "@t3tools/client-runtime/connection";
+import { openRouterIcon } from "@t3tools/client-runtime/provider-clients";
 import {
   AuthSettingsWriteScope,
+  CLOUD_SPEECH_LABELS,
+  CloudSpeechProvider,
   DEFAULT_SPEECH_POST_PROCESSING_PROMPT,
   type EnvironmentId,
   type EnvironmentSpeechModel,
   type EnvironmentSpeechStatus,
   type ProjectId,
+  ProviderDriverKind,
   type SpeechAcceleration,
+  type SpeechBenchmarkTier,
   type SpeechCustomWords,
   type SpeechModelUnloadTimeout,
   type VoiceShortcutMode,
 } from "@t3tools/contracts";
 import { createModelSelection } from "@t3tools/shared/model";
 import { resolveSpeechPostProcessingModelSelection } from "@t3tools/shared/serverSettings";
+import { cloudSpeechLanguages } from "@t3tools/shared/speech";
 import {
   AudioLinesIcon,
   CheckIcon,
   DownloadIcon,
   LanguagesIcon,
+  KeyRoundIcon,
+  MonitorIcon,
+  MicOffIcon,
   MicIcon,
   RefreshCwIcon,
   StarIcon,
+  SlidersHorizontalIcon,
   Trash2Icon,
   XIcon,
 } from "lucide-react";
@@ -39,18 +49,19 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useStableCallback } from "~/hooks/useStableCallback";
 import { useI18n } from "~/i18n/WebI18nContext";
 import { listBrowserMicrophones, type BrowserMicrophone } from "../../speech/browserMicrophones";
+import { preferredSpeechLanguages } from "../../speech/preferredSpeechLanguages";
 import {
   chooseAudioDestination,
   chooseTranscriptCleanup,
   useCleanupGrant,
 } from "../../speech/voiceConsent";
 import { updateClientSettings, useClientSettings } from "../../hooks/useSettings";
-import { runtime } from "../../lib/runtime";
+import { runEnvironmentSpeech } from "../../speech/runEnvironmentSpeech";
 import {
   getCustomModelOptionsByInstance,
   resolveAppModelSelectionState,
 } from "../../modelSelection";
-import { providerInstanceEntriesFor } from "../../providerInstances";
+import { useTextGenerationTargets } from "../../textGenerators";
 import { useEnvironmentProviders, useEnvironments } from "../../state/environments";
 import { useEnvironmentScope } from "../../state/session";
 import { EMPTY_SERVER_PROVIDERS } from "../../state/server";
@@ -60,23 +71,47 @@ import {
 } from "../../speech/useEnvironmentSpeechInput";
 import { ComposerSpeechRecordingPill } from "../chat/ComposerSpeechButton";
 import { ProviderModelPicker } from "../chat/ProviderModelPicker";
+import { ProviderInstanceIcon } from "../chat/ProviderInstanceIcon";
+import { ProviderPackageIcon } from "../chat/ProviderPackageIcon";
 import { TraitsPicker } from "../chat/TraitsPicker";
 import { VoiceInputSetup } from "../chat/VoiceInputSetup";
 import { Badge } from "../ui/badge";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
+import {
+  Menu,
+  MenuCheckboxItem,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuPopup,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuRadioItemIndicator,
+  MenuSeparator,
+  MenuTrigger,
+} from "../ui/menu";
+import {
+  Select,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { toastManager } from "../ui/toast";
 import { MicrophoneTest } from "./MicrophoneTest";
+import { CloudVoiceConfiguration } from "./CloudVoiceConfiguration";
 import { LanguageRow, ModelBenchmarks, orderSpeechLanguages } from "./SpeechModelComparison";
 import { languageLabel, SpeechLanguageSelect } from "./SpeechLanguageSelect";
+import { filterSpeechModels, type SpeechModelSort } from "./speechModelBrowser";
 import { AdvancedSettings } from "./AdvancedSettings";
 import {
   SETTINGS_PICKER_TRIGGER_CLASSNAME,
-  SettingResetButton,
   SettingsPageContainer,
   SettingsRow,
   SettingsSearchTarget,
@@ -88,6 +123,17 @@ import { useScopedModelDisabledReason } from "./useScopedModelAvailability";
 import { useScopedSettings, useUpdateScopedSettings } from "./useScopedSettings";
 
 const OFF = "off";
+function CloudSpeechLogo({ provider }: { provider: CloudSpeechProvider }) {
+  if (provider === "openrouter")
+    return <ProviderPackageIcon icon={openRouterIcon} aria-hidden className="size-4 shrink-0" />;
+  return (
+    <ProviderInstanceIcon
+      driverKind={ProviderDriverKind.make(provider === "openai" ? "codex" : "grok")}
+      displayName={CLOUD_SPEECH_LABELS[provider]}
+      iconClassName="size-4"
+    />
+  );
+}
 const SYSTEM_DEFAULT = "system-default";
 const formatSize = (bytes: number) => `${Math.round(bytes / 1024 / 1024)} MB`;
 const SHORTCUT_MODE_LABELS: Record<VoiceShortcutMode, string> = {
@@ -111,16 +157,11 @@ const spellingsOf = (words: SpeechCustomWords) =>
       [term, ...aliases].map((spelling) => spelling.toLocaleLowerCase()),
     ),
   );
-const modelSortOrder = (model: EnvironmentSpeechModel) => {
-  if (model.active) return 0;
-  if (model.state === "installed") return 1;
-  if (model.state === "downloading" || model.state === "verifying") return 2;
-  return model.recommended ? 3 : 4;
-};
 
 type ModelCardProps = {
   readonly model: EnvironmentSpeechModel;
   readonly comparisonLanguages: readonly string[];
+  readonly benchmarkTier: SpeechBenchmarkTier;
   readonly busy: boolean;
   readonly canCancel: boolean;
   readonly onDownload: () => void;
@@ -183,6 +224,7 @@ function ModelCard(props: ModelCardProps) {
         <ModelBenchmarks
           model={model}
           languages={props.comparisonLanguages}
+          tier={props.benchmarkTier}
           facts={[
             ...(model.languages.length > 1
               ? [
@@ -446,7 +488,7 @@ function ProjectDictionaryRow() {
 
 /** Cleanup runs on the draft's environment, so its model is an environment setting there. */
 function CleanupModelRow() {
-  const { locale, tx } = useI18n();
+  const { tx } = useI18n();
   const { environment, connectedEnvironments } = useSettingsScope();
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
@@ -455,10 +497,18 @@ function CleanupModelRow() {
     (environment?.serverConfig
       ? providersByEnvironment.get(environment.environmentId)
       : undefined) ?? EMPTY_SERVER_PROVIDERS;
-  const textGenerationProviders = providers.filter(
-    (provider) => provider.supportsTextGeneration !== false,
-  );
-  const instanceEntries = providerInstanceEntriesFor(textGenerationProviders, settings, null);
+  const targets = useTextGenerationTargets({
+    environmentId: environment?.environmentId ?? null,
+    settings,
+    providers: providers.filter((provider) => provider.supportsTextGeneration !== false),
+    projectId: null,
+    selections: [
+      settings.speechPostProcessingModelSelection,
+      settings.textGenerationModelSelection,
+    ],
+  });
+  const textGenerationProviders = targets.providers;
+  const instanceEntries = targets.entries;
   const hasProvider = instanceEntries.some((entry) => entry.enabled && entry.isAvailable);
   const dedicated = settings.speechPostProcessingModelSelection !== null;
   const selection = resolveAppModelSelectionState(
@@ -497,56 +547,64 @@ function CleanupModelRow() {
       settingKeys={["speechPostProcessingModelSelection"]}
       {...searchableSetting("speech-post-processing-model")}
       title={tx("Cleanup model")}
-      description={
-        dedicated
-          ? locale === "zh-CN"
-            ? `${environment?.label ?? "此环境"}上的草稿将使用此模型进行润色，而非环境的文本生成模型。`
-            : `Drafts on ${environment?.label ?? "this environment"} use this model for cleanup instead of the environment’s text generation model.`
-          : locale === "zh-CN"
-            ? `润色当前使用${environment?.label ?? "此环境"}上的文本生成模型。如果想要更便宜或更快的模型，可以选择其他模型。`
-            : `Cleanup currently uses the text generation model on ${environment?.label ?? "this environment"}. Pick another model if you want a cheaper or faster one.`
-      }
-      resetAction={
-        dedicated ? (
-          <SettingResetButton
-            label={tx("cleanup model")}
-            onClick={() => updateSettings({ speechPostProcessingModelSelection: null })}
-          />
-        ) : null
-      }
+      description={tx(
+        "Model for transcript cleanup, such as a cheaper or faster one. When disabled, use the text generation model configured for this environment.",
+      )}
       control={
         connectedEnvironments.length === 0 ? (
           <span className="text-sm text-muted-foreground">
             {tx("Connect an environment first.")}
           </span>
-        ) : !hasProvider || !instanceEntry ? (
-          <span className="text-sm text-muted-foreground">{tx("No providers available.")}</span>
         ) : (
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
-            <ProviderModelPicker
-              environmentId={environment?.environmentId ?? null}
-              activeInstanceId={selection.instanceId}
-              model={selection.model}
-              lockedProvider={null}
-              instanceEntries={instanceEntries}
-              modelOptionsByInstance={modelOptionsByInstance}
-              triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
-              getModelDisabledReason={modelDisabledReason}
-              onInstanceModelChange={(instanceId, model) =>
-                setModel(createModelSelection(instanceId, model))
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            {dedicated && (!hasProvider || !instanceEntry) ? (
+              <span className="text-sm text-muted-foreground">
+                {tx("No text generation providers available.")}
+              </span>
+            ) : null}
+            {dedicated && hasProvider && instanceEntry ? (
+              <>
+                <ProviderModelPicker
+                  environmentId={environment?.environmentId ?? null}
+                  activeInstanceId={selection.instanceId}
+                  model={selection.model}
+                  lockedProvider={null}
+                  instanceEntries={instanceEntries}
+                  modelOptionsByInstance={modelOptionsByInstance}
+                  triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
+                  getModelDisabledReason={modelDisabledReason}
+                  onInstanceModelChange={(instanceId, model) =>
+                    setModel(createModelSelection(instanceId, model))
+                  }
+                />
+                <TraitsPicker
+                  provider={instanceEntry.driverKind}
+                  models={instanceEntry.models}
+                  model={selection.model}
+                  modelOptions={selection.options ?? []}
+                  allowPromptInjectedEffort={false}
+                  triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
+                  onModelOptionsChange={(options) =>
+                    setModel(createModelSelection(selection.instanceId, selection.model, options))
+                  }
+                />
+              </>
+            ) : null}
+            <Switch
+              checked={dedicated}
+              disabled={!dedicated && !hasProvider}
+              onCheckedChange={(checked) =>
+                updateSettings({
+                  speechPostProcessingModelSelection: checked
+                    ? createModelSelection(
+                        settings.textGenerationModelSelection.instanceId,
+                        settings.textGenerationModelSelection.model,
+                        settings.textGenerationModelSelection.options,
+                      )
+                    : null,
+                })
               }
-            />
-            <TraitsPicker
-              provider={instanceEntry.driverKind}
-              models={instanceEntry.models}
-              model={selection.model}
-              modelOptions={selection.options ?? []}
-              allowPromptInjectedEffort={false}
-              planModeEnabled={settings.planModeEnabled}
-              triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
-              onModelOptionsChange={(options) =>
-                setModel(createModelSelection(selection.instanceId, selection.model, options))
-              }
+              aria-label={tx("Use a separate cleanup model")}
             />
           </div>
         )
@@ -578,8 +636,8 @@ function useVoiceModels(prepared: PreparedConnection | null) {
       const revision = ++refreshRevision.current;
       try {
         const [nextStatus, nextModels] = await Promise.all([
-          runtime.runPromise(getEnvironmentSpeechStatus(connection)),
-          runtime.runPromise(getEnvironmentSpeechModels(connection, mode === "foreground")),
+          runEnvironmentSpeech(getEnvironmentSpeechStatus(connection)),
+          runEnvironmentSpeech(getEnvironmentSpeechModels(connection, mode === "foreground")),
         ]);
         if (current !== epoch.current || revision !== refreshRevision.current) return;
         setStatus(nextStatus);
@@ -686,7 +744,7 @@ function AdvancedSpeechSettings({
             onValueChange={(value) => {
               if (value)
                 void run("Could not change transcription hardware", () =>
-                  runtime.runPromise(
+                  runEnvironmentSpeech(
                     updateEnvironmentSpeechAcceleration(prepared, value as SpeechAcceleration),
                   ),
                 );
@@ -725,7 +783,7 @@ function AdvancedSpeechSettings({
             onValueChange={(value) => {
               if (value)
                 void run("Could not change when the model unloads", () =>
-                  runtime.runPromise(
+                  runEnvironmentSpeech(
                     updateEnvironmentSpeechModelUnloadTimeout(
                       prepared,
                       value as SpeechModelUnloadTimeout,
@@ -764,9 +822,11 @@ function SpeechModelBrowser(props: {
     catalog: { status, models, run, controlsDisabled, canCancel, requestedDownload },
   } = props;
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SpeechModelSort>("recommended");
+  const [downloadedOnly, setDownloadedOnly] = useState(false);
   const [languageSearch, setLanguageSearch] = useState("");
   const [selection, setSelection] = useState<string[] | null>(null);
-  const preferred = navigator.languages.map((language) => language.toLowerCase().split("-")[0]!);
+  const [preferred] = useState(preferredSpeechLanguages);
   const supportedLanguages = [...new Set(models.flatMap((model) => model.languages))];
   const defaultLanguage = preferred.find((code) => supportedLanguages.includes(code));
   const selectedLanguages = selection ?? (defaultLanguage ? [defaultLanguage] : []);
@@ -776,14 +836,24 @@ function SpeechModelBrowser(props: {
     (code) =>
       !needle || code.includes(needle) || languageLabel(code).toLocaleLowerCase().includes(needle),
   );
-  const query = search.trim().toLocaleLowerCase();
-  const sortedModels = models
-    .filter(
-      (model) =>
-        selectedLanguages.every((language) => model.languages.includes(language)) &&
-        (!query || (model.name + " " + model.description).toLocaleLowerCase().includes(query)),
-    )
-    .toSorted((left, right) => modelSortOrder(left) - modelSortOrder(right));
+  const accuracyLanguage = selectedLanguages[0] ?? "en";
+  const sortLabels: Record<SpeechModelSort, string> = {
+    recommended: tx("Recommended"),
+    size: tx("Smallest download"),
+    accuracy:
+      locale === "zh-CN"
+        ? `${languageLabel(accuracyLanguage, locale)}准确率最高`
+        : `Best ${languageLabel(accuracyLanguage)} accuracy`,
+    speed: tx("Fastest transcription"),
+  };
+  const sortedModels = filterSpeechModels(models, {
+    search,
+    languages: selectedLanguages,
+    downloadedOnly,
+    sort,
+    accuracyLanguage,
+    benchmarkTier: status?.supported ? status.benchmarkTier : "accelerated",
+  });
   const activeModel = models.find((model) => model.active);
   const renderedModels =
     activeModel && !sortedModels.includes(activeModel)
@@ -806,7 +876,7 @@ function SpeechModelBrowser(props: {
         <>
           <p className="border-b border-border/60 px-3 py-2 text-xs text-muted-foreground sm:px-4">
             {tx(
-              "Pick languages to see models that support all of them. Accuracy is word or character error rate: lower is better. Speed is the time to transcribe 30 seconds of audio on Handy’s benchmark GPU.",
+              `Pick languages to see models that support all of them. Accuracy is word or character error rate: lower is better. Speed is the time to transcribe 30 seconds of audio on Handy’s benchmark ${status.benchmarkTier === "cpu" ? "CPU" : "GPU"}.`,
             )}
           </p>
           <div className="@min-[32rem]/voice-models:grid @min-[32rem]/voice-models:grid-cols-[11rem_minmax(0,1fr)]">
@@ -862,13 +932,58 @@ function SpeechModelBrowser(props: {
                         selectedLanguages.map((code) => languageLabel(code, locale)).join(", ")
                     : tx("All models")}
                 </p>
-                <Input
-                  size="compact"
-                  aria-label={tx("Search transcription models")}
-                  placeholder={tx("Search models")}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+                <InputGroup>
+                  <InputGroupInput
+                    size="compact"
+                    aria-label={tx("Search transcription models")}
+                    placeholder={tx("Search models")}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <Menu>
+                      <MenuTrigger
+                        render={<Button size="compact" variant="ghost-muted" />}
+                        aria-label={
+                          locale === "zh-CN"
+                            ? `排序与筛选模型：${sortLabels[sort]}${downloadedOnly ? "，仅已下载" : ""}`
+                            : `Sort and filter models: ${sortLabels[sort]}${downloadedOnly ? ", downloaded only" : ""}`
+                        }
+                      >
+                        <SlidersHorizontalIcon />
+                        <span className="hidden @min-[40rem]/voice-models:inline">
+                          {sortLabels[sort]}
+                        </span>
+                        {downloadedOnly && <span>1</span>}
+                      </MenuTrigger>
+                      <MenuPopup align="end">
+                        <MenuGroup>
+                          <MenuGroupLabel>{tx("Sort by")}</MenuGroupLabel>
+                          <MenuRadioGroup
+                            value={sort}
+                            onValueChange={(value) => setSort(value as SpeechModelSort)}
+                          >
+                            {(Object.keys(sortLabels) as SpeechModelSort[]).map((value) => (
+                              <MenuRadioItem key={value} value={value} closeOnClick>
+                                <span className="flex items-center justify-between gap-3">
+                                  {sortLabels[value]}
+                                  <MenuRadioItemIndicator />
+                                </span>
+                              </MenuRadioItem>
+                            ))}
+                          </MenuRadioGroup>
+                        </MenuGroup>
+                        <MenuSeparator />
+                        <MenuCheckboxItem
+                          checked={downloadedOnly}
+                          onCheckedChange={setDownloadedOnly}
+                        >
+                          {tx("Downloaded only")}
+                        </MenuCheckboxItem>
+                      </MenuPopup>
+                    </Menu>
+                  </InputGroupAddon>
+                </InputGroup>
               </div>
               <div
                 className="h-72 overflow-y-auto divide-y divide-border/60"
@@ -890,26 +1005,27 @@ function SpeechModelBrowser(props: {
                     busy: controlsDisabled,
                     canCancel,
                     comparisonLanguages: selectedLanguages,
+                    benchmarkTier: status.benchmarkTier,
                     onDownload: () =>
                       void run(
                         "Could not download the model",
                         () =>
-                          runtime.runPromise(downloadEnvironmentSpeechModel(prepared, model.id)),
+                          runEnvironmentSpeech(downloadEnvironmentSpeechModel(prepared, model.id)),
                         model.id,
                       ),
                     onSelect: () =>
                       void run("Could not select the model", () =>
-                        runtime.runPromise(selectEnvironmentSpeechModel(prepared, model.id)),
+                        runEnvironmentSpeech(selectEnvironmentSpeechModel(prepared, model.id)),
                       ),
                     onCancel: () =>
                       void run("Could not cancel the download", () =>
-                        runtime.runPromise(
+                        runEnvironmentSpeech(
                           cancelEnvironmentSpeechModelDownload(prepared, model.id),
                         ),
                       ),
                     onDelete: () =>
                       void run("Could not delete the model", () =>
-                        runtime.runPromise(removeEnvironmentSpeechModel(prepared, model.id)),
+                        runEnvironmentSpeech(removeEnvironmentSpeechModel(prepared, model.id)),
                       ),
                   };
                   return model.active ? (
@@ -1047,9 +1163,11 @@ function TranscriptionTest(props: {
         step={speech.setup.step}
         status={speech.status}
         model={speech.setup.model}
+        language={speech.setup.language}
         downloading={speech.setup.downloading}
         error={speech.setup.error}
         onOpenChange={speech.setup.setOpen}
+        onRetryCatalog={speech.setup.retryCatalog}
         onDownload={() => void speech.setup.download()}
         onCancelDownload={() => void speech.setup.cancelDownload()}
         onStartRecording={() => void speech.setup.startRecording()}
@@ -1064,9 +1182,14 @@ export function VoiceSettingsPanel() {
   const settings = useClientSettings();
   const settingsScope = useOptionalSettingsScope();
   const destination = useVoiceTranscriptionDestination();
+  const canManageKey = useEnvironmentScope(destination.environmentId, AuthSettingsWriteScope);
+  const [pendingCloud, setPendingCloud] = useState<{
+    provider: CloudSpeechProvider;
+    environmentId: EnvironmentId;
+  } | null>(null);
   const { environments } = useEnvironments();
   const [microphones, setMicrophones] = useState<BrowserMicrophone[]>([]);
-  const prepared = destination.prepared;
+  const prepared = destination.cloudProvider ? null : destination.prepared;
   const catalog = useVoiceModels(prepared);
 
   const refreshMicrophones = useStableCallback(async () => {
@@ -1099,11 +1222,40 @@ export function VoiceSettingsPanel() {
     ? (microphones.find((device) => device.deviceId === selectedMicrophone)?.label ??
       tx("Selected microphone (unavailable)"))
     : tx("System default");
-  const destinationValue = destination.environmentId ?? OFF;
+  const environmentChoices = environments.map((environment) => ({
+    environment,
+    value: JSON.stringify(["environment", environment.environmentId]),
+  }));
+  const cloudGroups = environments
+    .filter(
+      (environment) => environment.serverConfig?.environment.capabilities.cloudVoiceTranscription,
+    )
+    .map((environment) => ({
+      environment,
+      choices: CloudSpeechProvider.literals.map((provider) => ({
+        environment,
+        provider,
+        value: JSON.stringify(["cloud", environment.environmentId, provider]),
+      })),
+    }));
+  const cloudChoices = cloudGroups.flatMap((group) => group.choices);
+  const destinationValue = destination.cloudProvider
+    ? JSON.stringify(["cloud", destination.environmentId, destination.cloudProvider])
+    : destination.environmentId
+      ? JSON.stringify(["environment", destination.environmentId])
+      : OFF;
+  const cloudEnvironment = environments.find(
+    (env) => env.environmentId === pendingCloud?.environmentId,
+  );
+  // OpenRouter users without settings access still manage their own model choice.
+  const manageLabel = tx(
+    destination.cloudProvider === "openrouter" ? "Manage OpenRouter" : "Manage key",
+  );
   const chosenEnvironment = environments.find(
     (environment) => environment.environmentId === destination.environmentId,
   );
   const chosenUnsupported =
+    !destination.cloudProvider &&
     chosenEnvironment?.serverConfig != null &&
     chosenEnvironment.serverConfig.environment.capabilities.voiceTranscription !== true;
   const model = prepared && modelStatus?.supported ? modelStatus : null;
@@ -1111,6 +1263,8 @@ export function VoiceSettingsPanel() {
   return (
     <SettingsPageContainer
       searchTargetFallbacks={{
+        "speech-language":
+          model || destination.cloudProvider ? undefined : "voice-transcription-destination",
         "speech-models": prepared ? undefined : "voice-transcription-destination",
         "speech-hardware": prepared && model ? undefined : "voice-transcription-destination",
         "transcription-test": !prepared
@@ -1203,78 +1357,194 @@ export function VoiceSettingsPanel() {
       </SettingsSection>
 
       <SettingsSection id="voice-transcription" title={tx("Transcription")}>
-        <SettingsRow
+        <SettingsSearchTarget
           {...searchableSetting("voice-transcription-destination")}
-          title={tx("Send microphone audio to")}
-          description={
-            <>
-              {tx(
-                "Microphone audio is sent to this environment to transcribe, then discarded. Choose Off to turn voice input off on this device. This choice is saved on this device only.",
-              )}
-            </>
-          }
-          control={
-            <Select
-              value={destinationValue}
-              onValueChange={(value) => {
-                if (!value) return;
-                chooseAudioDestination(
-                  value === OFF
-                    ? null
-                    : { kind: "environment", environmentId: value as EnvironmentId },
-                );
-              }}
-            >
-              <SelectTrigger
-                size="sm"
-                aria-label={tx("Send microphone audio to")}
-                className="max-w-72"
-              >
-                <SelectValue>
-                  {destinationValue === OFF
-                    ? tx("Off")
-                    : (chosenEnvironment?.label ?? tx("Chosen environment (unavailable)"))}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectPopup align="end" alignItemWithTrigger={false}>
-                <SelectItem value={OFF}>{tx("Off")}</SelectItem>
-                {environments.map((environment) => (
-                  <SelectItem key={environment.environmentId} value={environment.environmentId}>
-                    {environment.label}
-                  </SelectItem>
-                ))}
-                {destination.environmentId && !chosenEnvironment ? (
-                  <SelectItem value={destination.environmentId}>
-                    {tx("Chosen environment (unavailable)")}
-                  </SelectItem>
-                ) : null}
-              </SelectPopup>
-            </Select>
-          }
+          className="@container/destination px-3 py-3 sm:px-4"
         >
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="shrink-0 text-sm font-medium">
+              <span className="@max-[18rem]/destination:hidden">{tx("Transcribe with")}</span>
+              <span className="@min-[18rem]/destination:hidden">{tx("Use")}</span>
+            </h3>
+            <div className="flex min-w-0 items-center justify-end gap-1">
+              <Select
+                value={destinationValue}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  const cloud = cloudChoices.find((choice) => choice.value === value);
+                  if (cloud) {
+                    setPendingCloud({
+                      environmentId: cloud.environment.environmentId,
+                      provider: cloud.provider,
+                    });
+                    return;
+                  }
+                  setPendingCloud(null);
+                  const chosen = environmentChoices.find((choice) => choice.value === value);
+                  if (value === OFF) chooseAudioDestination(null);
+                  else if (chosen)
+                    chooseAudioDestination({
+                      kind: "environment",
+                      environmentId: chosen.environment.environmentId,
+                    });
+                }}
+              >
+                <SelectTrigger
+                  size="sm"
+                  aria-label={tx("Transcribe with")}
+                  className="w-auto min-w-0 max-w-72"
+                >
+                  <SelectValue>
+                    <span className="flex min-w-0 items-center gap-2">
+                      {destination.cloudProvider ? (
+                        <CloudSpeechLogo provider={destination.cloudProvider} />
+                      ) : destination.environmentId ? (
+                        <MonitorIcon aria-hidden className="size-4" />
+                      ) : (
+                        <MicOffIcon aria-hidden className="size-4" />
+                      )}
+                      <span className="truncate">
+                        {destination.cloudProvider
+                          ? CLOUD_SPEECH_LABELS[destination.cloudProvider]
+                          : destination.environmentId
+                            ? (chosenEnvironment?.label ?? tx("Chosen environment (unavailable)"))
+                            : tx("Off")}
+                        {destination.cloudProvider && (
+                          <span className="text-muted-foreground">
+                            {locale === "zh-CN" ? " · 通过 " : " via "}
+                            {chosenEnvironment?.label ?? tx("unavailable environment")}
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectPopup align="end" alignItemWithTrigger={false}>
+                  <SelectItem value={OFF}>
+                    <span className="flex items-center gap-2">
+                      <MicOffIcon aria-hidden className="size-4" />
+                      {tx("Off")}
+                    </span>
+                  </SelectItem>
+                  {environmentChoices.length > 0 && (
+                    <SelectGroup>
+                      <SelectGroupLabel>{tx("On an environment")}</SelectGroupLabel>
+                      {environmentChoices.map(({ environment, value }) => (
+                        <SelectItem key={value} value={value}>
+                          <span className="flex items-center gap-2">
+                            <MonitorIcon aria-hidden className="size-4" />
+                            {environment.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {cloudGroups.map(({ environment, choices }) => (
+                    <SelectGroup key={environment.environmentId}>
+                      <SelectGroupLabel>
+                        {locale === "zh-CN"
+                          ? `云端（通过 ${environment.label}）`
+                          : `Cloud via ${environment.label}`}
+                      </SelectGroupLabel>
+                      {choices.map(({ value, provider }) => (
+                        <SelectItem
+                          key={value}
+                          value={value}
+                          aria-label={
+                            locale === "zh-CN"
+                              ? `${CLOUD_SPEECH_LABELS[provider]}（通过 ${environment.label}）`
+                              : `${CLOUD_SPEECH_LABELS[provider]} via ${environment.label}`
+                          }
+                        >
+                          <span className="flex items-center gap-2">
+                            <CloudSpeechLogo provider={provider} />
+                            {CLOUD_SPEECH_LABELS[provider]}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                  {destination.environmentId &&
+                  (!chosenEnvironment ||
+                    (destination.cloudProvider &&
+                      !cloudChoices.some((option) => option.value === destinationValue))) ? (
+                    <SelectItem value={destinationValue}>
+                      {tx("Chosen environment (unavailable)")}
+                    </SelectItem>
+                  ) : null}
+                </SelectPopup>
+              </Select>
+              {destination.cloudProvider &&
+                chosenEnvironment &&
+                (canManageKey || destination.cloudProvider === "openrouter") && (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="icon-sm"
+                          type="button"
+                          variant="ghost"
+                          aria-label={manageLabel}
+                          onClick={() => {
+                            if (destination.cloudProvider)
+                              setPendingCloud({
+                                provider: destination.cloudProvider,
+                                environmentId: chosenEnvironment.environmentId,
+                              });
+                          }}
+                        >
+                          <KeyRoundIcon aria-hidden className="size-4" />
+                        </Button>
+                      }
+                    />
+                    <TooltipPopup>{manageLabel}</TooltipPopup>
+                  </Tooltip>
+                )}
+            </div>
+          </div>
           {destination.environmentId && chosenUnsupported ? (
             <p className="mt-2 text-xs text-destructive">
               {locale === "zh-CN"
-                ? `${chosenEnvironment.label} 无法转写音频。请选择支持语音转写的环境以使用语音输入。`
-                : `${chosenEnvironment.label} can’t transcribe audio. Pick an environment that can to use voice input.`}
+                ? `${chosenEnvironment.label} 无法在本地转写音频。请选择其他目标。`
+                : `${chosenEnvironment.label} can’t transcribe audio locally. Choose a different destination.`}
             </p>
           ) : null}
-        </SettingsRow>
+        </SettingsSearchTarget>
 
-        <SettingsRow
-          {...searchableSetting("speech-language")}
-          title={tx("Language")}
-          description={
-            model
-              ? locale === "zh-CN"
-                ? `${model.model} ${model.supportsLanguageDetection ? "会自动检测语言" : "使用固定单一语言"}。`
-                : `${model.model} ${model.supportsLanguageDetection ? "detects the language automatically" : "uses one fixed language"}.`
-              : tx(
-                  "Choose an environment above to see the languages its transcription model supports.",
-                )
-          }
-          control={<SpeechLanguageSelect model={model} />}
-        />
+        {pendingCloud && cloudEnvironment && (
+          <CloudVoiceConfiguration
+            key={JSON.stringify(pendingCloud)}
+            provider={pendingCloud.provider}
+            environment={cloudEnvironment}
+            active={
+              destination.environmentId === pendingCloud.environmentId &&
+              destination.cloudProvider === pendingCloud.provider
+            }
+            close={() => setPendingCloud(null)}
+          />
+        )}
+        {(model || destination.cloudProvider) && (
+          <SettingsRow
+            {...searchableSetting("speech-language")}
+            title={tx("Language")}
+            description={
+              destination.cloudProvider
+                ? tx("The cloud provider can detect your language automatically.")
+                : model
+                  ? locale === "zh-CN"
+                    ? `${model.model} ${model.supportsLanguageDetection ? "会自动检测语言" : "使用固定单一语言"}。`
+                    : `${model.model} ${model.supportsLanguageDetection ? "detects the language automatically" : "uses one fixed language"}.`
+                  : tx(
+                      "Choose an environment above to see the languages its transcription model supports.",
+                    )
+            }
+            control={
+              <SpeechLanguageSelect
+                model={destination.cloudProvider ? cloudSpeechLanguages : model}
+              />
+            }
+          />
+        )}
         {model?.supportsTranslation ? (
           <SettingsRow
             title={tx("Translate to English")}
@@ -1309,11 +1579,14 @@ export function VoiceSettingsPanel() {
           {...searchableSetting("speech-silence-filtering")}
           title={tx("Silence filtering")}
           description={tx(
-            "Skip silence and other non-speech audio before transcription, keeping a short buffer so words aren’t cut off.",
+            destination.cloudProvider === "openai"
+              ? "OpenAI handles silence automatically."
+              : "Skip silence and other non-speech audio before transcription, keeping a short buffer so words aren’t cut off.",
           )}
           control={
             <Switch
               aria-label={tx("Silence filtering")}
+              disabled={destination.cloudProvider === "openai"}
               checked={settings.speechSilenceFiltering}
               onCheckedChange={(checked) =>
                 void updateClientSettings({ speechSilenceFiltering: checked })
@@ -1362,13 +1635,13 @@ export function VoiceSettingsPanel() {
 
       <SettingsSection id={searchableSetting("speech-post-processing").id} title={tx("Cleanup")}>
         <SettingsRow
-          title={tx("Clean up transcripts with a provider")}
+          title={tx("Clean up transcripts")}
           description={tx(
-            "Sends each transcript and the draft text around your cursor to the draft environment’s text generation provider to fix punctuation, numbers, and spoken corrections. Your audio is never sent.",
+            "Fixes punctuation, numbers, and spoken corrections with the cleanup model on the draft’s environment. Sends the transcript and nearby draft text, never audio.",
           )}
           control={
             <Switch
-              aria-label={tx("Clean up transcripts with a provider")}
+              aria-label={tx("Clean up transcripts")}
               checked={cleanupEnabled}
               onCheckedChange={chooseTranscriptCleanup}
             />

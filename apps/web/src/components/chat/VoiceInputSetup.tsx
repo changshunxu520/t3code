@@ -14,6 +14,7 @@ import { useClientSettings, updateClientSettings } from "../../hooks/useSettings
 import { useEnvironment } from "../../state/environments";
 import { AuthSettingsWriteScope } from "@t3tools/contracts";
 import { useEnvironmentScope } from "../../state/session";
+import { languageLabel } from "../settings/SpeechLanguageSelect";
 import { Button } from "../ui/button";
 import { Dialog } from "../ui/dialog";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
@@ -25,9 +26,12 @@ export function VoiceInputSetup(props: {
   step: number;
   status: EnvironmentSpeechStatus | null;
   model: EnvironmentSpeechModel | null;
+  /** The language the offered model was chosen for. */
+  language: string | null;
   downloading: boolean;
   error: string | null;
   onOpenChange(open: boolean): void;
+  onRetryCatalog: (() => void) | null;
   onDownload(): void;
   onCancelDownload(): void;
   onStartRecording(): void;
@@ -91,54 +95,60 @@ export function VoiceInputSetup(props: {
         <WizardPanel>
           {props.step === 0 ? (
             <section className="space-y-3 text-sm">
-              <div className="rounded-lg border border-border/70 bg-card/60 p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-medium">
-                    {status?.model ?? tx("English transcription model")}
-                  </h3>
-                  {status?.modelId === "handy-computer/parakeet-unified-en-0.6b-gguf" ? (
-                    <span className="text-xs font-medium text-primary">
-                      {tx("Recommended for English")}
-                    </span>
+              {model ? (
+                <div className="rounded-lg border border-border/70 bg-card/60 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-medium">{model.name}</h3>
+                    {model?.recommended && props.language ? (
+                      <span className="text-xs font-medium text-primary">
+                        {locale === "zh-CN"
+                          ? `${tx(languageLabel(props.language))}推荐`
+                          : `Recommended for ${languageLabel(props.language)}`}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-muted-foreground">
+                    {locale === "zh-CN"
+                      ? `将 ${Math.round(model.size / 1024 / 1024)} MB 模型下载到 ${environment?.label ?? "转写环境"}。根据语音设置中的选择，麦克风音频将发送到此处进行转写。`
+                      : `Download the ${Math.round(model.size / 1024 / 1024)} MB model to ${environment?.label ?? "your transcription environment"}. Microphone audio is sent there for transcription, as chosen in Voice settings.`}
+                  </p>
+                  <p className="mt-2 text-muted-foreground">
+                    {tx(
+                      "Silero (1.2 MB), used for silence filtering and pause detection, downloads alongside the speech model. An installed copy is reused.",
+                    )}
+                  </p>
+                  {props.downloading ? (
+                    <div role="status" className="mt-4 space-y-1 text-muted-foreground">
+                      <div
+                        role="progressbar"
+                        aria-label={tx("Speech model download progress")}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={progress ?? undefined}
+                        className="h-1 overflow-hidden rounded-full bg-muted"
+                      >
+                        <div
+                          className="h-full bg-primary transition-[width] duration-200"
+                          style={{ width: `${progress ?? 0}%` }}
+                        />
+                      </div>
+                      <p className="text-xs">
+                        {model?.state === "verifying"
+                          ? tx("Verifying download…")
+                          : progress === null
+                            ? tx("Starting download…")
+                            : locale === "zh-CN"
+                              ? `已下载 ${progress}%`
+                              : `${progress}% downloaded`}
+                      </p>
+                    </div>
                   ) : null}
                 </div>
-                <p className="mt-2 text-muted-foreground">
-                  {locale === "zh-CN"
-                    ? `将 ${status ? Math.round(status.size / 1024 / 1024) : 697} MB 模型下载到 ${environment?.label ?? "转写环境"}。根据语音设置中的选择，麦克风音频将发送到此处进行转写。`
-                    : `Download the ${status ? Math.round(status.size / 1024 / 1024) : 697} MB model to ${environment?.label ?? "your transcription environment"}. Microphone audio is sent there for transcription, as chosen in Voice settings.`}
+              ) : !props.error ? (
+                <p role="status" className="text-muted-foreground">
+                  {tx("Loading transcription models…")}
                 </p>
-                <p className="mt-2 text-muted-foreground">
-                  {tx(
-                    "Silero (1.2 MB), used for silence filtering and pause detection, downloads alongside the speech model. An installed copy is reused.",
-                  )}
-                </p>
-                {props.downloading ? (
-                  <div role="status" className="mt-4 space-y-1 text-muted-foreground">
-                    <div
-                      role="progressbar"
-                      aria-label={tx("Speech model download progress")}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={progress ?? undefined}
-                      className="h-1 overflow-hidden rounded-full bg-muted"
-                    >
-                      <div
-                        className="h-full bg-primary transition-[width] duration-200"
-                        style={{ width: `${progress ?? 0}%` }}
-                      />
-                    </div>
-                    <p className="text-xs">
-                      {model?.state === "verifying"
-                        ? tx("Verifying download…")
-                        : progress === null
-                          ? tx("Starting download…")
-                          : locale === "zh-CN"
-                            ? `已下载 ${progress}%`
-                            : `${progress}% downloaded`}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
               {props.error ? (
                 <p role="alert" className="text-destructive">
                   {tx(props.error)}
@@ -221,25 +231,30 @@ export function VoiceInputSetup(props: {
           {props.step === 0 ? (
             <>
               <Button variant="outline" onClick={() => openSettings("speech-models")}>
-                {tx("Choose another model or language")}
+                {tx(model ? "Choose another model or language" : "Choose a model or language")}
               </Button>
+              {props.onRetryCatalog ? (
+                <Button onClick={props.onRetryCatalog}>{tx("Retry loading models")}</Button>
+              ) : null}
               {props.downloading ? (
                 <Button variant="outline" disabled={!canManage} onClick={props.onCancelDownload}>
                   {tx("Cancel download")}
                 </Button>
               ) : null}
-              <Button
-                disabled={!canManage || props.downloading || !status}
-                onClick={props.onDownload}
-              >
-                {props.downloading
-                  ? tx("Downloading…")
-                  : props.error
-                    ? tx("Retry download")
-                    : canManage
-                      ? tx("Download model")
-                      : tx("Ask an environment admin to download")}
-              </Button>
+              {model ? (
+                <Button
+                  disabled={!canManage || props.downloading || !status}
+                  onClick={props.onDownload}
+                >
+                  {props.downloading
+                    ? tx("Downloading…")
+                    : props.error
+                      ? tx("Try again")
+                      : canManage
+                        ? tx("Download model")
+                        : tx("Ask an environment admin to download")}
+                </Button>
+              ) : null}
             </>
           ) : (
             <>

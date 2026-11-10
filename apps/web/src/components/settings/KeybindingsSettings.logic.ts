@@ -107,6 +107,7 @@ export type KeybindingCommandTranslator = (
 const CORE_WHEN_VARIABLES = [
   "terminalFocus",
   "terminalOpen",
+  "previewOpen",
   "isWeb",
   "isDesktop",
   "true",

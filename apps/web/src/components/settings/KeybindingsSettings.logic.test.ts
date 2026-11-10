@@ -1,10 +1,17 @@
 import { DEFAULT_RESOLVED_KEYBINDINGS } from "@t3tools/shared/keybindings";
 import {
   buildKeybindingCommandOptions,
+  buildKeybindingRows,
   buildWhenVariableOptions,
   commandLabel,
   filterKeybindingRows,
+  keybindingConflictLabels,
+  keybindingFromKeyboardEvent,
+  localizedCommandLabel,
+  parseWhenExpressionDraft,
+  shortcutToKeybindingInput,
   unknownWhenVariables,
+  whenAstToExpression,
   whenNodeRemoveLabel,
 } from "./KeybindingsSettings.logic";
 import { assert, describe, expect, it } from "vite-plus/test";
@@ -17,16 +24,6 @@ import {
 import { resolveShortcutCommand } from "../../keybindings";
 
 import { translateWebMessage } from "../../i18n/messages";
-
-import {
-  buildKeybindingRows,
-  keybindingConflictLabels,
-  keybindingFromKeyboardEvent,
-  localizedCommandLabel,
-  parseWhenExpressionDraft,
-  shortcutToKeybindingInput,
-  whenAstToExpression,
-} from "./KeybindingsSettings.logic";
 
 const localizedChineseCommandLabel = (command: Parameters<typeof localizedCommandLabel>[0]) =>
   localizedCommandLabel(command, (key, values) => translateWebMessage("zh-CN", key, values));
@@ -282,6 +279,10 @@ describe("KeybindingsSettings.logic", () => {
         },
       },
     });
+    const previewOpenDraft = parseWhenExpressionDraft("previewOpen && !previewFocus");
+    assert(previewOpenDraft.ok);
+    expect(unknownWhenVariables(previewOpenDraft.value)).toEqual([]);
+    expect(buildWhenVariableOptions()).toContain("previewOpen");
     expect(parseWhenExpressionDraft("editorFocus &&")).toEqual({
       ok: false,
       message: "Use variables with !, &&, ||, and parentheses.",

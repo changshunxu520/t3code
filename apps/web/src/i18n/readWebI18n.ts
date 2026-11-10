@@ -1,6 +1,11 @@
 import { resolveAppLocale } from "@t3tools/shared/appLocale";
 import { getClientSettings } from "../hooks/useSettings";
-import { translateWebMessage, type WebMessageKey, type WebMessageValues } from "./messages";
+import {
+  translateWebMessage,
+  translateWebSource,
+  type WebMessageKey,
+  type WebMessageValues,
+} from "./messages";
 import { readRuntimeLocales } from "./WebI18nProvider";
 
 /** Capture the current locale for non-React actions, without calling a hook. */
@@ -9,5 +14,6 @@ export function readWebI18n() {
   return {
     locale,
     t: (key: WebMessageKey, values?: WebMessageValues) => translateWebMessage(locale, key, values),
+    tx: (source: string) => translateWebSource(locale, source),
   };
 }

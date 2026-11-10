@@ -1,9 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import type {
-  ProviderInstanceId,
-  ServerSettings,
-  SourceControlWritingStyleMode,
+import {
+  type ProviderInstanceId,
+  type ServerSettings,
+  type SourceControlWritingStyleMode,
+  textGeneratorForSelection,
 } from "@t3tools/contracts";
 import { DEFAULT_UNIFIED_SETTINGS } from "@t3tools/contracts/settings";
 import { createModelSelection } from "@t3tools/shared/model";
@@ -22,6 +23,7 @@ import {
 import { useScopedModelDisabledReason } from "./useScopedModelAvailability";
 import { useSettingsScope } from "./SettingsScopeContext";
 import { providerInstanceEntriesFor } from "../../providerInstances";
+import { useTextGenerationTargets } from "../../textGenerators";
 import {
   getCustomModelOptionsByInstance,
   resolveAppModelSelectionState,
@@ -115,12 +117,21 @@ export function SourceControlWritingSettingsSection() {
     settings,
     target?.projectId ?? null,
   );
+  // Text generators may write source control text, but never review guides.
+  const writerTargets = useTextGenerationTargets({
+    environmentId,
+    settings,
+    providers: textGenerationProviders,
+    projectId: target?.projectId ?? null,
+    selections: [settings.sourceControlWriterModelSelection, settings.textGenerationModelSelection],
+  });
+  const writerEntries = writerTargets.entries;
   const projectEnabledInstanceIds = new Set(
-    instanceEntries
+    writerEntries
       .filter((entry) => entry.enabled && entry.isAvailable)
       .map((entry) => entry.instanceId),
   );
-  const projectEffectiveTextGenerationProviders = textGenerationProviders.filter((provider) =>
+  const projectEffectiveTextGenerationProviders = writerTargets.providers.filter((provider) =>
     projectEnabledInstanceIds.has(provider.instanceId),
   );
   const defaultModelSelection = resolveAppModelSelectionState(
@@ -139,7 +150,7 @@ export function SourceControlWritingSettingsSection() {
     },
     projectEffectiveTextGenerationProviders,
   );
-  const canEnableDedicatedModel = instanceEntries.some(
+  const canEnableDedicatedModel = writerEntries.some(
     (entry) =>
       entry.instanceId === defaultModelSelection.instanceId && entry.enabled && entry.isAvailable,
   );
@@ -149,34 +160,44 @@ export function SourceControlWritingSettingsSection() {
     activeSelection.instanceId,
     activeSelection.model,
   );
-  const writerModelDisabledReason = useScopedModelDisabledReason(settings, instanceEntries);
-  const writerInstanceEntry = instanceEntries.find(
+  const writerModelDisabledReason = useScopedModelDisabledReason(settings, writerEntries);
+  const writerInstanceEntry = writerEntries.find(
     (entry) => entry.instanceId === activeSelection.instanceId,
   );
   const usesReviewGuideModel = settings.reviewGuideModelSelection !== null;
+  // Resolve against agents this project can use, so the fallback never lands on one it turned off.
+  const projectAgentProviders = textGenerationProviders.filter((provider) =>
+    instanceEntries.some(
+      (entry) => entry.instanceId === provider.instanceId && entry.enabled && entry.isAvailable,
+    ),
+  );
   const reviewGuideSelection = resolveAppModelSelectionState(
     {
       ...settings,
       textGenerationModelSelection: resolveReviewGuideModelSelection(
         settings,
-        textGenerationProviders,
+        projectAgentProviders,
         target?.projectId ?? null,
       ),
     },
-    textGenerationProviders,
+    projectAgentProviders,
   );
   const reviewGuideModelOptionsByInstance = getCustomModelOptionsByInstance(
     settings,
-    textGenerationProviders,
+    projectAgentProviders,
     reviewGuideSelection.instanceId,
     reviewGuideSelection.model,
+  );
+  const canEnableReviewGuideModel = instanceEntries.some(
+    (entry) =>
+      entry.instanceId === reviewGuideSelection.instanceId && entry.enabled && entry.isAvailable,
   );
   const reviewGuideInstanceEntry = instanceEntries.find(
     (entry) => entry.instanceId === reviewGuideSelection.instanceId,
   );
 
   return (
-    <SettingsSection id="source-control-text-generation" title="Writing & review">
+    <SettingsSection id="source-control-text-generation" title="Commits & pull requests">
       <SettingsRow
         serverScoped
         settingKeys={["sourceControlWritingStyle"]}
@@ -187,7 +208,7 @@ export function SourceControlWritingSettingsSection() {
         resetAction={
           isSourceControlWritingStyleDirty ? (
             <SettingResetButton
-              label={t("sourceControl.writingStyle.title")}
+              label={translateWebSource(locale, "commit and pull request writing")}
               onClick={() =>
                 updateSettings({
                   sourceControlWritingStyle: {
@@ -247,7 +268,7 @@ export function SourceControlWritingSettingsSection() {
                   rows={4}
                   aria-label={translateWebSource(
                     locale,
-                    "Custom source control instructions for all selected environments",
+                    "Custom commit and pull request instructions for all selected environments",
                   )}
                   placeholder={translateWebSource(
                     locale,
@@ -299,7 +320,7 @@ export function SourceControlWritingSettingsSection() {
               }}
               rows={4}
               placeholder={t("sourceControl.writingStyle.customPlaceholder")}
-              aria-label={t("sourceControl.writingStyle.custom")}
+              aria-label={translateWebSource(locale, "Custom commit and pull request instructions")}
             />
           </div>
         ) : null}
@@ -327,7 +348,7 @@ export function SourceControlWritingSettingsSection() {
             serverScoped
             settingKeys={["reviewGuideModelSelection"]}
             {...searchableSetting("review-guide-model")}
-            description="Model that reads a pull request to write its review guide. It reads the change itself over many steps, so a stronger model helps. Off uses the source control writer model."
+            description="Must be a coding agent: it reads the pull request over many steps. Off uses the writer model, or Codex or Claude if that model is a text generator."
             control={
               !hasServerTargets ? (
                 <span className="text-sm text-muted-foreground">
@@ -338,7 +359,7 @@ export function SourceControlWritingSettingsSection() {
                 </span>
               ) : (
                 <div className="flex flex-wrap items-center justify-end gap-2">
-                  {(usesReviewGuideModel || mixedReviewGuideModel) && canEnableDedicatedModel ? (
+                  {(usesReviewGuideModel || mixedReviewGuideModel) && canEnableReviewGuideModel ? (
                     <ProviderModelPicker
                       environmentId={environmentId}
                       activeInstanceId={reviewGuideSelection.instanceId}
@@ -369,7 +390,7 @@ export function SourceControlWritingSettingsSection() {
                     />
                   ) : null}
                   {usesReviewGuideModel &&
-                  canEnableDedicatedModel &&
+                  canEnableReviewGuideModel &&
                   !mixedReviewGuideModel &&
                   reviewGuideInstanceEntry ? (
                     <TraitsPicker
@@ -378,9 +399,7 @@ export function SourceControlWritingSettingsSection() {
                       model={reviewGuideSelection.model}
                       modelOptions={reviewGuideSelection.options ?? []}
                       allowPromptInjectedEffort={false}
-                      planModeEnabled={
-                        settings.planModeEnabled || selectsPlanAgent(reviewGuideSelection.options)
-                      }
+                      includePlanAgent={selectsPlanAgent(reviewGuideSelection.options)}
                       triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
                       onModelOptionsChange={(options) =>
                         updateSettings({
@@ -396,16 +415,16 @@ export function SourceControlWritingSettingsSection() {
                   <Switch
                     mixed={mixedReviewGuideModel}
                     checked={mixedReviewGuideModel ? false : usesReviewGuideModel}
-                    disabled={!usesReviewGuideModel && !canEnableDedicatedModel}
+                    disabled={!usesReviewGuideModel && !canEnableReviewGuideModel}
                     onCheckedChange={(checked) => {
                       if (!checked) {
                         updateSettings({ reviewGuideModelSelection: null });
                         return;
                       }
-                      const reason = writerModelDisabledReason(
-                        activeSelection.instanceId,
-                        activeSelection.model,
-                      );
+                      const seed = textGeneratorForSelection(settings, activeSelection.instanceId)
+                        ? reviewGuideSelection
+                        : activeSelection;
+                      const reason = writerModelDisabledReason(seed.instanceId, seed.model);
                       if (reason) {
                         toastManager.add({
                           type: "error",
@@ -416,9 +435,9 @@ export function SourceControlWritingSettingsSection() {
                       }
                       updateSettings({
                         reviewGuideModelSelection: createModelSelection(
-                          activeSelection.instanceId,
-                          activeSelection.model,
-                          activeSelection.options,
+                          seed.instanceId,
+                          seed.model,
+                          seed.options,
                         ),
                       });
                     }}
@@ -489,7 +508,7 @@ export function SourceControlWritingSettingsSection() {
             templatesMixed ||
             style.followChangeRequestTemplates !== defaults.followChangeRequestTemplates ? (
               <SettingResetButton
-                label={t("sourceControl.followTemplates.title")}
+                label="pull request templates"
                 onClick={() =>
                   updateSettings({
                     sourceControlWritingStyle: {
@@ -520,7 +539,7 @@ export function SourceControlWritingSettingsSection() {
           serverScoped
           settingKeys={["sourceControlWriterModelSelection"]}
           {...searchableSetting("source-control-writer-model")}
-          description="Model for source control text and branch or bookmark names. When disabled, use the text generation model configured for this environment."
+          description="Model for commit messages, pull request text, and branch or bookmark names. When disabled, use the text generation model configured for this environment."
           control={
             !hasServerTargets ? (
               <span className="text-sm text-muted-foreground">
@@ -542,7 +561,7 @@ export function SourceControlWritingSettingsSection() {
                     activeInstanceId={activeSelection.instanceId}
                     model={activeSelection.model}
                     lockedProvider={null}
-                    instanceEntries={instanceEntries}
+                    instanceEntries={writerEntries}
                     modelOptionsByInstance={modelOptionsByInstance}
                     triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
                     triggerAriaLabel={t("sourceControl.writerModel.title")}
@@ -589,9 +608,7 @@ export function SourceControlWritingSettingsSection() {
                     model={activeSelection.model}
                     modelOptions={activeSelection.options ?? []}
                     allowPromptInjectedEffort={false}
-                    planModeEnabled={
-                      settings.planModeEnabled || selectsPlanAgent(activeSelection.options)
-                    }
+                    includePlanAgent={selectsPlanAgent(activeSelection.options)}
                     triggerClassName={SETTINGS_PICKER_TRIGGER_CLASSNAME}
                     onModelOptionsChange={(options) =>
                       updateSettings({
