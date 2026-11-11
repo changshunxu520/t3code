@@ -11527,6 +11527,35 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "Choose an OpenRouter model in Settings → Voice.":
     "请在“设置 → 语音”中选择一个 OpenRouter 模型。",
   "Follow settings": "跟随设置",
+  "Steer · waiting to be read": "引导 · 等待读取",
+  "Waiting for the agent to read this after the running command finishes.":
+    "正在等待运行中的命令结束后由智能体读取此消息。",
+  "Using reset credit…": "正在使用重置额度…",
+  "No reset credits banked": "暂无已储备的重置额度",
+  "Use reset": "使用重置额度",
+  "This redeems one credit on your account and clears the current rate-limit windows. It cannot be undone.":
+    "这将兑换您账号上的一个重置额度并清空当前速率限制窗口，此操作无法撤销。",
+  "5-hour reset": "5 小时重置",
+  "Weekly reset": "每周重置",
+  "Fable reset": "Fable 重置",
+  "Full reset": "完整重置",
+  "Refills your 5-hour limit.": "补满你的 5 小时额度上限。",
+  "Refills your weekly limit.": "补满你的每周额度上限。",
+  "Refills your Fable allowance and gives back what Fable used on your weekly limit. It doesn't reset your whole week.":
+    "补满你的 Fable 额度，并返还 Fable 在每周额度上限中消耗的用量，不会重置整周总额度。",
+  "Refills your 5-hour and weekly limits.": "同时补满你的 5 小时与每周额度上限。",
+  "Could not use a model from that path": "无法使用该路径下的模型",
+  "Path to a model file or folder already on this environment":
+    "此环境中已有模型文件或文件夹的路径",
+  "Already downloaded elsewhere? Paste the model file or folder path":
+    "已在其他位置下载？粘贴模型文件或文件夹路径",
+  "Use existing": "使用现有文件",
+  "Thread actions unavailable": "任务操作不可用",
+  "This thread has not loaded yet.": "此任务尚未加载完成。",
+  "Failed to regenerate thread title": "重新生成任务标题失败",
+  "The Codex hub account is missing or disabled.": "Codex 中心账号不存在或已被禁用。",
+  "No Antigravity project reported.": "未报告 Antigravity 项目。",
+  "No Antigravity quota reported.": "未报告 Antigravity 配额。",
 };
 
 function translateDynamicWebSource(source: string): string | null {
@@ -11743,6 +11772,42 @@ function translateDynamicWebSource(source: string): string | null {
 
   match = /^(.+) models$/.exec(source);
   if (match) return `${match[1]} 模型`;
+
+  const localizeShortDuration = (duration: string) =>
+    duration
+      .replace(/(\d+)d/g, "$1 天")
+      .replace(/(\d+)h/g, "$1 小时")
+      .replace(/(\d+)m/g, "$1 分钟");
+
+  match = /^Using your file at (.+)$/.exec(source);
+  if (match) return `正在使用位于 ${match[1]} 的现有文件`;
+
+  match = /^(\d+) reset credits? banked(?: · next expires in (.+))?$/.exec(source);
+  if (match)
+    return `已储备 ${match[1]} 个重置额度${match[2] ? ` · 下一个将于 ${localizeShortDuration(match[2])}后过期` : ""}`;
+
+  match = /^(\d+) banked(?: · expires in (.+))?$/.exec(source);
+  if (match)
+    return `已储备 ${match[1]} 个${match[2] ? ` · ${localizeShortDuration(match[2])}后过期` : ""}`;
+
+  match = /^(.+) · (\d+) left(?: · expires in (.+))?$/.exec(source);
+  if (match)
+    return `${translateWebSource("zh-CN", match[1]!)} · 剩余 ${match[2]} 个${match[3] ? ` · ${localizeShortDuration(match[3])}后过期` : ""}`;
+
+  match = /^(5-hour reset|Weekly reset|Fable reset|Full reset): (.+) This cannot be undone\.$/.exec(
+    source,
+  );
+  if (match)
+    return `${translateWebSource("zh-CN", match[1]!)}：${translateWebSource("zh-CN", match[2]!)} 此操作无法撤销。`;
+
+  match = /^(.+) · (5-hour|Weekly)$/.exec(source);
+  if (match) {
+    const family =
+      match[1] === "Claude & GPT (shared)"
+        ? "Claude 与 GPT（共享）"
+        : translateWebSource("zh-CN", match[1]!);
+    return `${family} · ${match[2] === "5-hour" ? "5 小时" : "每周"}`;
+  }
 
   return null;
 }

@@ -15,12 +15,11 @@ import { ComposerContextActionsContext } from "./composerContextActions";
 import type { ComposerFileAttachment, ComposerImageAttachment } from "~/composerDraftStore";
 import { composerFileNeedsReattach } from "~/composerDraftStore";
 import { useTheme } from "~/hooks/useTheme";
+import type { ResolvedAppLocale as WebLocale } from "@t3tools/shared/appLocale";
 import { useI18n } from "~/i18n/WebI18nContext";
-import { translateWebSource, type WebLocale } from "~/i18n/messages";
-import {
-  formatAttachmentUploadProgress,
-  type AttachmentUploadState,
-} from "~/lib/attachmentUploadState";
+import { translateWebSource } from "~/i18n/messages";
+import type { AttachmentUploadState } from "~/lib/attachmentUploadState";
+import { useAttachmentUploadProgress } from "~/hooks/useAttachmentUploadProgress";
 import { PullRequestGlyph } from "~/components/pullRequest/pullRequestIcons";
 import {
   fileContextReference,
@@ -169,13 +168,14 @@ function ContextChip(props: {
   );
 }
 
-function uploadStatusSuffix(
+function useUploadStatusSuffix(
+  key: string,
   upload: AttachmentUploadState | undefined,
-  locale: WebLocale = "en",
 ): string | null {
-  if (upload?.status === "uploading") return formatAttachmentUploadProgress(upload.progress);
-  if (upload?.status === "failed") return translateWebSource(locale, "upload failed");
-  return null;
+  const { tx } = useI18n();
+  const progress = useAttachmentUploadProgress(key, upload);
+  if (upload?.status === "failed") return tx("upload failed");
+  return progress;
 }
 
 function attachmentTooltip(
@@ -191,8 +191,8 @@ function ImageContextChip(props: {
   record: ComposerImageAttachment;
   upload: AttachmentUploadState | undefined;
 }) {
-  const { locale } = useI18n();
   const actions = use(ComposerContextActionsContext);
+  const suffix = useUploadStatusSuffix(props.record.id, props.upload);
   return (
     <Tooltip>
       <TooltipTrigger
@@ -201,7 +201,7 @@ function ImageContextChip(props: {
             name={props.record.name}
             previewUrl={props.record.previewUrl}
             size={formatAttachmentSize(props.record.sizeBytes)}
-            suffix={uploadStatusSuffix(props.upload, locale)}
+            suffix={suffix}
             onClick={() => actions.expandImage(props.record.id)}
           />
         }
@@ -221,9 +221,8 @@ function FileContextChip(props: {
   const actions = use(ComposerContextActionsContext);
   const { resolvedTheme } = useTheme();
   const needsReattach = composerFileNeedsReattach(props.record);
-  const suffix = needsReattach
-    ? translateWebSource(locale, "attach again")
-    : uploadStatusSuffix(props.upload, locale);
+  const uploadSuffix = useUploadStatusSuffix(props.record.id, props.upload);
+  const suffix = needsReattach ? translateWebSource(locale, "attach again") : uploadSuffix;
   const size = formatAttachmentSize(props.record.sizeBytes);
   const isVideo = videoMimeType(props.record) !== null;
   return (

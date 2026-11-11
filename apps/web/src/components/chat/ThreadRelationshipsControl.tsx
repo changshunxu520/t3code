@@ -320,10 +320,14 @@ function RemoteSubagentRow(props: {
             </span>
           </span>
           <span
-            className={`shrink-0 text-2xs ${failed ? "text-destructive" : "text-muted-foreground"}`}
+            className={`flex max-w-1/2 shrink-0 gap-1 text-2xs ${failed ? "text-destructive" : "text-muted-foreground"}`}
           >
-            {locale === "zh-CN" ? `在 ${remoteChild.label} 上` : `on ${remoteChild.label}`} ·{" "}
-            {translateWebSource(locale, threadRelationshipStatusLabel(status))}
+            <span className="truncate">
+              {locale === "zh-CN" ? `在 ${remoteChild.label} 上` : `on ${remoteChild.label}`}
+            </span>
+            <span className="shrink-0">
+              · {translateWebSource(locale, threadRelationshipStatusLabel(status))}
+            </span>
           </span>
         </TooltipTrigger>
         <TooltipPopup side="left">
@@ -390,7 +394,7 @@ function DelegatedFromRow(props: {
             </span>
           </span>
           {label ? (
-            <span className="shrink-0 text-2xs text-muted-foreground">
+            <span className="max-w-1/2 shrink-0 truncate text-2xs text-muted-foreground">
               {locale === "zh-CN" ? `在 ${label} 上` : `on ${label}`}
             </span>
           ) : null}
@@ -403,7 +407,9 @@ function DelegatedFromRow(props: {
                 ? locale === "zh-CN"
                   ? `由 ${label ?? "已关联环境"} 委派。连接该环境后即可打开父任务。`
                   : `Delegated from ${label ?? "a linked environment"}. Connect to it to open the parent thread.`
-                : translateWebSource(locale, "Open parent agent")
+                : locale === "zh-CN"
+                  ? `在 ${environment.label} 上打开父智能体`
+                  : `Open parent agent on ${environment.label}`
             }
           />
         </TooltipPopup>

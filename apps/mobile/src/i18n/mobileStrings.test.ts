@@ -248,6 +248,11 @@ describe("mobile strings", () => {
     expect(localizeMobileString("2 reset credits banked · next expires in 3d 4h", "zh-CN")).toBe(
       "有 2 个重置额度 · 下一额度将在 3 天 4 小时后过期",
     );
+    expect(localizeMobileString("Fable reset · 2 left · expires in 3d 4h", "zh-CN")).toBe(
+      "Fable 重置 · 剩余 2 个 · 3 天 4 小时后过期",
+    );
+    expect(localizeMobileString("Method on Mac Studio", "zh-CN")).toBe("Mac Studio 上的转写方式");
+    expect(localizeMobileString("Steer · waiting to be read", "zh-CN")).toBe("引导 · 等待读取");
     expect(localizeMobileString("Set up Antigravity", "zh-CN")).toBe("设置 Antigravity");
     expect(localizeMobileString("Enabled. Installed 1.2.3", "zh-CN")).toBe("已启用 · 已安装 1.2.3");
   });

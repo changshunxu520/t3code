@@ -2077,6 +2077,43 @@ const ZH_CN_MESSAGES = {
   "Copy model reference": "复制模型引用",
   "Share model reference": "分享模型引用",
   "Stored DPoP proof key is invalid.": "已存储的 DPoP 证明密钥无效。",
+  "Cloud provider": "云端提供商",
+  "Use your own API key": "使用你自己的 API 密钥",
+  "API key": "API 密钥",
+  "API key saved": "已保存 API 密钥",
+  "API key saved · choose a model to use it": "已保存 API 密钥 · 请选择模型以启用",
+  "Add an API key to use this provider": "添加 API 密钥以使用此提供商",
+  "Ask an environment administrator to add an API key": "请联系环境管理员添加 API 密钥",
+  "Tap to manage key": "轻触管理密钥",
+  "Update the environment to use this provider": "请更新此环境以使用该提供商",
+  "Environment not connected": "环境未连接",
+  "Could not load keys · Retry": "无法加载密钥 · 重试",
+  "Checking API keys…": "正在检查 API 密钥…",
+  "Could not load models · Retry": "无法加载模型 · 重试",
+  "Loading transcription models…": "正在加载转写模型…",
+  "Save and enable": "保存并启用",
+  "Save key": "保存密钥",
+  "Saved key · enter a new one to replace": "已保存密钥 · 输入新密钥可替换",
+  "Enter a valid API key.": "请输入有效的 API 密钥。",
+  "Uses the API key saved on this environment. The model choice applies only to this device.":
+    "使用保存在此环境上的 API 密钥。所选模型仅对当前设备生效。",
+  "Local model": "本地模型",
+  "Not available on this environment": "此环境不支持",
+  "Checking…": "正在检查…",
+  "No model installed · Choose one to download": "未安装模型 · 请选择一个进行下载",
+  "Steer · waiting to be read": "引导 · 等待读取",
+  "Steer waiting for the agent to read it after the running command finishes":
+    "正在等待运行中的命令结束后由智能体读取此引导消息",
+  Use: "使用",
+  "5-hour reset": "5 小时重置",
+  "Weekly reset": "每周重置",
+  "Fable reset": "Fable 重置",
+  "Full reset": "完整重置",
+  "Refills your 5-hour limit.": "补满你的 5 小时额度上限。",
+  "Refills your weekly limit.": "补满你的每周额度上限。",
+  "Refills your Fable allowance and gives back what Fable used on your weekly limit. It doesn't reset your whole week.":
+    "补满你的 Fable 额度，并返还 Fable 在每周额度上限中消耗的用量，不会重置整周总额度。",
+  "Refills your 5-hour and weekly limits.": "同时补满你的 5 小时与每周额度上限。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
@@ -2579,6 +2616,80 @@ function translateDynamicMessage(value: string): string | null {
 
   const filterFilesCount = /^Filter (\d+) files?$/.exec(value);
   if (filterFilesCount) return `筛选 ${filterFilesCount[1]} 个文件`;
+
+  const methodOnEnv = /^Method on (.+)$/.exec(value);
+  if (methodOnEnv) return `${methodOnEnv[1]} 上的转写方式`;
+
+  const localModelSize = /^Local model · (.+)$/.exec(value);
+  if (localModelSize) return `本地模型 · ${localModelSize[1]}`;
+
+  const noModelInstalledOn = /^No model installed · Add one using T3 Code on (.+)$/.exec(value);
+  if (noModelInstalledOn) return `未安装模型 · 请在 ${noModelInstalledOn[1]} 上的 T3 Code 中添加`;
+
+  const audioSentThrough = /^Audio is sent through (.+) using its API key\.$/.exec(value);
+  if (audioSentThrough) return `音频将通过 ${audioSentThrough[1]} 并使用其 API 密钥发送。`;
+
+  const openRouterDelisted =
+    /^OpenRouter no longer lists (.+)\. Dictation stays off until you choose another model\.$/.exec(
+      value,
+    );
+  if (openRouterDelisted)
+    return `OpenRouter 已不再提供 ${openRouterDelisted[1]}。在你选择其他模型前，听写功能将保持关闭。`;
+
+  const showAllModels = /^Show all (\d+) models$/.exec(value);
+  if (showAllModels) return `显示全部 ${showAllModels[1]} 个模型`;
+
+  const tapToChangeModel = /^(.+) · Tap to change model( or key)?$/.exec(value);
+  if (tapToChangeModel)
+    return `${tapToChangeModel[1]} · 轻触更改模型${tapToChangeModel[2] ? "或密钥" : ""}`;
+
+  const useForDictation = /^Use (.+) for dictation\?$/.exec(value);
+  if (useForDictation) return `要使用 ${useForDictation[1]} 进行听写吗？`;
+
+  const anyoneDictationBill = /^Anyone with dictation access to (.+) can bill this key\.$/.exec(
+    value,
+  );
+  if (anyoneDictationBill)
+    return `任何拥有 ${anyoneDictationBill[1]} 听写权限的人都可以使用此密钥。`;
+
+  const updatesProviderKeyOn =
+    /^Updates the (.+) key on (.+)\. Your dictation destination stays the same\.$/.exec(value);
+  if (updatesProviderKeyOn)
+    return `更新 ${updatesProviderKeyOn[2]} 上的 ${updatesProviderKeyOn[1]} 密钥。你的听写目标设置保持不变。`;
+
+  const providerApiKeyRef = /^(.+) API key( reference)?$/.exec(value);
+  if (providerApiKeyRef)
+    return `${providerApiKeyRef[1]} API 密钥${providerApiKeyRef[2] ? "引用" : ""}`;
+
+  const compactCreditsBanked = /^(\d+) banked(?: · expires in (.+))?$/.exec(value);
+  if (compactCreditsBanked)
+    return `已储备 ${compactCreditsBanked[1]} 个${compactCreditsBanked[2] ? ` · ${localizeDuration(compactCreditsBanked[2])}后过期` : ""}`;
+
+  const creditOptionSummary = /^(.+) · (\d+) left(?: · expires in (.+))?$/.exec(value);
+  if (creditOptionSummary)
+    return `${localizeMobileString(creditOptionSummary[1]!, "zh-CN")} · 剩余 ${creditOptionSummary[2]} 个${creditOptionSummary[3] ? ` · ${localizeDuration(creditOptionSummary[3])}后过期` : ""}`;
+
+  const resetKindConfirm =
+    /^(5-hour reset|Weekly reset|Fable reset|Full reset): (.+) This cannot be undone\.$/.exec(
+      value,
+    );
+  if (resetKindConfirm)
+    return `${localizeMobileString(resetKindConfirm[1]!, "zh-CN")}：${localizeMobileString(resetKindConfirm[2]!, "zh-CN")} 此操作无法撤销。`;
+
+  const quotaWindowLabel = /^(.+) · (5-hour|Weekly)$/.exec(value);
+  if (quotaWindowLabel) {
+    const family =
+      quotaWindowLabel[1] === "Claude & GPT (shared)"
+        ? "Claude 与 GPT（共享）"
+        : localizeMobileString(quotaWindowLabel[1]!, "zh-CN");
+    return `${family} · ${quotaWindowLabel[2] === "5-hour" ? "5 小时" : "每周"}`;
+  }
+
+  const useTarget = /^Use (.+)$/.exec(value);
+  if (useTarget) return `使用 ${useTarget[1]}`;
+
+  const openTarget = /^Open (.+)$/.exec(value);
+  if (openTarget) return `打开 ${openTarget[1]}`;
 
   return null;
 }

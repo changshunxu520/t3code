@@ -660,8 +660,11 @@ export function useThreadLifecycle(input: ThreadLifecycleInput) {
       toastManager.add(
         stackedThreadToast({
           type: "error",
-          title,
-          description: error instanceof Error ? error.message : "An error occurred.",
+          title: translateWebSource(uiLocale, title),
+          description:
+            error instanceof Error
+              ? error.message
+              : translateWebSource(uiLocale, "An error occurred."),
         }),
       );
     };
@@ -693,6 +696,15 @@ export function useThreadLifecycle(input: ThreadLifecycleInput) {
           activeThreadPinned ? "Failed to unpin thread" : t("sidebar.pinFailed"),
         ),
       );
+    },
+    "thread.regenerateTitle": () => {
+      if (!readEnvironmentScope(environmentId, AuthOrchestrationOperateScope)) return false;
+      if (!activeThreadShell || !activeThreadRef || !serverConfigLoaded) return;
+      if (activeThreadShell.titleRegeneration != null) return;
+      void updateThreadMetadata({
+        environmentId: activeThreadRef.environmentId,
+        input: { threadId: activeThreadRef.threadId, regenerateTitle: true },
+      }).then(toastThreadActionFailure("Failed to regenerate thread title"));
     },
   } satisfies ChatShortcutCommands;
   return {

@@ -155,6 +155,14 @@ describe("upstream UI localization", () => {
     expect(translateWebSource("zh-CN", "Queue message")).toBe("将消息加入队列");
     expect(translateWebSource("zh-CN", "App permission approval")).toBe("应用权限审批");
     expect(translateWebSource("zh-CN", "Restore device defaults")).toBe("恢复此设备的默认设置");
+    expect(translateWebSource("zh-CN", "Steer · waiting to be read")).toBe("引导 · 等待读取");
+    expect(translateWebSource("zh-CN", "Fable reset · 2 left · expires in 3d 4h")).toBe(
+      "Fable 重置 · 剩余 2 个 · 3 天 4 小时后过期",
+    );
+    expect(translateWebSource("zh-CN", "Using your file at /models/ggml-base.bin")).toBe(
+      "正在使用位于 /models/ggml-base.bin 的现有文件",
+    );
+    expect(translateWebSource("zh-CN", "Gemini 4 Carbon · Weekly")).toBe("Gemini 4 Carbon · 每周");
     expect(translateWebSource("en", "Queue message")).toBe("Queue message");
   });
 

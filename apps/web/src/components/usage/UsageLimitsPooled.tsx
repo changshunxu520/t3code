@@ -13,6 +13,8 @@ import {
   type LimitPoolWindow,
   paceRemainingPercent,
   remainingPercent,
+  type ResetCreditChoice,
+  resetCreditChoices,
 } from "@t3tools/shared/usageLimits";
 import type { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { normalizeProviderAccentColor } from "@t3tools/client-runtime/state/provider-instance-display";
@@ -46,7 +48,6 @@ import {
   barColor,
   localizedResetsIn,
   usePaceMark,
-  resetCreditsSummary,
   useResetCredit,
 } from "./UsageLimits";
 
@@ -149,7 +150,7 @@ function SegmentPopover({
   readonly reset: LimitPoolWindow["resets"][number] | undefined;
   readonly now: number;
   readonly redeem: ReturnType<typeof useResetCredit> | null;
-  readonly onRedeem: () => void;
+  readonly onRedeem: (choice: ResetCreditChoice) => void;
 }) {
   const { locale: sourceLocale } = useI18n();
   const { t } = useI18n();
@@ -161,8 +162,10 @@ function SegmentPopover({
     account.environments.length > 0
       ? account.environments.map((environment) => environment.label).join(", ")
       : account.sourceLabel;
-  const credits =
-    redeem && account.limits.resetCredits?.availableCount ? account.limits.resetCredits : null;
+  const choices =
+    redeem && account.redeem && account.limits.resetCredits?.availableCount
+      ? resetCreditChoices(account.limits.resetCredits, account.redeem.input, now, true)
+      : [];
   return (
     <div className="flex w-72 max-w-[calc(100vw-3rem)] flex-col gap-2.5 text-xs">
       <div className="flex min-w-0 flex-col gap-0.5">
@@ -214,20 +217,28 @@ function SegmentPopover({
           </Row>
         ) : null}
       </div>
-      {credits && redeem ? (
-        <div className="border-t border-border/60 pt-2.5 text-muted-foreground">
-          <span className="flex items-center gap-3">
-            <span className="tabular-nums">{resetCreditsSummary(credits, now, t, true)}</span>
-            <Button
-              size="xs"
-              variant="outline"
-              disabled={redeem.busy || !redeem.canManageProviders}
-              className="ms-auto"
-              onClick={onRedeem}
-            >
-              {redeem.busy ? t("usage.limits.usingCredit") : t("usage.limits.useReset")}
-            </Button>
-          </span>
+      {choices.length > 0 && redeem ? (
+        <div className="flex flex-col gap-1.5 border-t border-border/60 pt-2.5 text-muted-foreground">
+          {choices.map((choice) => (
+            <span key={choice.key} className="flex items-center gap-3">
+              <span className="tabular-nums">
+                {translateWebSource(sourceLocale, choice.summary)}
+              </span>
+              {choice.availableCount > 0 ? (
+                <Button
+                  size="xs"
+                  variant="outline"
+                  disabled={redeem.busy || !redeem.canManageProviders}
+                  className="ms-auto"
+                  onClick={() => onRedeem(choice)}
+                >
+                  {redeem.busy
+                    ? t("usage.limits.usingCredit")
+                    : translateWebSource(sourceLocale, choice.actionLabel)}
+                </Button>
+              ) : null}
+            </span>
+          ))}
         </div>
       ) : null}
     </div>
@@ -282,9 +293,9 @@ function ActiveSegmentPopover({
       <SegmentPopover
         {...payload}
         now={now}
-        onRedeem={() => {
+        onRedeem={(choice) => {
           handle.close();
-          payload.redeem?.setConfirming(true);
+          payload.redeem?.confirm(choice);
         }}
       />
     </PopoverPopup>
@@ -321,13 +332,15 @@ function RedeemableSegment({
 }: Omit<Parameters<typeof SegmentTriggers>[0], "redeem"> & {
   readonly redeemAt: NonNullable<LimitAccount["redeem"]>;
 }) {
-  const redeem = useResetCredit(redeemAt.environmentId, redeemAt.input);
+  const { tx } = useI18n();
+  const redeem = useResetCredit(redeemAt.environmentId);
   return (
     <>
       <SegmentTriggers redeem={redeem} {...props} />
       <ResetCreditDialog
         open={redeem.confirming}
         onOpenChange={redeem.setConfirming}
+        choice={redeem.choice}
         onConfirm={() => void redeem.redeem()}
         disabled={!redeem.canManageProviders}
       />
@@ -335,7 +348,7 @@ function RedeemableSegment({
       {redeem.busy || redeem.status ? (
         <span role="status" className="col-span-full text-xs text-muted-foreground">
           <AccountName account={props.account} className="font-medium text-foreground" />{" "}
-          {redeem.busy ? "Using reset credit…" : redeem.status}
+          {redeem.busy ? tx("Using reset credit…") : redeem.status}
         </span>
       ) : null}
     </>
@@ -574,12 +587,12 @@ function PoolWindowCard({
   readonly label?: string | undefined;
   readonly description?: string | undefined;
 }) {
-  const { locale: uiLocale } = useI18n();
+  const { locale: uiLocale, tx } = useI18n();
   const nextRefill = pool.resets.find((reset) => reset.restoresPercent > 0);
   return (
     <div className="grid items-center gap-x-6 gap-y-3 rounded-lg border border-border/60 p-4 md:grid-cols-[11rem_minmax(0,1fr)]">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{label ?? pool.label}</span>
+        <span className="text-sm font-medium text-foreground">{tx(label ?? pool.label)}</span>
         <span className="flex items-baseline gap-2">
           <span className="text-3xl font-semibold text-foreground tabular-nums">
             {pool.remainingPercent}%
@@ -597,7 +610,7 @@ function PoolWindowCard({
       </div>
       <PoolBar pool={pool} color={color} now={now} />
       {description ? (
-        <p className="text-xs text-muted-foreground md:col-span-2">{description}</p>
+        <p className="text-xs text-muted-foreground md:col-span-2">{tx(description)}</p>
       ) : null}
     </div>
   );
@@ -701,7 +714,9 @@ export function UsageLimitsPooled({
                   )}
                 </p>
               ) : link.message ? (
-                <p className="max-w-xl text-xs text-muted-foreground">{link.message}</p>
+                <p className="max-w-xl text-xs text-muted-foreground">
+                  {translateWebSource(uiLocale, link.message)}
+                </p>
               ) : null}
             </div>
           </div>
@@ -721,13 +736,14 @@ export function UsageLimitsPooled({
 }
 
 function LimitNotices({ notices }: { readonly notices: readonly string[] }) {
+  const { tx } = useI18n();
   if (notices.length === 0) return null;
   return (
     <Alert variant="warning" controlAlignment="first-line">
       <AlertTriangleIcon />
       {notices.map((notice) => (
         <AlertTitle key={notice} className="break-words">
-          {notice}
+          {tx(notice)}
         </AlertTitle>
       ))}
     </Alert>

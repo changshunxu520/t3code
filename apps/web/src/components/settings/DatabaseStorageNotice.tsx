@@ -182,7 +182,7 @@ function ReclaimRow({
         status.reclaimFailure === undefined
           ? locale === "zh-CN"
             ? `将重启该设备上的 T3 Code，预计离线约 ${minutes} 分钟。`
-            : `Restarts T3 Code there. It is offline for about ${minutes} min.`
+            : `Restarts T3 Code there. It will be offline for about ${minutes} min.`
           : locale === "zh-CN"
             ? `上次尝试失败：${status.reclaimFailure}`
             : `The last attempt failed: ${status.reclaimFailure}`
@@ -209,7 +209,7 @@ function ReclaimRow({
                 <AlertDialogDescription>
                   {locale === "zh-CN"
                     ? `${label} 上的 T3 Code 将停止运行、重建数据库并重新启动，预计离线约 ${minutes} 分钟。重启时正在运行的智能体将会停止。`
-                    : `T3 Code on ${label} stops, rebuilds its database, and starts again. It is offline for about ${minutes} min. Running agents stop when it restarts.`}
+                    : `T3 Code on ${label} stops, rebuilds its database, and starts again. It will be offline for about ${minutes} min. Running agents stop when it restarts.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
