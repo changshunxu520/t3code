@@ -61,6 +61,7 @@ import * as AcpRegistryRuntimeCoordinator from "./AcpRegistryRuntimeCoordinator.
 import * as AcpRegistryAuth from "./auth.ts";
 import * as AcpRegistryAuthenticationState from "./authenticationState.ts";
 import { FACTORY_DROID_AGENT_ID, makeDroidUsageLimitsReader } from "./droidUsageLimits.ts";
+import { droidUsageReader, type DroidUsageReaderEnv } from "./droidUsage.ts";
 
 const DRIVER_KIND = ProviderDriverKind.make("acpRegistry");
 const decodeSettings = Schema.decodeSync(AcpRegistrySettings);
@@ -500,7 +501,11 @@ export type AcpRegistryDriverEnv =
   | Digest.Digest
   | ProviderHost.ProviderHost;
 
-export const AcpRegistryDriver: ProviderDriver<AcpRegistrySettings, AcpRegistryDriverEnv> = {
+export const AcpRegistryDriver: ProviderDriver<
+  AcpRegistrySettings,
+  AcpRegistryDriverEnv,
+  DroidUsageReaderEnv
+> = {
   driverKind: DRIVER_KIND,
   metadata: {
     displayName: "ACP Registry",
@@ -509,6 +514,7 @@ export const AcpRegistryDriver: ProviderDriver<AcpRegistrySettings, AcpRegistryD
   },
   configSchema: AcpRegistrySettings,
   defaultConfig: () => decodeSettings({}),
+  usage: droidUsageReader,
   create: Effect.fn("AcpRegistryDriver.create")(function* ({
     instanceId,
     displayName,
