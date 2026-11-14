@@ -5,7 +5,6 @@ import { requestConfirmDialog } from "./confirmDialog";
 import { dismissContextMenu, showContextMenuFallback } from "./contextMenuFallback";
 import { readBrowserClientSettings, writeBrowserClientSettings } from "./clientPersistenceStorage";
 import { translateWebSource, type WebLocale } from "./i18n/messages";
-import { readWebI18n } from "./i18n/readWebI18n";
 
 function localizeContextMenuItems<T extends string>(
   items: readonly ContextMenuItem<T>[],
@@ -60,6 +59,8 @@ export function createLocalApi(): LocalApi {
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
       ): Promise<T | null> => {
+        // readWebI18n imports hooks/useSettings, which imports this module; a static import is a cycle.
+        const { readWebI18n } = await import("./i18n/readWebI18n");
         const localizedItems = localizeContextMenuItems(items, readWebI18n().locale);
         if (window.desktopBridge) {
           return window.desktopBridge.showContextMenu(
