@@ -14,6 +14,7 @@ import { isElectron } from "../../env";
 import { useI18n } from "../../i18n/WebI18nContext";
 import { runConnectMcpApproval } from "../../state/connectMcpApproval";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
+import { retryClerkLoad, useClerkLoadFailed } from "../clerk/clerkLoadFailure";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
@@ -88,6 +89,7 @@ export function ApproveAgentSurface() {
   );
   const clerk = useClerk();
   const { isLoaded, isSignedIn } = useAuth();
+  const loadFailed = useClerkLoadFailed();
   const session = useAtomValue(managedRelaySessionAtom);
   const signInOpened = useRef(false);
 
@@ -117,6 +119,21 @@ export function ApproveAgentSurface() {
         title={tx("Open this page in its own window")}
         description={tx("For your safety, agent sign-ins cannot be approved inside another site.")}
       />
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <Message
+        title={tx("Could not load sign-in")}
+        description={tx("T3 Connect sign-in did not load. Check your connection, then try again.")}
+      >
+        <div className="mt-6">
+          <Button type="button" onClick={retryClerkLoad}>
+            {tx("Retry sign-in")}
+          </Button>
+        </div>
+      </Message>
     );
   }
 

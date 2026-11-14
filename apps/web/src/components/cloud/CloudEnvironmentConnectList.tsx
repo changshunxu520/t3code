@@ -360,7 +360,7 @@ export function CloudEnvironmentConnectRows({
         : offlineReason !== null
           ? offlineReason
           : savedConnection
-            ? savedConnection.statusText
+            ? translateWebSource(uiLocale, savedConnection.statusText)
             : availability === "online"
               ? `T3 Connect · ${notAdded} · Relay online`
               : availability === "offline"
@@ -410,14 +410,15 @@ export function CloudEnvironmentConnectRows({
             >
               {connectingEnvironmentIds.has(environment.environmentId)
                 ? translateWebSource(uiLocale, "Connecting…")
-                : (savedConnection?.buttonLabel ??
-                  (availability === "online"
+                : savedConnection
+                  ? translateWebSource(uiLocale, savedConnection.buttonLabel)
+                  : availability === "online"
                     ? translateWebSource(uiLocale, "Available")
                     : availability === "offline"
                       ? t("connectEnvironment.connection.offline")
                       : availability === "error"
                         ? translateWebSource(uiLocale, "Unavailable")
-                        : translateWebSource(uiLocale, "Checking…")))}
+                        : translateWebSource(uiLocale, "Checking…")}
             </TooltipTrigger>
             <TooltipPopup>{unsupportedDetail ?? statusText}</TooltipPopup>
           </Tooltip>
@@ -464,7 +465,9 @@ export function CloudEnvironmentConnectRows({
               className={cn(
                 "mt-1 truncate text-xs",
                 savedConnection?.tone === "error" ||
-                  (savedConnection?.tone === "connecting" && savedEnvironment?.connection.error) ||
+                  (savedConnection?.tone === "connecting" &&
+                    savedEnvironment?.connection.error &&
+                    !savedEnvironment.connection.awaitingApproval) ||
                   (savedConnection === null && availability === "error")
                   ? "text-destructive"
                   : "text-muted-foreground",
@@ -484,7 +487,7 @@ export function CloudEnvironmentConnectRows({
             </Tooltip>
           ) : savedConnection ? (
             <Button size="sm" variant="outline" disabled>
-              {savedConnection.buttonLabel}
+              {translateWebSource(uiLocale, savedConnection.buttonLabel)}
             </Button>
           ) : (
             <Button

@@ -2142,9 +2142,58 @@ const ZH_CN_MESSAGES = {
   "Refills your Fable allowance and gives back what Fable used on your weekly limit. It doesn't reset your whole week.":
     "补满你的 Fable 额度，并返还 Fable 在每周额度上限中消耗的用量，不会重置整周总额度。",
   "Refills your 5-hour and weekly limits.": "同时补满你的 5 小时与每周额度上限。",
+  "This connection cannot read host files. Pair again with a new link to view it.":
+    "此连接无法读取主机文件。请使用新链接重新配对后查看。",
+  "Hide secret": "隐藏密钥",
+  "Show secret": "显示密钥",
+  "Request no longer waiting": "请求已不再等待",
+  "It expired or was answered elsewhere.": "该请求已过期，或已在其他位置处理。",
+  "The request is still waiting. Try again.": "该请求仍在等待中，请重试。",
+  Deny: "拒绝",
+  Approve: "批准",
+  OK: "确定",
+  "Could not deny the device": "无法拒绝该设备",
+  "Could not approve the device": "无法批准该设备",
+  "A new device": "一台新设备",
+  "Approve this device?": "要批准此设备吗？",
+  "Waiting for approval": "等待批准",
+  "Waiting for approval on the host": "正在等待主机批准",
+  "This device is waiting for approval on the host.": "此设备正在等待主机批准。",
+  "Waiting on a subagent": "正在等待 1 个子智能体",
+  "Fast-forward merge": "快进合并（Fast-forward）",
+  "Add the commits as they are. Needs the branch to contain the base.":
+    "按原样合入所有提交。要求该分支已包含基础分支。",
+  "Could not paste image": "无法粘贴图片",
+  "Could not paste images": "无法粘贴图片",
+  "Too many attachments.": "附件过多。",
+  "A pasted image exceeds the 10 MB attachment limit.": "粘贴的图片超出 10 MB 附件大小上限。",
+  "Could not read a pasted image.": "无法读取粘贴的图片。",
+  "Run action on default branch?": "要在默认分支上执行操作吗？",
+  "Choose how to continue.": "请选择继续方式。",
+  "The server could not prepare triage.": "服务器无法准备问题分流。",
+  "Agents here can then launch, message and wait on threads there. It appears under Authorized clients in that machine's Sharing & access, where it can be revoked.":
+    "之后，此处的智能体即可在该机器上启动任务、发送消息并等待任务完成。该关联会显示在该机器“共享与访问”的“已授权客户端”中，可随时撤销。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/^(.+) is waiting for someone to approve this device$/, "$1 正在等待有人批准此设备"],
+  [/^Waiting for (.+) to approve this device$/, "正在等待 $1 批准此设备"],
+  [
+    /^Approve this device on (.+)\. It shows code (.+)\.$/,
+    "请在 $1 上批准此设备。其显示的验证码为 $2。",
+  ],
+  [
+    /^On a device already connected to (.+), open Settings > Sharing & access and approve the device showing (.+)\.$/,
+    "在已连接到 $1 的设备上打开“设置 > 共享与访问”，并批准显示验证码 $2 的设备。",
+  ],
+  [
+    /^On a device already connected to (.+), open Settings > Sharing & access and approve this device\.$/,
+    "在已连接到 $1 的设备上打开“设置 > 共享与访问”，并批准此设备。",
+  ],
+  [
+    /^Or run `t3 auth connect-device approve (.+)` on (.+)\.$/,
+    "或在 $2 上运行 `t3 auth connect-device approve $1`。",
+  ],
   [/^(.+) runs an older T3 Code$/, "$1 正在运行旧版 T3 Code"],
   [/^(.+) is not linked to your T3 Connect account$/, "$1 尚未关联到你的 T3 Connect 账户"],
   [/^(.+)'s tunnel is still being set up$/, "正在为 $1 设置隧道"],
@@ -2200,6 +2249,23 @@ function translateDynamicMessage(value: string): string | null {
   if (createPrivateRepository) return `在 ${createPrivateRepository[1]} 上创建私有仓库`;
   const createRepositoryFailure = /^Could not create the (.+) repository$/.exec(value);
   if (createRepositoryFailure) return `无法创建 ${createRepositoryFailure[1]} 仓库`;
+
+  const connectDeviceRequest =
+    /^(.+) wants to connect to (.+) through T3 Connect\. It shows code (.+)\. Approve it only if that code matches\.$/.exec(
+      value,
+    );
+  if (connectDeviceRequest) {
+    // Device labels are client-owned; only the built-in fallback is UI copy.
+    const device =
+      connectDeviceRequest[1] === "A new device" ? "一台新设备" : `${connectDeviceRequest[1]} `;
+    return `${device}想通过 T3 Connect 连接到 ${connectDeviceRequest[2]}。其显示的验证码为 ${connectDeviceRequest[3]}。请仅在验证码一致时批准。`;
+  }
+  const waitingOnSubagents = /^Waiting on (\d+) subagents$/.exec(value);
+  if (waitingOnSubagents) return `正在等待 ${waitingOnSubagents[1]} 个子智能体`;
+  const videoUnavailable = /^Video unavailable\. ([\s\S]+)$/.exec(value);
+  if (videoUnavailable) return `视频不可用。${localizeMobileString(videoUnavailable[1]!, "zh-CN")}`;
+  const projectStillArchived = /^(.+) is still archived\. Try again later\.$/.exec(value);
+  if (projectStillArchived) return `${projectStillArchived[1]} 仍处于归档状态，请稍后重试。`;
 
   const updatingProviders = /^Updating (\d+) providers…$/.exec(value);
   if (updatingProviders) return `正在更新 ${updatingProviders[1]} 个提供商…`;
@@ -2550,18 +2616,18 @@ function translateDynamicMessage(value: string): string | null {
     return `此应用没有可供其他机器访问 ${noAddressForMachine[1]} 的地址。请输入其 HTTPS 或 Tailscale 地址。`;
 
   const alreadyLinkedTo =
-    /^This environment is already linked to (.+)\. The agent can use that link as it is; change its access in Settings → Connections\.$/.exec(
+    /^This environment is already linked to (.+)\. The agent can use that link as it is; change its access in Settings → (Connections|Environments)\.$/.exec(
       value,
     );
   if (alreadyLinkedTo)
-    return `此环境已与 ${alreadyLinkedTo[1]} 关联。智能体可直接使用该关联；如需更改权限，请前往“设置 → 连接”。`;
+    return `此环境已与 ${alreadyLinkedTo[1]} 关联。智能体可直接使用该关联；如需更改权限，请前往“设置 → ${alreadyLinkedTo[2] === "Environments" ? "环境" : "连接"}”。`;
 
   const createLinkOn =
-    /^Create a link on (.+): Settings → Connections → Create link, then paste its code here\.$/.exec(
+    /^Create a link on (.+): Settings → (Connections|Sharing & access → Authorized clients) → Create link, then paste its code here\.$/.exec(
       value,
     );
   if (createLinkOn)
-    return `请在 ${createLinkOn[1]} 上创建关联：前往“设置 → 连接 → 创建关联”，然后将配对码粘贴到此处。`;
+    return `请在 ${createLinkOn[1]} 上创建关联：前往“设置 → ${createLinkOn[2] === "Connections" ? "连接" : "共享与访问 → 已授权客户端"} → 创建关联”，然后将配对码粘贴到此处。`;
 
   const requestingReviewsRequires =
     /^Requesting reviews requires write access and an open (.+)\.$/.exec(value);

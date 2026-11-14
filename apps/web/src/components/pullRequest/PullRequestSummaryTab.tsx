@@ -35,6 +35,8 @@ import { useLocalStorage } from "~/hooks/useLocalStorage";
 import { cn } from "~/lib/utils";
 import { useOpenLink } from "~/browser/useOpenLink";
 import { RelativeTime } from "~/components/RelativeTime";
+import { useClientSettings } from "~/hooks/useSettings";
+import { formatFullTimestamp } from "~/timestampFormat";
 import { useI18n, type WebTranslate } from "../../i18n/WebI18nContext";
 
 import { Button } from "../ui/button";
@@ -112,6 +114,7 @@ function CommentIdentity({
   detail: PullRequestDetailView;
 }) {
   const { locale } = useI18n();
+  const timestampFormat = useClientSettings((settings) => settings.timestampFormat);
   const actor = comment.author;
   const profileUrl = actor
     ? sourceControlClients.get(detail.provider).authorProfileUrl(actor.login, detail.url)
@@ -139,7 +142,7 @@ function CommentIdentity({
           </time>
         </TooltipTrigger>
         <TooltipPopup>
-          {new Date(comment.createdAt).toLocaleString(locale)}
+          {formatFullTimestamp(comment.createdAt, timestampFormat)}
           {comment.url ? ` · ${translateWebSource(locale, "Open comment on host")}` : ""}
         </TooltipPopup>
       </Tooltip>

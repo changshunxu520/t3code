@@ -3578,6 +3578,16 @@ const EN_MESSAGES = {
   "chat.queuedEdit.threadSuffix": " in “{title}”",
   "chat.queuedEdit.recovered": "Your unsaved edit{where} was kept in the composer.",
   "chat.queuedEdit.discarded": "Your unsaved edit{where} was discarded.",
+  "connectDevices.toastTitle": "A device wants to connect to {environment}",
+  "connectDevices.toastDescription": "{device}. Approve only if it shows code {code}.",
+  "connectDevices.trustedSince": "Trusted since {time}",
+  "connectDevices.review": "Review",
+  "chat.environmentAwaitingApproval": "{label} is waiting to approve this device",
+  "chat.environmentReconnecting": "{label} is reconnecting",
+  "chat.environmentOffline": "{label} is offline",
+  "themeEditor.cssConflict":
+    "“{label}” has different custom CSS. Use the same CSS or pick another name.",
+  "themeCss.position": "Ln {line}, Col {column}",
 } as const;
 
 export type WebMessageKey = keyof typeof EN_MESSAGES;
@@ -6995,6 +7005,15 @@ const ZH_CN_MESSAGES = {
   "chat.queuedEdit.threadSuffix": "（会话“{title}”）",
   "chat.queuedEdit.recovered": "未保存的编辑{where}已保留在输入框中。",
   "chat.queuedEdit.discarded": "未保存的编辑{where}已丢弃。",
+  "connectDevices.toastTitle": "有设备请求连接到 {environment}",
+  "connectDevices.toastDescription": "{device}。仅当该设备显示代码 {code} 时才批准。",
+  "connectDevices.trustedSince": "自 {time} 起受信任",
+  "connectDevices.review": "查看",
+  "chat.environmentAwaitingApproval": "{label} 正在等待批准此设备",
+  "chat.environmentReconnecting": "{label} 正在重新连接",
+  "chat.environmentOffline": "{label} 已离线",
+  "themeEditor.cssConflict": "“{label}”的自定义 CSS 不同。请使用相同的 CSS，或换一个名称。",
+  "themeCss.position": "行 {line}，列 {column}",
 } as const satisfies WebMessages;
 
 const WEB_MESSAGES: Readonly<Record<ResolvedAppLocale, WebMessages>> = {
@@ -10149,12 +10168,11 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   Forget: "移除关联",
   "Could not link the environment": "无法关联环境",
   "Link an environment": "关联环境",
-  "Agents here can then launch, message and wait on threads there. It appears in that environment's Connections, where it can be revoked.":
-    "此处的代理随后可以在目标环境中启动会话、发送消息和等待结果。此关联会显示在目标环境的“连接”中，并可在那里撤销。",
+  "Agents here can then launch, message and wait on threads there. It appears under Authorized clients in that environment's Sharing & access, where it can be revoked.":
+    "此处的智能体随后可以在目标环境中启动任务、发送消息并等待任务。此关联会显示在目标环境“共享与访问”的“已授权客户端”中，并可在那里撤销。",
   "Already linked. Linking again renews it with the access you pick.":
     "已关联。重新关联会续期，并应用你选择的权限。",
-  "From that environment's Connections, or t3 pair there":
-    "从目标环境的“连接”页面获取，或在那里运行 t3 pair",
+  "From Sharing & access there, or t3 pair": "从目标环境的“共享与访问”获取，或在那里运行 t3 pair",
   "Linking…": "正在关联…",
   "Add Simlock host": "添加 Simlock 主机",
   "Edit Simlock host": "编辑 Simlock 主机",
@@ -10277,11 +10295,11 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
     "，其他设备无法访问。请输入其 HTTPS 或 Tailscale 地址。",
   "Paste the code": "粘贴配对码",
   "Create a link on": "在以下设备上创建链接：",
-  ": Settings → Connections → Create link, then paste its code here.":
-    "：设置 → 连接 → 创建链接，然后将配对码粘贴到这里。",
+  ": Settings → Sharing & access → Authorized clients → Create link, then paste its code here.":
+    "：设置 → 共享与访问 → 已授权客户端 → 创建链接，然后将配对码粘贴到这里。",
   "This environment is already linked to": "此环境已连接到",
-  ". The agent can use that link as it is; change its access in Settings → Connections.":
-    "。智能体可直接使用此连接；如需修改访问权限，请前往设置 → 连接。",
+  ". The agent can use that link as it is; change its access in Settings → Environments.":
+    "。智能体可直接使用此关联；如需修改访问权限，请前往设置 → 环境。",
   "Another address…": "其他地址…",
   Servers: "服务器",
   "Open in the browser panel.": "在浏览器面板中打开。",
@@ -10397,10 +10415,6 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "This connection still uses the old permissions, so some actions may no longer be available. Pair again using a new link with the permissions you need.":
     "此连接仍使用旧权限，部分操作可能已不可用。请使用包含所需权限的新链接重新配对。",
   "Open Sharing & access": "打开共享与访问",
-  "On {host}, check Settings > Connections or run `t3 connect status`.":
-    "在 {host} 上查看“设置 > 连接”，或运行 `t3 connect status`。",
-  "On {host}, open Settings > Connections and turn T3 Connect on.":
-    "在 {host} 上打开“设置 > 连接”，并启用 T3 Connect。",
   "Update timed out: try again.": "更新超时，请重试。",
   "This environment isn’t connected: try again once it reconnects.":
     "此环境尚未连接，请在重新连接后重试。",
@@ -10718,8 +10732,8 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "No effort levels": "无推理强度级别",
   "Link a machine to this environment": "将机器关联到此环境",
   "Link a machine": "关联机器",
-  "Agents here can then launch, message and wait on threads there. Revoke it in that machine's Connections.":
-    "此处的智能体随后可以在该机器上启动、发送消息并等待会话。可在该机器的“连接”设置中撤销授权。",
+  "Agents here can then launch, message and wait on threads there. Revoke it in that machine's Sharing & access.":
+    "此处的智能体随后可以在该机器上启动任务、发送消息并等待任务。可在该机器的“共享与访问”中撤销。",
   "Provider process is gone. Interrupt or restart the child thread to respond.":
     "提供商进程已结束。请中断或重启子会话以进行响应。",
   "Available when the main thread is idle.": "主会话空闲时可用。",
@@ -11670,10 +11684,77 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
     "此应用无法确认这是你的机器之一。你粘贴的配对码将被发送到该地址。",
   "Writer model not saved": "撰写模型未保存",
   "Offer when adding or publishing a project": "添加或发布项目时提供此选项",
+  "Search ignored files": "搜索被忽略的文件",
+  "No ignored files match.": "没有匹配的被忽略文件。",
+  "Search to find the rest.": "可通过搜索查找其余文件。",
+  Approve: "批准",
+  "Could not approve the device": "无法批准该设备",
+  "Could not deny the device": "无法拒绝该设备",
+  "Could not revoke the device": "无法撤销该设备",
+  "Could not load sign-in": "无法加载登录",
+  "T3 Connect sign-in did not load. Check your connection, then try again.":
+    "T3 Connect 登录未能加载。请检查网络连接后重试。",
+  "Retry sign-in": "重试登录",
+  "Retry T3 Connect": "重试 T3 Connect",
+  "Stopping…": "正在停止…",
+  "Waiting on a subagent": "正在等待 1 个子智能体",
+  "Could not switch machine": "无法切换机器",
+  "Require approval for new devices": "新设备需经批准",
+  "Require approval for new T3 Connect devices": "新的 T3 Connect 设备需经批准",
+  "Devices that sign in to your T3 Connect account wait until someone already connected here approves them.":
+    "登录你的 T3 Connect 账户的设备，需等待已连接到此处的人批准后才能连接。",
+  "Waiting for approval…": "等待审批…",
+  "Waiting for approval on the host": "等待主机审批",
+  "This device is waiting for approval on the host.": "此设备正在等待主机审批。",
+  "{host} is waiting for someone to approve this device": "{host} 正在等待有人批准此设备",
+  "Reconnecting…": "正在重新连接…",
+  "T3 Connect devices": "T3 Connect 设备",
+  "No device has connected through T3 Connect yet.": "尚无设备通过 T3 Connect 连接。",
+  ". Approve only if the device in front of you shows this code.":
+    "。仅当你面前的设备显示此代码时才批准。",
+  "Revoke all other clients?": "撤销所有其他客户端？",
+  "Unknown device": "未知设备",
+  "This sign-in link is not a web address, so it was not opened.":
+    "此登录链接不是网址，因此未打开。",
+  "Approval for new devices is off, so a revoked device signed in to your T3 Connect account can connect again on its own.":
+    "新设备审批已关闭，因此被撤销但仍登录着你的 T3 Connect 账户的设备可以自行重新连接。",
+  "The device has to be approved here before it can connect again.":
+    "该设备必须先在此处获得批准，才能再次连接。",
+  "Your session does not have permission to manage access.": "你的会话无权管理访问权限。",
+  "Custom CSS": "自定义 CSS",
+  "Tab indents. Shift+Tab unindents. Press Escape, then Tab to leave.":
+    "Tab 缩进，Shift+Tab 取消缩进。先按 Escape 再按 Tab 可离开编辑器。",
+  "Tab moves to the next control.": "Tab 会移到下一个控件。",
+  "Clear CSS": "清除 CSS",
+  "Saved with this theme and included when you export it. Web and desktop only. Rules that load remote files are ignored.":
+    "随此主题保存，并在导出主题时一并包含。仅适用于网页版和桌面版。加载远程文件的规则会被忽略。",
+  "Fast-forward merge": "快进合并",
 };
 
 function translateDynamicWebSource(source: string): string | null {
-  let match = /^Model (.+)$/.exec(source);
+  let match = /^Waiting on (\d+) subagents$/.exec(source);
+  if (match) return `正在等待 ${match[1]} 个子智能体`;
+
+  match = /^Revoke (.+)\?$/.exec(source);
+  if (match) {
+    const name = translateWebSource("zh-CN", match[1]!);
+    return name === match[1] ? `撤销 ${name}？` : `撤销${name}？`;
+  }
+
+  match = /^Approve this device on (.+)\. It shows code (.+)\.$/.exec(source);
+  if (match) return `请在 ${match[1]} 上批准此设备。此设备显示的代码为 ${match[2]}。`;
+
+  match =
+    /^On a device already connected to (.+), open Settings > Sharing & access and approve (?:the device showing (.+)|this device)\.$/.exec(
+      source,
+    );
+  if (match)
+    return `在已连接到 ${match[1]} 的设备上，打开“设置 > 共享与访问”，然后批准${match[2] ? `显示代码 ${match[2]} 的设备` : "此设备"}。`;
+
+  match = /^Or run `t3 auth connect-device approve (.+)` on (.+)\.$/.exec(source);
+  if (match) return `或在 ${match[2]} 上运行 \`t3 auth connect-device approve ${match[1]}\`。`;
+
+  match = /^Model (.+)$/.exec(source);
   if (match) return `模型 ${match[1]}`;
 
   match = /^Use T3 Code in another app \(MCP\) · (.+)$/.exec(source);

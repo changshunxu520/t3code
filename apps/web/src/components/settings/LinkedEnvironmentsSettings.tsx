@@ -114,8 +114,8 @@ function LinkedEnvironmentRow({
   const forget = async () => {
     const confirmed = await (requestConfirmDialog(
       locale === "zh-CN"
-        ? `移除与 ${link.label} 的关联？此处的代理将停止在该环境中工作。若要同时终止目标环境中的连接，请在 ${link.label} 的“连接”中撤销“T3 Code · …”。`
-        : `Forget ${link.label}? Agents here stop working there. Revoke "T3 Code · …" in ${link.label}'s Connections to end the session there too.`,
+        ? `移除与 ${link.label} 的关联？此处的代理将停止在该环境中工作。若要同时终止目标环境中的连接，请在 ${link.label} 的“共享与访问”中撤销“T3 Code · …”。`
+        : `Forget ${link.label}? Agents here stop working there. Revoke "T3 Code · …" in ${link.label}'s Sharing & access to end the session there too.`,
       { variant: "destructive" },
     ) ?? Promise.resolve(false));
     if (!confirmed) return;
@@ -293,7 +293,7 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
           <DialogTitle>{tx("Link an environment")}</DialogTitle>
           <DialogDescription>
             {tx(
-              "Agents here can then launch, message and wait on threads there. It appears in that environment's Connections, where it can be revoked.",
+              "Agents here can then launch, message and wait on threads there. It appears under Authorized clients in that environment's Sharing & access, where it can be revoked.",
             )}
           </DialogDescription>
         </DialogHeader>
@@ -356,7 +356,7 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                   onChange={(event) => setPairingCode(event.target.value)}
                   placeholder={
                     machine === null
-                      ? tx("From that environment's Connections, or t3 pair there")
+                      ? tx("From Sharing & access there, or t3 pair")
                       : tx("Paste the code")
                   }
                   disabled={busy}
@@ -367,8 +367,8 @@ function LinkEnvironmentAction({ environmentId }: { readonly environmentId: Envi
                 {machine !== null ? (
                   <span className="block text-xs text-muted-foreground">
                     {locale === "zh-CN"
-                      ? `在 ${machine.label} 上打开“设置 → 连接 → 创建链接”，然后将配对码粘贴到这里。`
-                      : `Create a link on ${machine.label}: Settings → Connections → Create link, then paste its code here.`}
+                      ? `在 ${machine.label} 上打开“设置 → 共享与访问 → 已授权客户端 → 创建链接”，然后将配对码粘贴到这里。`
+                      : `Create a link on ${machine.label}: Settings → Sharing & access → Authorized clients → Create link, then paste its code here.`}
                   </span>
                 ) : null}
               </label>

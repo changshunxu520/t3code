@@ -86,6 +86,20 @@ describe("mobile strings", () => {
         "Make sure T3 Code is running on {host}.": "请确保 T3 Code 正在 {host} 上运行。",
         "{host} tunnel": "{host} 隧道",
         "T3 Code on {host}": "{host} 上的 T3 Code",
+        "{host} is waiting for someone to approve this device": "{host} 正在等待有人批准此设备",
+        "Waiting for {host} to approve this device": "正在等待 {host} 批准此设备",
+        "Approve this device on {host}. It shows code K7Q-29F.":
+          "请在 {host} 上批准此设备。其显示的验证码为 K7Q-29F。",
+        "On a device already connected to {host}, open Settings > Sharing & access and approve the device showing K7Q-29F.":
+          "在已连接到 {host} 的设备上打开“设置 > 共享与访问”，并批准显示验证码 K7Q-29F 的设备。",
+        "On a device already connected to {host}, open Settings > Sharing & access and approve this device.":
+          "在已连接到 {host} 的设备上打开“设置 > 共享与访问”，并批准此设备。",
+        "Or run `t3 auth connect-device approve K7Q-29F` on {host}.":
+          "或在 {host} 上运行 `t3 auth connect-device approve K7Q-29F`。",
+        "A new device wants to connect to {host} through T3 Connect. It shows code K7Q-29F. Approve it only if that code matches.":
+          "一台新设备想通过 T3 Connect 连接到 {host}。其显示的验证码为 K7Q-29F。请仅在验证码一致时批准。",
+        "Chrome on macOS wants to connect to {host} through T3 Connect. It shows code K7Q-29F. Approve it only if that code matches.":
+          "Chrome on macOS 想通过 T3 Connect 连接到 {host}。其显示的验证码为 K7Q-29F。请仅在验证码一致时批准。",
       };
       for (const [source, translated] of Object.entries(messages)) {
         const message = source.replaceAll("{host}", host);
@@ -104,6 +118,19 @@ describe("mobile strings", () => {
       "Replay key template": "重放去重键模板",
       "Coalesce window (seconds, 10–3600)": "合并窗口（秒，10–3600）",
       "Resume queue": "恢复队列",
+      "Branches & worktrees": "分支与工作树",
+      "Feature branch & continue": "创建功能分支并继续",
+      "Fast-forward merge": "快进合并（Fast-forward）",
+      "No review diffs": "没有可审查的差异",
+      "Approve this device?": "要批准此设备吗？",
+      "Waiting for approval": "等待批准",
+      "Hide secret": "隐藏密钥",
+      "Waiting on a subagent": "正在等待 1 个子智能体",
+      "Waiting on 3 subagents": "正在等待 3 个子智能体",
+      "Video unavailable. This connection cannot read host files. Pair again with a new link to view it.":
+        "视频不可用。此连接无法读取主机文件。请使用新链接重新配对后查看。",
+      "Project already archived is still archived. Try again later.":
+        "Project already archived 仍处于归档状态，请稍后重试。",
     };
     for (const [source, translated] of Object.entries(messages)) {
       expect(localizeMobileString(source, "zh-CN")).toBe(translated);

@@ -163,6 +163,18 @@ describe("upstream UI localization", () => {
       "正在使用位于 /models/ggml-base.bin 的现有文件",
     );
     expect(translateWebSource("zh-CN", "Gemini 4 Carbon · Weekly")).toBe("Gemini 4 Carbon · 每周");
+    expect(translateWebSource("zh-CN", "Waiting on 3 subagents")).toBe("正在等待 3 个子智能体");
+    expect(translateWebSource("zh-CN", "Revoke this device?")).toBe("撤销此设备？");
+    expect(translateWebSource("zh-CN", "Revoke MacBook Pro?")).toBe("撤销 MacBook Pro？");
+    expect(
+      translateWebSource("zh-CN", "Approve this device on dev.box. It shows code ABCD-1234."),
+    ).toBe("请在 dev.box 上批准此设备。此设备显示的代码为 ABCD-1234。");
+    expect(
+      translateWebMessage("zh-CN", "connectDevices.toastDescription", {
+        device: "MacBook Pro · macOS",
+        code: "ABCD-1234",
+      }),
+    ).toBe("MacBook Pro · macOS。仅当该设备显示代码 ABCD-1234 时才批准。");
     expect(translateWebSource("en", "Queue message")).toBe("Queue message");
   });
 

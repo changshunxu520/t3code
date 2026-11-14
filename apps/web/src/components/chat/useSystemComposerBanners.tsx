@@ -1,5 +1,5 @@
 import { useI18n } from "~/i18n/WebI18nContext";
-import { translateWebSource } from "~/i18n/messages";
+import { translateWebMessage, translateWebSource } from "~/i18n/messages";
 import { useStableCallback } from "../../hooks/useStableCallback";
 import { type EnvironmentId } from "@t3tools/contracts";
 import { type EnvironmentConnectionPresentation } from "@t3tools/client-runtime/connection";
@@ -188,8 +188,11 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
       unavailableConnection !== null &&
       (unavailableConnection.phase === "connecting" ||
         unavailableConnection.phase === "reconnecting");
+    const awaitingApproval = unavailableConnection?.awaitingApproval === true;
     const suppressUnavailableBanner =
-      environmentReconnecting && (updateRunning || !reconnectWarningGraceElapsed);
+      environmentReconnecting &&
+      !awaitingApproval &&
+      (updateRunning || !reconnectWarningGraceElapsed);
     const showUnavailableBanner =
       activeEnvironmentUnavailableState !== null &&
       unavailableConnection !== null &&
@@ -200,8 +203,20 @@ export function useSystemComposerBanners(input: SystemComposerBannersInput) {
         variant: unavailableConnection.phase === "error" ? "error" : "warning",
         group: "environment",
         icon: <WifiOffIcon />,
-        title: `${activeEnvironmentUnavailableState.label} is ${environmentReconnecting ? "reconnecting" : "offline"}`,
-        description: activeEnvironment ? (
+        title: translateWebMessage(
+          uiLocale,
+          awaitingApproval
+            ? "chat.environmentAwaitingApproval"
+            : environmentReconnecting
+              ? "chat.environmentReconnecting"
+              : "chat.environmentOffline",
+          { label: activeEnvironmentUnavailableState.label },
+        ),
+        description: awaitingApproval ? (
+          unavailableConnection.error === null ? undefined : (
+            translateWebSource(uiLocale, unavailableConnection.error)
+          )
+        ) : activeEnvironment ? (
           <ConnectionDiagnosisHeadline environment={activeEnvironment} />
         ) : undefined,
         actions: (

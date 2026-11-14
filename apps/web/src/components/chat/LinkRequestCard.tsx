@@ -336,7 +336,7 @@ function LinkRequestDialog(props: {
           }
           description={translateWebSource(
             copyLocale,
-            "Agents here can then launch, message and wait on threads there. Revoke it in that machine's Connections.",
+            "Agents here can then launch, message and wait on threads there. Revoke it in that machine's Sharing & access.",
           )}
         >
           {steps.length > 1 && !useExisting ? (
@@ -429,11 +429,10 @@ function LinkRequestDialog(props: {
                           spellCheck={false}
                         />
                         <span className="block text-xs text-muted-foreground">
-                          {translateWebSource(copyLocale, "Create a link on")}
-                          {targetName}
+                          {translateWebSource(copyLocale, "Create a link on")} {targetName}
                           {translateWebSource(
                             copyLocale,
-                            ": Settings → Connections → Create link, then paste its code here.",
+                            ": Settings → Sharing & access → Authorized clients → Create link, then paste its code here.",
                           )}
                         </span>
                       </label>
@@ -445,11 +444,11 @@ function LinkRequestDialog(props: {
             )}
             {useExisting ? (
               <p className="text-xs text-muted-foreground">
-                {translateWebSource(copyLocale, "This environment is already linked to")}
+                {translateWebSource(copyLocale, "This environment is already linked to")}{" "}
                 {targetName}
                 {translateWebSource(
                   copyLocale,
-                  ". The agent can use that link as it is; change its access in Settings → Connections.",
+                  ". The agent can use that link as it is; change its access in Settings → Environments.",
                 )}
               </p>
             ) : null}
