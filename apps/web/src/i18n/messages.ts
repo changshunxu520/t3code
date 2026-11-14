@@ -11729,6 +11729,27 @@ const ZH_CN_SOURCE_MESSAGES: Readonly<Record<string, string>> = {
   "Saved with this theme and included when you export it. Web and desktop only. Rules that load remote files are ignored.":
     "随此主题保存，并在导出主题时一并包含。仅适用于网页版和桌面版。加载远程文件的规则会被忽略。",
   "Fast-forward merge": "快进合并",
+  "5-hour": "5 小时",
+  Weekly: "每周",
+  Monthly: "每月",
+  "Core 5-hour": "Core 5 小时",
+  "Core weekly": "Core 每周",
+  "Core monthly": "Core 每月",
+  "This Factory organization does not expose personal usage limits.":
+    "此 Factory 组织未提供个人用量限额。",
+  "Keychain access to the Droid login was refused.": "已拒绝访问钥匙串中的 Droid 登录信息。",
+  "Could not read the Droid login key.": "无法读取 Droid 登录密钥。",
+  "The Droid login file is not readable.": "无法读取 Droid 登录文件。",
+  "Could not read the Droid login.": "无法读取 Droid 登录信息。",
+  "The Droid login expired. Run Droid to refresh it.":
+    "Droid 登录已过期，请运行一次 Droid 以刷新。",
+  "Sign in to Droid on this machine to see its limits.": "请在这台机器上登录 Droid 以查看限额。",
+  "Factory did not accept FACTORY_API_KEY.": "Factory 未接受 FACTORY_API_KEY。",
+  "This Factory account does not expose usage limits.": "此 Factory 账户未提供用量限额。",
+  "Factory did not return usage limits.": "Factory 未返回用量限额。",
+  "Droid could not read usage limits.": "Droid 无法读取用量限额。",
+  "Droid usage needs FACTORY_API_KEY on this platform.":
+    "在此平台上查看 Droid 用量需要设置 FACTORY_API_KEY。",
 };
 
 function translateDynamicWebSource(source: string): string | null {

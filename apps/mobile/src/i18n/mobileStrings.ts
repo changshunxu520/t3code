@@ -2173,6 +2173,25 @@ const ZH_CN_MESSAGES = {
   "The server could not prepare triage.": "服务器无法准备问题分流。",
   "Agents here can then launch, message and wait on threads there. It appears under Authorized clients in that machine's Sharing & access, where it can be revoked.":
     "之后，此处的智能体即可在该机器上启动任务、发送消息并等待任务完成。该关联会显示在该机器“共享与访问”的“已授权客户端”中，可随时撤销。",
+  "5-hour": "5 小时",
+  "Core 5-hour": "Core 5 小时",
+  "Core weekly": "Core 每周",
+  "Core monthly": "Core 每月",
+  "This Factory organization does not expose personal usage limits.":
+    "此 Factory 组织未提供个人用量限额。",
+  "Keychain access to the Droid login was refused.": "已拒绝访问钥匙串中的 Droid 登录信息。",
+  "Could not read the Droid login key.": "无法读取 Droid 登录密钥。",
+  "The Droid login file is not readable.": "无法读取 Droid 登录文件。",
+  "Could not read the Droid login.": "无法读取 Droid 登录信息。",
+  "The Droid login expired. Run Droid to refresh it.":
+    "Droid 登录已过期，请运行一次 Droid 以刷新。",
+  "Sign in to Droid on this machine to see its limits.": "请在这台机器上登录 Droid 以查看限额。",
+  "Factory did not accept FACTORY_API_KEY.": "Factory 未接受 FACTORY_API_KEY。",
+  "This Factory account does not expose usage limits.": "此 Factory 账户未提供用量限额。",
+  "Factory did not return usage limits.": "Factory 未返回用量限额。",
+  "Droid could not read usage limits.": "Droid 无法读取用量限额。",
+  "Droid usage needs FACTORY_API_KEY on this platform.":
+    "在此平台上查看 Droid 用量需要设置 FACTORY_API_KEY。",
 } as const satisfies Readonly<Record<string, string>>;
 
 const CONNECTION_DIAGNOSIS_PATTERNS: ReadonlyArray<readonly [RegExp, string]> = [

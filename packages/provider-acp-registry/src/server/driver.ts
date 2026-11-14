@@ -60,6 +60,7 @@ import * as AcpRegistrySupport from "./AcpRegistrySupport.ts";
 import * as AcpRegistryRuntimeCoordinator from "./AcpRegistryRuntimeCoordinator.ts";
 import * as AcpRegistryAuth from "./auth.ts";
 import * as AcpRegistryAuthenticationState from "./authenticationState.ts";
+import { FACTORY_DROID_AGENT_ID, makeDroidUsageLimitsReader } from "./droidUsageLimits.ts";
 
 const DRIVER_KIND = ProviderDriverKind.make("acpRegistry");
 const decodeSettings = Schema.decodeSync(AcpRegistrySettings);
@@ -628,10 +629,26 @@ export const AcpRegistryDriver: ProviderDriver<AcpRegistrySettings, AcpRegistryD
             }),
           );
     });
-    const checkProvider = checkAcpRegistryProviderReadiness(readinessInput).pipe(
+    const checkUsageLimits =
+      effectiveConfig.agentId === FACTORY_DROID_AGENT_ID
+        ? (yield* makeDroidUsageLimitsReader(processEnvironment)).pipe(
+            Effect.provideService(ChildProcessSpawner.ChildProcessSpawner, spawner),
+          )
+        : undefined;
+    const checkReadiness = checkAcpRegistryProviderReadiness(readinessInput).pipe(
       Effect.provideService(AcpRegistrySupport.AcpRegistryCatalog, catalog),
       Effect.flatMap(withLiveRuntimeState),
     );
+    const checkProvider =
+      checkUsageLimits === undefined
+        ? checkReadiness
+        : checkReadiness.pipe(
+            Effect.filterOrElse(
+              (provider) => !provider.enabled || !provider.installed,
+              (provider) =>
+                checkUsageLimits.pipe(Effect.map((usageLimits) => ({ ...provider, usageLimits }))),
+            ),
+          );
     const enrichProvider = checkAcpRegistryProviderStatus(
       {
         ...readinessInput,
@@ -697,6 +714,7 @@ export const AcpRegistryDriver: ProviderDriver<AcpRegistrySettings, AcpRegistryD
       haveSettingsChanged: haveProviderSnapshotSettingsChanged,
       initialSnapshot: () => checkProvider,
       checkProvider,
+      ...(checkUsageLimits === undefined ? {} : { checkUsageLimits }),
       enrichSnapshot: Effect.fn("enrichSnapshot")(function ({
         snapshot,
         getSnapshot,
