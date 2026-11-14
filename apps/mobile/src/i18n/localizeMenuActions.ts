@@ -1,9 +1,9 @@
 import type { MenuAction } from "@react-native-menu/menu";
-import { localizeMobileString, MOBILE_LOCALE, type MobileLocale } from "./mobileStrings";
+import { getMobileLocale, localizeMobileString, type MobileLocale } from "./mobileStrings";
 
 export function localizeMenuActions(
   actions: readonly MenuAction[],
-  locale: MobileLocale = MOBILE_LOCALE,
+  locale: MobileLocale = getMobileLocale(),
 ): MenuAction[] {
   return actions.map((action) => ({
     ...action,

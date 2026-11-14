@@ -1,4 +1,4 @@
-import { localizeMobileString, MOBILE_LOCALE } from "../../i18n/mobileStrings";
+import { localizeMobileString, useMobileLocale } from "../../i18n/mobileStrings";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import { ChatGptUsageSummary } from "./ChatGptUsageSummary";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
@@ -78,6 +78,7 @@ function UsageScreen(props: {
   readonly workspace?: boolean;
   readonly tabParam: string | undefined;
 }) {
+  const mobileLocale = useMobileLocale();
   const insets = useSafeAreaInsets();
   const [selection, setSelection] = useState(() => ({
     params: props.tabParam,
@@ -111,7 +112,7 @@ function UsageScreen(props: {
   const limits = useRefreshLimits(selectedEnvironmentIds, isFocused && view === "limits");
   const sourceMessages = usageSourceMessages(
     selectedEnvironments.flatMap((environment) => environment.summary?.sources ?? []),
-    MOBILE_LOCALE,
+    mobileLocale,
   );
   const canReadDiagnostics = selectedEnvironments.some(
     (environment) => environment.canReadDiagnostics,
@@ -419,6 +420,7 @@ function ChartCard(props: {
   /** Grows the chart past `height` to match a taller neighbouring column. */
   readonly fill?: boolean;
 }) {
+  const mobileLocale = useMobileLocale();
   const { merged, metric } = props;
   const colors = useProviderColors();
   const hasActivity = props.daily.some((period) => period.totalTokens > 0);
@@ -459,8 +461,8 @@ function ChartCard(props: {
         <View className="flex-row items-center justify-between">
           <Text className="text-xs text-foreground-tertiary">
             {props.isPast24Hours
-              ? formatHourShort(props.days[0] ?? "", props.timeZone, true, MOBILE_LOCALE)
-              : formatDayShort(props.sinceDay, MOBILE_LOCALE)}
+              ? formatHourShort(props.days[0] ?? "", props.timeZone, true, mobileLocale)
+              : formatDayShort(props.sinceDay, mobileLocale)}
           </Text>
           <Text className="text-xs text-foreground-tertiary">
             {props.isPast24Hours
@@ -468,9 +470,9 @@ function ChartCard(props: {
                   props.days[props.days.length - 1] ?? "",
                   props.timeZone,
                   true,
-                  MOBILE_LOCALE,
+                  mobileLocale,
                 )
-              : formatDayShort(props.untilDay, MOBILE_LOCALE)}
+              : formatDayShort(props.untilDay, mobileLocale)}
           </Text>
         </View>
         <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">

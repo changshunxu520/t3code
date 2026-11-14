@@ -226,7 +226,9 @@ export default function LargeTextViewer(props: {
         role="status"
       >
         {props.delimiter
-          ? t("files.largeText.rowCount", { count: lineOrRowCount })
+          ? t("files.largeText.rowCount", {
+              count: Math.max(0, meta.count - 1).toLocaleString(),
+            })
           : t("files.largeText.lineCount", { count: lineOrRowCount })}
         {props.delimiter
           ? t("files.largeText.columnSuffix", {

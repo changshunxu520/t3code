@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { localizeAlertArguments, localizeMobileString } from "./mobileStrings";
+import {
+  localizeAlertArguments,
+  localizeMobileString,
+  MOBILE_LOCALE,
+  setMobileLocale,
+} from "./mobileStrings";
 
 describe("mobile strings", () => {
   it.each([
@@ -20,6 +25,11 @@ describe("mobile strings", () => {
     ["Provider accounts", "提供商账户"],
     ["New thread", "新建任务"],
     ["No conversation yet", "还没有对话"],
+    ["Loading threads", "正在加载任务"],
+    [
+      "Create a task to start a new coding runtime in one of your connected projects.",
+      "在已连接的项目中创建任务，开启新的编程会话。",
+    ],
     ["Labs", "实验功能"],
     ["Routes", "连接路径"],
     ["Draft", "草稿"],
@@ -277,5 +287,16 @@ describe("mobile strings", () => {
       message: "此分支没有打开的 Pull Request。",
       buttons: [{ text: "取消" }, { text: "确认" }],
     });
+  });
+
+  it("updates default localizeMobileString locale when setMobileLocale changes", () => {
+    try {
+      setMobileLocale("zh-CN");
+      expect(localizeMobileString("New thread")).toBe("新建任务");
+      setMobileLocale("en");
+      expect(localizeMobileString("New thread")).toBe("New thread");
+    } finally {
+      setMobileLocale(MOBILE_LOCALE);
+    }
   });
 });

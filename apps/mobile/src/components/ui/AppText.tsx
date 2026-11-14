@@ -10,7 +10,7 @@ import {
 import { MOBILE_TEXT_CLASSES } from "../../lib/typography";
 import { cn } from "../../lib/cn";
 import { localizeTextChildren } from "../../i18n/localizeTextChildren";
-import { localizeMobileString } from "../../i18n/mobileStrings";
+import { localizeMobileString, useMobileLocale } from "../../i18n/mobileStrings";
 
 export type AppTextProps = RNTextProps & {
   readonly className?: string;
@@ -27,12 +27,13 @@ export function AppText({
   localize = true,
   ...props
 }: AppTextProps) {
+  const locale = useMobileLocale();
   return (
     <RNText
       accessibilityLabel={
         accessibilityLabel === undefined || !localize
           ? accessibilityLabel
-          : localizeMobileString(accessibilityLabel)
+          : localizeMobileString(accessibilityLabel, locale)
       }
       className={cn(
         "font-sans text-foreground",
@@ -42,7 +43,9 @@ export function AppText({
       selectionColorClassName={Platform.OS === "android" ? "accent-focus/32" : undefined}
       {...props}
     >
-      {localize ? localizeTextChildren(children, localizeMobileString) : children}
+      {localize
+        ? localizeTextChildren(children, (value) => localizeMobileString(value, locale))
+        : children}
     </RNText>
   );
 }
@@ -63,17 +66,22 @@ export function AppTextInput({
   ref,
   ...props
 }: AppTextInputProps) {
+  const locale = useMobileLocale();
   return (
     <RNTextInput
       ref={ref}
       accessibilityLabel={
-        accessibilityLabel === undefined ? undefined : localizeMobileString(accessibilityLabel)
+        accessibilityLabel === undefined
+          ? undefined
+          : localizeMobileString(accessibilityLabel, locale)
       }
       className={cn(
         "min-h-13.5 rounded-2xl border border-input-border bg-input px-3.5 py-3 font-sans text-base text-foreground",
         className,
       )}
-      placeholder={placeholder === undefined ? undefined : localizeMobileString(placeholder)}
+      placeholder={
+        placeholder === undefined ? undefined : localizeMobileString(placeholder, locale)
+      }
       placeholderTextColorClassName="accent-placeholder"
       selectionColorClassName={"accent-focus/32"}
       cursorColorClassName={"accent-focus"}

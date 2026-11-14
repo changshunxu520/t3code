@@ -1036,6 +1036,18 @@ function ManagedCodexSetup({
               </Button>
             ) : authenticated ? (
               <>
+                {updateAvailable ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={unavailable || busy}
+                    onClick={() =>
+                      void run(() => startInstall({ environmentId, input: { instanceId } }))
+                    }
+                  >
+                    Update Codex
+                  </Button>
+                ) : null}
                 <Button
                   size="sm"
                   variant="outline"

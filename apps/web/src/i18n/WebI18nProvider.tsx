@@ -51,7 +51,10 @@ export function WebI18nProvider({ children }: { readonly children: ReactNode }) 
   }, [locale]);
 
   const setAppLocale = (nextLocale: AppLocalePreference) =>
-    updateClientSettings({ appLocale: nextLocale });
+    updateClientSettings({
+      appLocale: nextLocale,
+      ...(nextLocale === "system" ? {} : { language: nextLocale === "zh-CN" ? "zh" : nextLocale }),
+    });
   const t: WebTranslate = (key, values) => translateWebMessage(locale, key, values);
   const tx = (source: string) => translateWebSource(locale, source);
   const value: WebI18nContextValue = { appLocale, locale, setAppLocale, t, tx };

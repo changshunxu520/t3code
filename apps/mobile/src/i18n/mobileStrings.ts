@@ -1,9 +1,34 @@
+import { useSyncExternalStore } from "react";
 import type { AlertButton, AlertOptions } from "react-native";
 
 export type MobileLocale = "en" | "zh-CN";
 
 export const MOBILE_LOCALE: MobileLocale =
   process.env.EXPO_PUBLIC_APP_LOCALE === "zh-CN" ? "zh-CN" : "en";
+
+let activeMobileLocale: MobileLocale = MOBILE_LOCALE;
+const mobileLocaleListeners = new Set<() => void>();
+
+export function getMobileLocale(): MobileLocale {
+  return activeMobileLocale;
+}
+
+export function setMobileLocale(next: MobileLocale): void {
+  if (activeMobileLocale === next) return;
+  activeMobileLocale = next;
+  for (const listener of mobileLocaleListeners) listener();
+}
+
+export function subscribeMobileLocale(listener: () => void): () => void {
+  mobileLocaleListeners.add(listener);
+  return () => {
+    mobileLocaleListeners.delete(listener);
+  };
+}
+
+export function useMobileLocale(): MobileLocale {
+  return useSyncExternalStore(subscribeMobileLocale, getMobileLocale, getMobileLocale);
+}
 
 const ZH_CN_MESSAGES = {
   "started a discussion": "发起了讨论",
@@ -2040,6 +2065,9 @@ const ZH_CN_MESSAGES = {
   "Try another name or language.": "请尝试其他名称或语言。",
   "T3 Code, Threads": "T3 Code，任务列表",
   "T3 Code, Pull requests": "T3 Code，拉取请求",
+  "Loading threads": "正在加载任务",
+  "Create a task to start a new coding runtime in one of your connected projects.":
+    "在已连接的项目中创建任务，开启新的编程会话。",
   "Hide sidebar": "隐藏侧边栏",
   "This folder does not exist yet. Cloning creates it.": "此文件夹尚不存在，克隆时将自动创建。",
   "New session": "新会话",
@@ -2694,7 +2722,10 @@ function translateDynamicMessage(value: string): string | null {
   return null;
 }
 
-export function localizeMobileString(value: string, locale: MobileLocale = MOBILE_LOCALE): string {
+export function localizeMobileString(
+  value: string,
+  locale: MobileLocale = activeMobileLocale,
+): string {
   if (locale !== "zh-CN") return value;
 
   const leadingWhitespace = value.match(/^\s*/)?.[0] ?? "";
@@ -2713,7 +2744,7 @@ export function localizeAlertArguments(
   title: string,
   message?: string,
   buttons?: AlertButton[],
-  locale: MobileLocale = MOBILE_LOCALE,
+  locale: MobileLocale = activeMobileLocale,
 ): {
   readonly title: string;
   readonly message?: string;

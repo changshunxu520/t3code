@@ -31,7 +31,7 @@ import { useEffect, useState } from "react";
 import { AppState, useWindowDimensions } from "react-native";
 
 import { OverlayPortal } from "../../components/ui/OverlayPortal";
-import { localizeMobileString, MOBILE_LOCALE } from "../../i18n/mobileStrings";
+import { localizeMobileString, useMobileLocale } from "../../i18n/mobileStrings";
 import { useAppearancePreferences } from "../settings/appearance/AppearancePreferencesProvider";
 import { useScaledTextRole } from "../settings/appearance/useScaledTextRole";
 import {
@@ -62,6 +62,7 @@ function systemUses24HourClock() {
 }
 
 export function CustomSnoozeSheet(props: Props) {
+  const mobileLocale = useMobileLocale();
   const { themeAppearance, themeVariables: colors } = useAppearancePreferences();
   const [is24Hour, setIs24Hour] = useState(systemUses24HourClock);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- subscribes to AppState to re-read the native 24-hour clock setting when the app resumes
@@ -164,14 +165,14 @@ export function CustomSnoozeSheet(props: Props) {
                       options={[
                         {
                           value: "date",
-                          label: date.toLocaleDateString(MOBILE_LOCALE, {
+                          label: date.toLocaleDateString(mobileLocale, {
                             month: "short",
                             day: "numeric",
                           }),
                         },
                         {
                           value: "time",
-                          label: date.toLocaleTimeString(MOBILE_LOCALE, {
+                          label: date.toLocaleTimeString(mobileLocale, {
                             hour: "numeric",
                             minute: "2-digit",
                             hourCycle: is24Hour ? "h23" : "h12",
